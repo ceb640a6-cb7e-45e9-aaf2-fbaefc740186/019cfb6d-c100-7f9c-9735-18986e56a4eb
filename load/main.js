@@ -55,8 +55,8 @@ const tests = {
 
     return {
       title: "Bilder mit leerem Alt-Tag",
-      status: emptyAltImages.length === 0 ? "pass" : "neutral",
-      content: missingAlt.length === 0
+      status: emptyAltImages.length === 0 ? "pass" : "check",
+      content: emptyAltImages.length === 0
         ? "Alle Alt-Texte in Bildern sind befüllt."
         : `
           <p><strong>${emptyAltImages.length}</strong> Bilder haben leere Alt-Texte und müssen <strong>manuell geprüft</strong> werden.</p>
