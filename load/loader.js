@@ -9,7 +9,8 @@
     "imageCount",
     "imagesMissingAlt",
     "linksWithoutText",
-    "headingJumps"
+    /* 1031 */ "oneH1",
+    /* 1031 */ "headingJumps"
   ];
 
   function loadScript(src) {
