@@ -3,8 +3,10 @@
 const tests = {
   headingCount() {
     const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
     return {
       title: "Heading count",
+      status: headings.length > 0 ? "pass" : "fail",
       content: `Found <strong>${headings.length}</strong> headings on this page.`
     };
   },
@@ -15,6 +17,7 @@ const tests = {
 
     return {
       title: "Images missing alt",
+      status: missingAlt.length === 0 ? "pass" : "fail",
       content: missingAlt.length === 0
         ? "All images have an <code>alt</code> attribute."
         : `
@@ -32,6 +35,7 @@ const tests = {
   pageTitle() {
     return {
       title: "Page title",
+      status: document.title ? "pass" : "fail",
       content: document.title
         ? `Title: <strong>${escapeHtml(document.title)}</strong>`
         : "This page has no title."
@@ -44,6 +48,7 @@ const tests = {
 
     return {
       title: "Links without text",
+      status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
         ? "No empty links found."
         : `
@@ -54,6 +59,16 @@ const tests = {
             `).join("")}
           </ul>
         `
+    };
+  },
+
+  imageCount() {
+    const images = document.querySelectorAll("img");
+
+    return {
+      title: "Image count",
+      status: "neutral",
+      content: `Found <strong>${images.length}</strong> image(s).`
     };
   }
 };
@@ -67,5 +82,4 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-// Expose globally so loader.js can access it
 window.PageAnalyzerTests = tests;
