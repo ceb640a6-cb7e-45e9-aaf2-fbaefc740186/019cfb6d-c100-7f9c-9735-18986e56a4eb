@@ -41,7 +41,7 @@ const tests = {
           <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
           <ul>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Image ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))} at ${getDomPath(img)}${img.hasAttribute('src') ? `<img src="${img.src}" height="80">` : ''}</li>
+              <li>Image ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ul>
           ${missingAlt.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
