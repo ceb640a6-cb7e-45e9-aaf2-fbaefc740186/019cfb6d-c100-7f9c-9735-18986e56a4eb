@@ -33,8 +33,29 @@ const tests = {
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
 
     return {
-      title: "Images missing alt",
+      title: "Bilder ohne Alt-Tag",
       status: missingAlt.length === 0 ? "pass" : "fail",
+      content: missingAlt.length === 0
+        ? "All images have an <code>alt</code> attribute."
+        : `
+          <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
+          <ul>
+            ${missingAlt.slice(0, 20).map((img, i) => `
+              <li>Image ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+            `).join("")}
+          </ul>
+          ${missingAlt.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+        `
+    };
+  },
+
+  imagesEmptyAlt() {
+    const images = [...document.querySelectorAll("img")];
+    const missingAlt = images.filter(img => !img.hasAttribute("alt"));
+
+    return {
+      title: "Bilder mit leerem Alt-Tag",
+      status: "check",
       content: missingAlt.length === 0
         ? "All images have an <code>alt</code> attribute."
         : `
@@ -346,6 +367,85 @@ const tests = {
       title: "Doppelte Attribute",
       status,
       content
+    };
+  },
+
+  textFromCSS() {
+    const normalizeContent = (value) => {
+      try {
+        value = String(value);
+      } catch {
+        return "";
+      }
+
+      if (value === "none" || value === '""' || value === "''") {
+        return "";
+      }
+
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      return value.trim();
+    };
+
+    const results = [];
+
+    document.querySelectorAll("*").forEach((el) => {
+      let before = "";
+      let after = "";
+
+      try {
+        before = normalizeContent(getComputedStyle(el, "::before").content);
+      } catch {}
+
+      try {
+        after = normalizeContent(getComputedStyle(el, "::after").content);
+      } catch {}
+
+      const matches = [];
+
+      if (before.length > 2) {
+        matches.push(`::before = "${before}"`);
+      }
+
+      if (after.length > 2) {
+        matches.push(`::after = "${after}"`);
+      }
+
+      if (matches.length > 0) {
+        let selector = (el.tagName || "").toLowerCase();
+
+        if (el.id) {
+          selector += `#${el.id}`;
+        }
+
+        if (el.classList && el.classList.length) {
+          selector += `.${Array.from(el.classList).slice(0, 4).join(".")}`;
+        }
+
+        results.push(`${selector || "(node)"}: ${matches.join(" | ")}`);
+      }
+    });
+
+    if (results.length === 0) {
+      return {
+        title: "CSS-Text in Pseudo-Elementen",
+        status: "pass",
+        content:
+          'Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.'
+      };
+    }
+
+    return {
+      title: "CSS-Text in Pseudo-Elementen",
+      status: "fail",
+      content:
+        `Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:\n\n` +
+        results.join("\n")
     };
   }
 
