@@ -84,23 +84,23 @@ const tests = {
     };
   },
 
-  headingJumps() { //1031
-    const headings = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
+  headingJumps() {
+    const headings = [...document.querySelectorAll("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
 
     for (let i = 1; i < headings.length; i++) {
-      const prev = headings[i - 1];
-      const curr = headings[i];
+      const previous = headings[i - 1];
+      const current = headings[i];
 
-      const prevLevel = Number(prev.tagName.substring(1));
-      const currLevel = Number(curr.tagName.substring(1));
+      const previousLevel = Number(previous.tagName.substring(1));
+      const currentLevel = Number(current.tagName.substring(1));
 
-      if (currLevel > prevLevel + 1) {
+      if (currentLevel > previousLevel + 1) {
         jumps.push({
-          from: prev,
-          to: curr,
-          fromLevel: prevLevel,
-          toLevel: currLevel
+          from: previous,
+          to: current,
+          fromLevel: previousLevel,
+          toLevel: currentLevel
         });
       }
     }
@@ -113,13 +113,11 @@ const tests = {
         : `
           <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
           <ul>
-            ${jumps.slice(0, 20).map((j, i) => `
+            ${jumps.slice(0, 20).map((jump, i) => `
               <li>
-                <strong>${i + 1}. Sprung von &lt;h${j.fromLevel}&gt; zu &lt;h${j.toLevel}&gt;</strong><br>
-                ${escapeHtml((j.from.textContent || "").trim() || "(ohne Text)")} 
-                zu 
-                ${escapeHtml((j.to.textContent || "").trim() || "(ohne Text)")}<br>
-                In Position: <code>${escapeHtml(getDomPath(j.to))}</code>
+                <strong>${i + 1}. Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
+                ${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")} zu ${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}<br>
+                In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
               </li>
             `).join("")}
           </ul>
@@ -137,5 +135,42 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+function getDomPath(el) {
+  const parts = [];
+  let current = el;
+  let depth = 0;
+
+  while (current && current.nodeType === 1 && depth < 6) {
+    let part = current.tagName.toLowerCase();
+
+    if (current.id) {
+      part += `#${current.id}`;
+      parts.unshift(part);
+      break;
+    }
+
+    if (current.classList && current.classList.length) {
+      part += "." + [...current.classList].slice(0, 3).join(".");
+    }
+
+    const parent = current.parentElement;
+    if (parent) {
+      const sameTagSiblings = [...parent.children].filter(
+        sibling => sibling.tagName === current.tagName
+      );
+
+      if (sameTagSiblings.length > 1) {
+        part += `:nth-of-type(${sameTagSiblings.indexOf(current) + 1})`;
+      }
+    }
+
+    parts.unshift(part);
+    current = parent;
+    depth++;
+  }
+
+  return parts.join(" > ");
+};
 
 window.PageAnalyzerTests = tests;
