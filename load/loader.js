@@ -5,7 +5,7 @@
 
   const selectedTests = [
     "pageTitle",
-    "headingCount",
+    "headingsList",
     "imageCount",
     "imagesMissingAlt",
     "linksWithoutText",
