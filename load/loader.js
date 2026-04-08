@@ -138,6 +138,21 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           }
 
+          .summary-pass {
+            background: #d1fae5;
+            border: 2px solid #065f46;
+          }
+
+          .summary-fail {
+            background: #fee2e2;
+            border: 2px solid #991b1b;
+          }
+
+          .summary-neutral {
+            background: #e5e7eb;
+            border: 2px solid #374151;
+          }
+
           .summary-box strong {
             display: block;
             font-size: 20px;
@@ -231,15 +246,15 @@
         </div>
 
         <div class="summary">
-          <div class="summary-box">
+          <div class="summary-box summary-pass">
             Pass
             <strong>${summary.pass}</strong>
           </div>
-          <div class="summary-box">
+          <div class="summary-box summary-fail">
             Fail
             <strong>${summary.fail}</strong>
           </div>
-          <div class="summary-box">
+          <div class="summary-box summary-neutral">
             Neutral
             <strong>${summary.neutral}</strong>
           </div>
