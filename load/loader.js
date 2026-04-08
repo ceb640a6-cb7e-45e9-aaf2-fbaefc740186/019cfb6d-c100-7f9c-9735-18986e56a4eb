@@ -8,7 +8,8 @@
     "headingCount",
     "imageCount",
     "imagesMissingAlt",
-    "linksWithoutText"
+    "linksWithoutText",
+    "headingJumps"
   ];
 
   function loadScript(src) {
