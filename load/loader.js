@@ -8,14 +8,14 @@
     "headingsList",
     "imageCount",
     "imagesMissingAlt",
-    "imagesEmptyAlt",
     "linksWithoutText",
     /* 1031 */ "oneH1",
     /* 1031 */ "headingJumps",
     /* 1242 */ "pruefeDokumenttitel",
     /* 1411 */ "checkIds",
     /* 1411 */ "checkDuplicateAttributes",
-    /* 1034 */ "textFromCSS"
+    /* 1034 */ "textFromCSS",
+    "imagesEmptyAlt"
   ].sort();
 
   function loadScript(src) {
@@ -38,7 +38,7 @@
   }
 
   function normalizeStatus(status) {
-    return ["pass", "fail", "neutral"].includes(status) ? status : "neutral";
+    return ["pass", "check", "fail", "neutral"].includes(status) ? status : "neutral";
   }
 
   function runTests(testNames) {
@@ -82,12 +82,13 @@
         acc[result.status] = (acc[result.status] || 0) + 1;
         return acc;
       },
-      { pass: 0, fail: 0, neutral: 0 }
+      { pass: 0, check: 0, fail: 0, neutral: 0 }
     );
   }
 
   function getBadgeLabel(status) {
     if (status === "pass") return "PASS";
+    if (status === "check") return "CHECK";
     if (status === "fail") return "FAIL";
     return "NEUTRAL";
   }
@@ -298,13 +299,13 @@
             Pass
             <strong>${summary.pass}</strong>
           </div>
+          <div class="summary-box summary-check">
+            Check
+            <strong>${summary.check}</strong>
+          </div>
           <div class="summary-box summary-fail">
             Fail
             <strong>${summary.fail}</strong>
-          </div>
-          <div class="summary-box summary-check">
-            Fail
-            <strong>${summary.check}</strong>
           </div>
           <div class="summary-box summary-neutral">
             Neutral
