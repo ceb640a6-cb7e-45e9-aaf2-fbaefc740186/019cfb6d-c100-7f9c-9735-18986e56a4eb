@@ -82,6 +82,50 @@ const tests = {
         ? `Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong>`
         : ((count <= 0) ? "This page has no heading h1." : 'This page has more than one h1 heading.')
     };
+  },
+
+  headingJumps() {
+    const headings = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
+    const jumps = [];
+
+    for (let i = 1; i < headings.length; i++) {
+      const prev = headings[i - 1];
+      const curr = headings[i];
+
+      const prevLevel = Number(prev.tagName.substring(1));
+      const currLevel = Number(curr.tagName.substring(1));
+
+      if (currLevel > prevLevel + 1) {
+        jumps.push({
+          from: prev,
+          to: curr,
+          fromLevel: prevLevel,
+          toLevel: currLevel
+        });
+      }
+    }
+
+    return {
+      title: "Heading hierarchy jumps",
+      status: jumps.length === 0 ? "pass" : "fail",
+      content: jumps.length === 0
+        ? "No heading hierarchy jumps found."
+        : `
+          <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
+          <ul>
+            ${jumps.slice(0, 20).map((j, i) => `
+              <li>
+                <strong>${i + 1}. Sprung von &lt;h${j.fromLevel}&gt; zu &lt;h${j.toLevel}&gt;</strong><br>
+                ${escapeHtml((j.from.textContent || "").trim() || "(ohne Text)")} 
+                zu 
+                ${escapeHtml((j.to.textContent || "").trim() || "(ohne Text)")}<br>
+                In Position: <code>${escapeHtml(getDomPath(j.to))}</code>
+              </li>
+            `).join("")}
+          </ul>
+          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+        `
+    };
   }
 };
 
