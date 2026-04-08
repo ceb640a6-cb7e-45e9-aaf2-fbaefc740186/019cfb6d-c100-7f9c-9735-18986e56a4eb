@@ -103,13 +103,42 @@
         <meta charset="UTF-8" />
         <title>Page Analysis Report</title>
         <style>
+          /*https://tailwindcss.com/docs/colors*/
+          :root {
+            --white: #f1f3f5;
+            --lighter: #dee2e6;
+            --light: #ced4da;
+            --gray: #adb5bd;
+            --dark: #868e96;
+            --daker: #343a40;
+            --black: #212529;
+
+            --pass-white: #e6fcf5;
+            --pass-light: #63e6be;
+            --pass: #20c997;
+            --pass-dark: #0ca678;
+            --pass-black: #087f5b;
+
+            --check-white: #f8f9fa;
+            --check-light: #dee2e6;
+            --check: #adb5bd;
+            --check-dark: #495057;
+            --check-black: #212529;
+            
+            --fail-white: #fff0f6;
+            --fail-light: #faa2c1;
+            --fail: #f06595;
+            --fail-dark: #d6336c;
+            --fail-black: #a61e4d;
+          }
+          
           body {
             font-family: Arial, sans-serif;
             line-height: 1.5;
             margin: 0;
             padding: 24px;
-            background: #f5f5f5;
-            color: #222;
+            background: var(--lighter);
+            color: var(--black);
           }
 
           h1 {
@@ -119,7 +148,7 @@
 
           .meta {
             margin-bottom: 24px;
-            color: #555;
+            color: var(--gray);
           }
 
           .summary {
@@ -131,26 +160,25 @@
 
           .summary-box {
             background: white;
-            border: 1px solid #ddd;
+            border: 1px solid var(--light);
             border-radius: 8px;
             padding: 12px 16px;
             min-width: 120px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           }
 
           .summary-pass {
-            background: #d1fae5;
-            border: 2px solid #065f46;
+            background: var(--pass-white);
+            border: 2px solid var(--pass-dark);
           }
 
           .summary-fail {
-            background: #fee2e2;
-            border: 2px solid #991b1b;
+            background: var(--fail-white);
+            border: 2px solid var(--fail-dark);
           }
 
           .summary-neutral {
-            background: #e5e7eb;
-            border: 2px solid #374151;
+            background: var(--check-white);
+            border: 2px solid var(--check-dark);
           }
 
           .summary-box strong {
@@ -161,11 +189,10 @@
 
           .box {
             background: white;
-            border: 1px solid #ddd;
+            border: 1px solid var(--light);
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           }
 
           .box-header {
@@ -191,34 +218,34 @@
           }
 
           .badge-pass {
-            background: #d1fae5;
-            color: #065f46;
+            background: var(--pass-white);
+            color: var(--pass-dark);
           }
 
           .badge-fail {
-            background: #fee2e2;
-            color: #991b1b;
+            background: var(--fail-white);
+            color: var(--fail-dark);
           }
 
           .badge-neutral {
-            background: #e5e7eb;
-            color: #374151;
+            background: var(--check-white);
+            color: var(--check-dark);
           }
 
           .box-pass {
-            border-left: 6px solid #065f46;
+            border-left: 6px solid var(--pass);
           }
 
           .box-fail {
-            border-left: 6px solid #991b1b;
+            border-left: 6px solid var(--fail);
           }
 
           .box-neutral {
-            border-left: 6px solid #374151;
+            border-left: 6px solid var(--check);
           }
 
           code, pre {
-            background: #f0f0f0;
+            background: var(--white);
             border-radius: 4px;
           }
 
