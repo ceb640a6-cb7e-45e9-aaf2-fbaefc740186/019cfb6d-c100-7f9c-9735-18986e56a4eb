@@ -70,6 +70,18 @@ const tests = {
       status: "neutral",
       content: `Found <strong>${images.length}</strong> image(s).`
     };
+  },
+
+  oneH1() { //1031
+    const count = document.querySelectorAll('h1').length;
+
+    return {
+      title: "Only one H1",
+      status: (count === 1) ? "pass" : "fail",
+      content: (count === 1)
+        ? `Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong>`
+        : ((count <= 0) ? "This page has no heading h1." : 'This page has more than one h1 heading.')
+    };
   }
 };
 
