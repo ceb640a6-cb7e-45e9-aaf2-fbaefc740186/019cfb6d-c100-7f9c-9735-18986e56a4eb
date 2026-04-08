@@ -16,7 +16,7 @@
     /* 1411 */ "checkDuplicateAttributes",
     /* 1034 */ "textFromCSS",
     "imagesEmptyAlt",
-    /* 1241 */ "pruefeLandmarkenErschliessung"
+    /* 1241 */ "checkLandmarks"
   ].sort();
 
   function loadScript(src) {
