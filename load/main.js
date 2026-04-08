@@ -49,7 +49,7 @@ const tests = {
     };
   },
 
-  pageTitle() {
+  /*pageTitle() { //obsolete because of pruefeDokumenttitel
     return {
       title: "Page title",
       status: document.title ? "pass" : "fail",
@@ -57,7 +57,7 @@ const tests = {
         ? `Title: <strong>${escapeHtml(document.title)}</strong>`
         : "This page has no title."
     };
-  },
+  },*/
 
   linksWithoutText() {
     const links = [...document.querySelectorAll("a")];
@@ -143,7 +143,7 @@ const tests = {
     };
   },
 
-  pruefeDokumenttitel() {
+  pruefeDokumenttitel() { //1242
     const rawTitle = document.title || "";
     const titleText = rawTitle.trim();
 
@@ -227,26 +227,128 @@ const tests = {
       status = "neutral";
     }
 
-    const parts = [`Gefundener Titel: "${titleText}".`, `Bewertung: ${score}/100.`];
-
-    if (fehler.length) {
-      parts.push("Probleme: " + fehler.join(" "));
-    }
-
-    if (hinweise.length) {
-      parts.push("Hinweise: " + hinweise.join(" "));
-    }
-
-    if (status === "pass") {
-      parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert.");
-    }
+    const parts = [`Gefundener Titel: "${titleText}".`, /*`Bewertung: ${score}/100.`*/''];
+    if (fehler.length) { parts.push("Probleme: " + fehler.join(" ")); }
+    if (hinweise.length) { parts.push("Hinweise: " + hinweise.join(" ")); }
+    if (status === "pass") { parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert."); }
 
     return {
       title: "Dokumenttitel prüfen",
       status,
-      content: parts.join(" ")
+      content: parts.join("<br>")
+    };
+  },
+  
+  checkIds() {
+    const visible = (el) => {
+      if (!el || !el.isConnected) return false;
+      if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.opacity === "0"
+      ) {
+        return false;
+      }
+
+      if (!el.offsetParent && style.position !== "fixed") return false;
+
+      return true;
+    };
+
+    const elementsWithId = Array.from(document.querySelectorAll("[id]")).filter(visible);
+
+    const idMap = new Map();
+    let emptyIds = 0;
+
+    elementsWithId.forEach((el) => {
+      const id = el.getAttribute("id") || "";
+
+      if (!id.trim()) {
+        emptyIds++;
+        return;
+      }
+
+      idMap.set(id, (idMap.get(id) || 0) + 1);
+    });
+
+    const duplicateIds = Array.from(idMap.entries()).filter(([, count]) => count > 1);
+    const issueCount = duplicateIds.length + emptyIds;
+
+    let status = "pass";
+    if (issueCount > 0 /*&& issueCount <= 3) status = "neutral";
+    if (issueCount > 3*/) status = "fail";
+
+    let content = "Keine Probleme mit IDs gefunden.";
+
+    if (issueCount > 0) {
+      content =
+        `Doppelte IDs: ${duplicateIds.length}, leere IDs: ${emptyIds}.`;
+    }
+
+    return {
+      title: "Prüfe IDs",
+      status,
+      content
+    };
+  },
+
+  checkDuplicateAttributes() {
+    const visible = (el) => {
+      if (!el || !el.isConnected) return false;
+      if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.opacity === "0"
+      ) {
+        return false;
+      }
+
+      if (!el.offsetParent && style.position !== "fixed") return false;
+
+      return true;
+    };
+
+    const allVisibleElements = Array.from(document.querySelectorAll("*")).filter(visible);
+    const affectedElements = [];
+
+    allVisibleElements.forEach((el) => {
+      const names = Array.from(el.attributes).map((attr) => attr.name.toLowerCase());
+      const counts = new Map();
+
+      names.forEach((name) => {
+        counts.set(name, (counts.get(name) || 0) + 1);
+      });
+
+      const duplicates = Array.from(counts.entries()).filter(([, count]) => count > 1);
+
+      if (duplicates.length > 0) {
+        affectedElements.push(el);
+      }
+    });
+
+    let status = "pass";
+    if (affectedElements.length === 1) status = "neutral";
+    if (affectedElements.length > 1) status = "fail";
+
+    let content = "Keine doppelten Attribute gefunden.";
+
+    if (affectedElements.length > 0) {
+      content = `Elemente mit doppelten Attributen gefunden: ${affectedElements.length}.`;
+    }
+
+    return {
+      title: "Doppelte Attribute",
+      status,
+      content
     };
   }
+
 };
 
 function escapeHtml(str) {
