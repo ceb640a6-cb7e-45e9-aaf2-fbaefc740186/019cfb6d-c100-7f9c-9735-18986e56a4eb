@@ -10,7 +10,8 @@
     "imagesMissingAlt",
     "linksWithoutText",
     /* 1031 */ "oneH1",
-    /* 1031 */ "headingJumps"
+    /* 1031 */ "headingJumps",
+    /* 1242 */ "pruefeDokumenttitel"
   ].sort();
 
   function loadScript(src) {
