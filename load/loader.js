@@ -148,7 +148,7 @@
 
           .meta {
             margin-bottom: 24px;
-            color: var(--gray);
+            color: var(--darker);
           }
 
           .summary {
@@ -168,17 +168,17 @@
 
           .summary-pass {
             background: var(--pass-white);
-            border: 2px solid var(--pass-dark);
+            border: 3px solid var(--pass-dark);
           }
 
           .summary-fail {
             background: var(--fail-white);
-            border: 2px solid var(--fail-dark);
+            border: 3px solid var(--fail-dark);
           }
 
           .summary-neutral {
             background: var(--check-white);
-            border: 2px solid var(--check-dark);
+            border: 3px solid var(--check-dark);
           }
 
           .summary-box strong {
@@ -189,7 +189,7 @@
 
           .box {
             background: white;
-            border: 1px solid var(--light);
+            border: 3px solid var(--light);
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 16px;
@@ -233,15 +233,15 @@
           }
 
           .box-pass {
-            border-left: 6px solid var(--pass);
+            border-left: 6px solid var(--pass-dark);
           }
 
           .box-fail {
-            border-left: 6px solid var(--fail);
+            border-left: 6px solid var(--fail-dark);
           }
 
           .box-neutral {
-            border-left: 6px solid var(--check);
+            border-left: 6px solid var(--check-dark);
           }
 
           code, pre {
