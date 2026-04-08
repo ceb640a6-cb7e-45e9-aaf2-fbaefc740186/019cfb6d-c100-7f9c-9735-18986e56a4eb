@@ -65,7 +65,7 @@ const tests = {
               <li>Bild ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ul>
-          ${missingAlt.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
+          ${emptyAltImages.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
         `
     };
   },
