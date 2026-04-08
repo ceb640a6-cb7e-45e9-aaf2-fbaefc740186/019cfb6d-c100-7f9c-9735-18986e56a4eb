@@ -262,6 +262,10 @@
     try {
       await ensureMainLoaded();
       const results = runTests(selectedTests);
+      results.sort((a, b) => {
+        const order = { fail: 0, neutral: 1, pass: 2 };
+        return order[a.status] - order[b.status];
+      });
       openReport(results);
     } catch (err) {
       console.error("Page analyzer failed:", err);
