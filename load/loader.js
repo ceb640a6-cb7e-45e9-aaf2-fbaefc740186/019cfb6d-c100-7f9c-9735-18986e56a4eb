@@ -4,16 +4,18 @@
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
   const selectedTests = [
-    "pageTitle",
+    /*"pageTitle"*/,
     "headingsList",
     "imageCount",
     "imagesMissingAlt",
+    "imagesEmptyAlt",
     "linksWithoutText",
     /* 1031 */ "oneH1",
     /* 1031 */ "headingJumps",
     /* 1242 */ "pruefeDokumenttitel",
     /* 1411 */ "checkIds",
-    /* 1411 */ "checkDuplicateAttributes"
+    /* 1411 */ "checkDuplicateAttributes",
+    /* 1034 */ "textFromCSS"
   ].sort();
 
   function loadScript(src) {
@@ -122,11 +124,17 @@
             --pass-dark: #0ca678;
             --pass-black: #087f5b;
 
-            --check-white: #f8f9fa;
-            --check-light: #dee2e6;
-            --check: #adb5bd;
-            --check-dark: #495057;
-            --check-black: #212529;
+            --neutral-white: #f8f9fa;
+            --neutral-light: #dee2e6;
+            --neutral: #adb5bd;
+            --neutral-dark: #495057;
+            --neutral-black: #212529;
+            
+            --check-white: #fff9db;
+            --check-light: #ffe066;
+            --check: #fcc419;
+            --check-dark: #f59f00;
+            --check-black: #e67700;
             
             --fail-white: #fff0f6;
             --fail-light: #faa2c1;
@@ -180,6 +188,11 @@
           }
 
           .summary-neutral {
+            background: var(--neutral-white);
+            border: 3px solid var(--neutral-dark);
+          }
+
+          .summary-check {
             background: var(--check-white);
             border: 3px solid var(--check-dark);
           }
@@ -231,6 +244,11 @@
           }
 
           .badge-neutral {
+            background: var(--neutral-white);
+            color: var(--neutral-dark);
+          }
+
+          .badge-check {
             background: var(--check-white);
             color: var(--check-dark);
           }
@@ -244,7 +262,7 @@
           }
 
           .box-neutral {
-            border-left: 6px solid var(--check-dark);
+            border-left: 6px solid var(--neutral-dark);
           }
 
           code, pre {
@@ -284,6 +302,10 @@
             Fail
             <strong>${summary.fail}</strong>
           </div>
+          <div class="summary-box summary-check">
+            Fail
+            <strong>${summary.check}</strong>
+          </div>
           <div class="summary-box summary-neutral">
             Neutral
             <strong>${summary.neutral}</strong>
@@ -322,7 +344,7 @@
       await ensureMainLoaded();
       const results = runTests(selectedTests);
       results.sort((a, b) => {
-        const order = { fail: 0, neutral: 1, pass: 2 };
+        const order = { fail: 0, check: 1, neutral: 2, pass: 3 };
         return order[a.status] - order[b.status];
       });
       openReport(results);
