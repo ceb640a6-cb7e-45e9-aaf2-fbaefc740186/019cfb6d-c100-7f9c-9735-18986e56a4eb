@@ -1,7 +1,7 @@
 // loader.js
 
 (function () {
-  const MAIN_JS_URL = "https://myName.github.io/myRepo/main.js";
+  const MAIN_JS_URL = "https://myName.github.io/myRepo/main.js?t="+Date.now();
 
   const selectedTests = [
     "imgAlt",
