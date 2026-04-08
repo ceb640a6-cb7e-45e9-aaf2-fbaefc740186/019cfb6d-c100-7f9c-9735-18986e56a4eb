@@ -447,6 +447,340 @@ const tests = {
         `Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:\n\n` +
         results.join("\n")
     };
+  },
+
+  pruefeLandmarkenErschliessung() {
+    const LANDMARK_SELECTOR = "header, nav, main, aside, footer";
+    const SECTIONING_SELECTOR = "article, aside, main, nav, section";
+
+    function isVisible(el) {
+      if (!el || !(el instanceof Element)) return false;
+
+      const style = window.getComputedStyle(el);
+      if (style.display === "none") return false;
+      if (style.visibility === "hidden" || style.visibility === "collapse") return false;
+      if (parseFloat(style.opacity) === 0) return false;
+      if (el.hidden || el.getAttribute("aria-hidden") === "true" || el.inert) return false;
+
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 1 || rect.height <= 1) return false;
+
+      return true;
+    }
+
+    function isPageLevelHeaderOrFooter(el) {
+      return !el.closest(SECTIONING_SELECTOR);
+    }
+
+    function getAccessibleName(el) {
+      const ariaLabel = el.getAttribute("aria-label");
+      if (ariaLabel && ariaLabel.trim()) {
+        return ariaLabel.trim();
+      }
+
+      const labelledBy = el.getAttribute("aria-labelledby");
+      if (labelledBy) {
+        const text = labelledBy
+          .split(/\s+/)
+          .map(id => document.getElementById(id))
+          .filter(Boolean)
+          .map(node => (node.textContent || "").trim())
+          .filter(Boolean)
+          .join(" ");
+
+        if (text) return text;
+      }
+
+      const heading = el.querySelector("h1, h2, h3, h4, h5, h6");
+      if (heading && heading.textContent.trim()) {
+        return heading.textContent.trim();
+      }
+
+      return "";
+    }
+
+    function getTextLength(root) {
+      if (!root || !isVisible(root)) return 0;
+
+      const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            if (!node.nodeValue || !node.nodeValue.trim()) {
+              return NodeFilter.FILTER_REJECT;
+            }
+
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            if (parent.closest("script, style, noscript, svg, canvas, template")) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (!isVisible(parent)) return NodeFilter.FILTER_REJECT;
+
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+
+      let total = 0;
+      let current;
+      while ((current = walker.nextNode())) {
+        total += current.nodeValue.replace(/\s+/g, " ").trim().length;
+      }
+
+      return total;
+    }
+
+    function getRelevantLandmarks() {
+      return [...document.querySelectorAll(LANDMARK_SELECTOR)].filter(el => {
+        if (!isVisible(el)) return false;
+
+        const tag = el.tagName.toLowerCase();
+        if ((tag === "header" || tag === "footer") && !isPageLevelHeaderOrFooter(el)) {
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    function getLargeBlocksOutsideLandmarks() {
+      const candidates = [...document.body.querySelectorAll("main, article, section, div, p")];
+      const result = [];
+
+      for (const el of candidates) {
+        if (!isVisible(el)) continue;
+        if (el.closest(LANDMARK_SELECTOR)) continue;
+        if (el.querySelector(LANDMARK_SELECTOR)) continue;
+
+        const text = (el.innerText || "").replace(/\s+/g, " ").trim();
+        if (text.length >= 180) {
+          result.push({
+            tag: el.tagName.toLowerCase(),
+            text: text.slice(0, 160)
+          });
+        }
+      }
+
+      return result.slice(0, 5);
+    }
+
+    const headerAll = [...document.querySelectorAll("header")].filter(isPageLevelHeaderOrFooter);
+    const headerVisible = headerAll.filter(isVisible);
+
+    const navAll = [...document.querySelectorAll("nav")];
+    const navVisible = navAll.filter(isVisible);
+
+    const mainAll = [...document.querySelectorAll("main")];
+    const mainVisible = mainAll.filter(isVisible);
+
+    const asideAll = [...document.querySelectorAll("aside")];
+    const asideVisible = asideAll.filter(isVisible);
+
+    const footerAll = [...document.querySelectorAll("footer")].filter(isPageLevelHeaderOrFooter);
+    const footerVisible = footerAll.filter(isVisible);
+
+    const messages = [];
+    let score = 0;
+
+    // Header
+    if (headerAll.length === 0) {
+      messages.push("Kein seitenweiter <code>header</code> gefunden.");
+    } else if (headerVisible.length === 0) {
+      messages.push("Ein seitenweiter <code>header</code> ist vorhanden, aber nicht sichtbar.");
+    } else {
+      messages.push(`Seitenweiter <code>header</code> gefunden (${headerVisible.length}).`);
+      score += 1;
+    }
+
+    // Nav
+    if (navAll.length === 0) {
+      messages.push("Kein <code>nav</code> gefunden.");
+    } else if (navVisible.length === 0) {
+      messages.push("<code>nav</code> vorhanden, aber nicht sichtbar.");
+    } else {
+      const navsWithLinks = navVisible.filter(nav => nav.querySelectorAll("a[href]").length >= 2);
+      const unnamedNavs = navVisible.filter(nav => !getAccessibleName(nav));
+
+      if (navsWithLinks.length > 0) {
+        messages.push(`Sichtbare <code>nav</code>-Bereiche mit Links gefunden (${navsWithLinks.length}).`);
+        score += 1;
+      } else {
+        messages.push("Sichtbare <code>nav</code>-Bereiche enthalten kaum echte Navigationslinks.");
+      }
+
+      if (navVisible.length > 1 && unnamedNavs.length > 0) {
+        messages.push(`Mehrere <code>nav</code>-Bereiche vorhanden, davon ${unnamedNavs.length} ohne unterscheidbare Benennung.`);
+      }
+    }
+
+    // Main
+    if (mainAll.length === 0) {
+      messages.push("Kein <code>main</code> gefunden.");
+    } else if (mainAll.length > 1) {
+      messages.push(`Mehrere <code>main</code>-Elemente gefunden (${mainAll.length}).`);
+    } else if (mainVisible.length === 0) {
+      messages.push("Ein <code>main</code> ist vorhanden, aber nicht sichtbar.");
+    } else {
+      messages.push("Genau ein sichtbares <code>main</code> gefunden.");
+      score += 2;
+    }
+
+    // Aside
+    if (asideAll.length === 0) {
+      messages.push("Kein <code>aside</code> gefunden. Das ist optional.");
+    } else if (asideVisible.length > 0) {
+      const unnamedAsides = asideVisible.filter(aside => !getAccessibleName(aside));
+      messages.push(`Sichtbare <code>aside</code>-Bereiche gefunden (${asideVisible.length}).`);
+      if (asideVisible.length > 1 && unnamedAsides.length > 0) {
+        messages.push(`Mehrere <code>aside</code>-Bereiche vorhanden, davon ${unnamedAsides.length} ohne Benennung.`);
+      }
+      score += 0.5;
+    }
+
+    // Footer
+    if (footerAll.length === 0) {
+      messages.push("Kein seitenweiter <code>footer</code> gefunden.");
+    } else if (footerVisible.length === 0) {
+      messages.push("Ein seitenweiter <code>footer</code> ist vorhanden, aber nicht sichtbar.");
+    } else {
+      messages.push(`Seitenweiter <code>footer</code> gefunden (${footerVisible.length}).`);
+      score += 1;
+    }
+
+    function getTextCoverageInLandmarks() {
+      const LANDMARK_SELECTOR = "header, nav, main, aside, footer";
+      const SECTIONING_SELECTOR = "article, aside, main, nav, section";
+
+      function isVisible(el) {
+        if (!el || !(el instanceof Element)) return false;
+
+        const style = window.getComputedStyle(el);
+        if (style.display === "none") return false;
+        if (style.visibility === "hidden" || style.visibility === "collapse") return false;
+        if (parseFloat(style.opacity) === 0) return false;
+        if (el.hidden || el.getAttribute("aria-hidden") === "true" || el.inert) return false;
+
+        const rect = el.getBoundingClientRect();
+        return rect.width > 1 && rect.height > 1;
+      }
+
+      function isRelevantLandmark(el) {
+        if (!el) return false;
+        const tag = el.tagName.toLowerCase();
+
+        if (tag !== "header" && tag !== "nav" && tag !== "main" && tag !== "aside" && tag !== "footer") {
+          return false;
+        }
+
+        if ((tag === "header" || tag === "footer") && el.closest(SECTIONING_SELECTOR)) {
+          return false;
+        }
+
+        return isVisible(el);
+      }
+
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            if (!node.nodeValue || !node.nodeValue.trim()) {
+              return NodeFilter.FILTER_REJECT;
+            }
+
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            if (parent.closest("script, style, noscript, svg, canvas, template")) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (!isVisible(parent)) return NodeFilter.FILTER_REJECT;
+
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+
+      let totalText = 0;
+      let landmarkText = 0;
+      let current;
+
+      while ((current = walker.nextNode())) {
+        const textLen = current.nodeValue.replace(/\s+/g, " ").trim().length;
+        totalText += textLen;
+
+        const landmark = current.parentElement.closest(LANDMARK_SELECTOR);
+        if (landmark && isRelevantLandmark(landmark)) {
+          landmarkText += textLen;
+        }
+      }
+
+      const ratio = totalText > 0 ? Math.round((landmarkText / totalText) * 100) : 0;
+
+      return {
+        totalText,
+        landmarkText,
+        ratio
+      };
+    }
+
+    // Textabdeckung
+    const coverage = getTextCoverageInLandmarks();
+    /*const bodyText = coverage.totalText;
+    const landmarkText = coverage.landmarkText;*/
+    const ratio = coverage.ratio;
+
+    messages.push(`Etwa <code>${ratio}%</code> des sichtbaren Textes liegen innerhalb von <code>header/nav/main/aside/footer</code>.`);
+
+    if (ratio >= 70) {
+      score += 2;
+    } else if (ratio >= 40) {
+      score += 1;
+    }
+
+    const outsideBlocks = getLargeBlocksOutsideLandmarks();
+    if (outsideBlocks.length > 0) {
+      const blockList = outsideBlocks
+        .map(block => `<li><code>${escapeHtml(block.tag)}</code>: ${escapeHtml(block.text)}…</li>`)
+        .join("");
+
+      messages.push(
+        `Größere Textblöcke außerhalb der Landmarken gefunden:<ul>${blockList}</ul>`
+      );
+    } else {
+      messages.push("Keine größeren Textblöcke außerhalb der Landmarken gefunden.");
+      score += 1;
+    }
+
+    let status = "neutral";
+    if (
+      mainAll.length !== 1 ||
+      mainVisible.length !== 1 ||
+      navAll.length === 0 ||
+      ratio < 40
+    ) {
+      status = "fail";
+    } else if (score >= 6) {
+      status = "pass";
+    }
+
+    let content = "";
+    if (status === "pass") {
+      content += "Die Landmarken erschließen die Seite insgesamt gut.";
+    } else if (status === "neutral") {
+      content += "Die Landmarken erschließen die Seite teilweise, es gibt aber kleinere Schwächen.";
+    } else {
+      content += "Die Landmarken erschließen die Seite nicht ausreichend.";
+    }
+
+    content += "<br><br>" + messages.map(msg => `• ${msg}`).join("<br>");
+
+    return {
+      title: "Prüfung: Erschließen header/nav/main/aside/footer die Seite?",
+      status,
+      content
+    };
   }
 
 };
