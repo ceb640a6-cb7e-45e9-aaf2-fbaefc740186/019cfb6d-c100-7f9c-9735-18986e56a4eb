@@ -1,13 +1,30 @@
 // main.js
 
 const tests = {
-  headingCount() {
-    const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+  headingsList() {
+    const heads = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
 
     return {
-      title: "Heading count",
-      status: headings.length > 0 ? "pass" : "fail",
-      content: `Found <strong>${headings.length}</strong> headings on this page.`
+      title: "Headings list",
+      status: heads.length === 0 ? "fail" : "pass",
+      content: heads.length === 0
+        ? "No headings found on the page."
+        : `
+          <p><strong>${heads.length}</strong> heading(s) found.</p>
+          <ul>
+            ${heads.map((el, i) => {
+              const level = parseInt(el.tagName.substring(1), 10);
+              const text = (el.textContent || "").trim() || "(no text)";
+              const indent = (level - 1) * 16;
+
+              return `
+                <li style="margin-left:${indent}px">
+                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+                </li>
+              `;
+            }).join("")}
+          </ul>
+        `
     };
   },
 
