@@ -8,8 +8,7 @@
     "headingCount",
     "imageCount",
     "imagesMissingAlt",
-    "linksWithoutText",
-    "oneH1"
+    "linksWithoutText"
   ];
 
   function loadScript(src) {
@@ -189,6 +188,18 @@
             color: #374151;
           }
 
+          .box-pass {
+            border-left: 3px solid #065f46;
+          }
+
+          .box-fail {
+            border-left: 3px solid #991b1b;
+          }
+
+          .box-neutral {
+            border-left: 3px solid #374151;
+          }
+
           code, pre {
             background: #f0f0f0;
             border-radius: 4px;
@@ -233,7 +244,7 @@
         </div>
 
         ${results.map(r => `
-          <div class="box">
+          <div class="box box-${r.status}">
             <div class="box-header">
               <h2>${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
