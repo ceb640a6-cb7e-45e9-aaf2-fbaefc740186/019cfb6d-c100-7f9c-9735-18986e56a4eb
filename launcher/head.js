@@ -1,4 +1,4 @@
-javascript:(async function () {
+/*javascript:*/(async function () {
   const baseUrl = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/";
   const files = ["headings.js", "links.js"];
   const results = [];
