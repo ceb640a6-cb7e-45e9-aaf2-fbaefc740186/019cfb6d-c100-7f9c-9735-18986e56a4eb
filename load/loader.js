@@ -189,15 +189,15 @@
           }
 
           .box-pass {
-            border-left: 3px solid #065f46;
+            border-left: 6px solid #065f46;
           }
 
           .box-fail {
-            border-left: 3px solid #991b1b;
+            border-left: 6px solid #991b1b;
           }
 
           .box-neutral {
-            border-left: 3px solid #374151;
+            border-left: 6px solid #374151;
           }
 
           code, pre {
