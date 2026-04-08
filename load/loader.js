@@ -15,7 +15,8 @@
     /* 1411 */ "checkIds",
     /* 1411 */ "checkDuplicateAttributes",
     /* 1034 */ "textFromCSS",
-    "imagesEmptyAlt"
+    "imagesEmptyAlt",
+    /* 1241 */ "pruefeLandmarkenErschliessung"
   ].sort();
 
   function loadScript(src) {
@@ -228,30 +229,30 @@
           .badge {
             display: inline-block;
             padding: 4px 10px;
-            border-radius: 999px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 0.03em;
           }
 
           .badge-pass {
-            background: var(--pass-white);
-            color: var(--pass-dark);
+            background: var(--pass-dark);
+            color: var(--pass-white);
           }
 
           .badge-fail {
-            background: var(--fail-white);
-            color: var(--fail-dark);
+            background: var(--fail-dark);
+            color: var(--fail-white);
           }
 
           .badge-neutral {
-            background: var(--neutral-white);
-            color: var(--neutral-dark);
+            background: var(--neutral-dark);
+            color: var(--neutral-white);
           }
 
           .badge-check {
-            background: var(--check-white);
-            color: var(--check-dark);
+            background: var(--check-dark);
+            color: var(--check-white);
           }
 
           .box-pass {
@@ -264,6 +265,10 @@
 
           .box-neutral {
             border-left: 6px solid var(--neutral-dark);
+          }
+
+          .box-check {
+            border-left: 6px solid var(--check-dark);
           }
 
           code, pre {
@@ -295,17 +300,17 @@
         </div>
 
         <div class="summary">
-          <div class="summary-box summary-pass">
-            Pass
-            <strong>${summary.pass}</strong>
+          <div class="summary-box summary-fail">
+            Fail
+            <strong>${summary.fail}</strong>
           </div>
           <div class="summary-box summary-check">
             Check
             <strong>${summary.check}</strong>
           </div>
-          <div class="summary-box summary-fail">
-            Fail
-            <strong>${summary.fail}</strong>
+          <div class="summary-box summary-pass">
+            Pass
+            <strong>${summary.pass}</strong>
           </div>
           <div class="summary-box summary-neutral">
             Neutral
