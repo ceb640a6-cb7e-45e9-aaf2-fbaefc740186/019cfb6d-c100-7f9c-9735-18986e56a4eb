@@ -1,4 +1,4 @@
-//main.js
+// main.js
 
 const tests = {
   headingsList() {
@@ -41,31 +41,31 @@ const tests = {
           <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
           <ul>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Image ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              <li>Bild ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ul>
-          ${missingAlt.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+          ${missingAlt.length > 20 ? "<p>Nur die ersten 20 Bilder werden gezeigt.</p>" : ""}
         `
     };
   },
 
   imagesEmptyAlt() {
     const images = [...document.querySelectorAll("img")];
-    const missingAlt = images.filter(img => !img.hasAttribute("alt"));
+    const emptyAltImages = images.filter(img => img.hasAttribute("alt") && img.getAttribute("alt").trim() === "");
 
     return {
       title: "Bilder mit leerem Alt-Tag",
-      status: "check",
+      status: emptyAltImages.length === 0 ? "pass" : "neutral",
       content: missingAlt.length === 0
-        ? "All images have an <code>alt</code> attribute."
+        ? "Alle Alt-Texte in Bildern sind befüllt."
         : `
-          <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
+          <p><strong>${emptyAltImages.length}</strong> Bilder haben leere Alt-Texte und müssen <strong>manuell geprüft</strong> werden.</p>
           <ul>
-            ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Image ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+            ${emptyAltImages.slice(0, 30).map((img, i) => `
+              <li>Bild ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ul>
-          ${missingAlt.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+          ${missingAlt.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
         `
     };
   },
