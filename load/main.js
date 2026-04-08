@@ -141,6 +141,111 @@ const tests = {
           ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
         `
     };
+  },
+
+  pruefeDokumenttitel() {
+    const rawTitle = document.title || "";
+    const titleText = rawTitle.trim();
+
+    let score = 100;
+    const fehler = [];
+    const hinweise = [];
+
+    const isEmpty = !titleText;
+    const hasEmojiOrDecoration = /[★☆✓✔✕✖✗✘✦✧❖❤🔥✨🎉🚀💫🌟⚡\u{1F300}-\u{1FAFF}]/u.test(titleText);
+    const hasManySpecials = /[!?.\-_=~*#|:;·•<>]{4,}/.test(titleText);
+    const hasRepeatedSpaces = /\s{2,}/.test(titleText);
+    const looksGeneric = /^(unbenannt|untitled|document|dokument|page|seite|home|homepage|index|app)$/i.test(titleText);
+    const looksLikeFile = /^(https?:\/\/|www\.|index\.(html?|php)|default\.(html?|php))/i.test(titleText) || /\.(html?|php|pdf|xml|json|txt)$/i.test(titleText);
+    const allCaps = /^[^a-zäöüß]*[A-ZÄÖÜ]{5,}[^a-zäöüß]*$/.test(titleText);
+    const words = titleText.split(/\s+/).filter(Boolean);
+
+    if (isEmpty) {
+      return {
+        title: "Dokumenttitel prüfen",
+        status: "fail",
+        content: "Kein Dokumenttitel vorhanden."
+      };
+    }
+
+    if (titleText.length < 5) {
+      score -= 40;
+      fehler.push("Titel ist sehr kurz.");
+    }
+
+    if (titleText.length > 80) {
+      score -= 10;
+      hinweise.push("Titel ist relativ lang.");
+    }
+
+    if (titleText.length > 120) {
+      score -= 25;
+      fehler.push("Titel ist sehr lang.");
+    }
+
+    if (looksGeneric) {
+      score -= 45;
+      fehler.push("Titel ist zu generisch.");
+    }
+
+    if (looksLikeFile) {
+      score -= 35;
+      fehler.push("Titel wirkt wie URL oder Dateiname.");
+    }
+
+    if (hasEmojiOrDecoration) {
+      score -= 15;
+      hinweise.push("Titel enthält dekorative Zeichen oder Emojis.");
+    }
+
+    if (hasManySpecials) {
+      score -= 10;
+      hinweise.push("Titel enthält viele Sonderzeichen.");
+    }
+
+    if (hasRepeatedSpaces) {
+      score -= 5;
+      hinweise.push("Titel enthält Mehrfach-Leerzeichen.");
+    }
+
+    if (allCaps) {
+      score -= 10;
+      hinweise.push("Titel ist weitgehend in Großbuchstaben.");
+    }
+
+    if (words.length < 2 && titleText.length < 15) {
+      score -= 10;
+      hinweise.push("Titel könnte konkreter sein.");
+    }
+
+    score = Math.max(0, Math.min(100, score));
+
+    let status = "pass";
+    if (score < 50) {
+      status = "fail";
+    } else if (score < 85) {
+      status = "neutral";
+    }
+
+    const parts = [`Gefundener Titel: "${titleText}".`, `Bewertung: ${score}/100.`];
+
+    if (fehler.length) {
+      parts.push("Probleme: " + fehler.join(" "));
+    }
+
+    if (hinweise.length) {
+      parts.push("Hinweise: " + hinweise.join(" "));
+    }
+
+    if (status === "pass") {
+      parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert.");
+    }
+
+    return {
+      title: "Dokumenttitel prüfen",
+      status,
+      content: parts.join(" ")
+    };
   }
 };
 
