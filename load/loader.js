@@ -1,12 +1,12 @@
 // loader.js
 
 (function () {
-  const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js";
+  const MAIN_JS_URL = "https://myName.github.io/myRepo/main.js";
 
-  // Choose which tests to run from main.js
   const selectedTests = [
     "pageTitle",
     "headingCount",
+    "imageCount",
     "imagesMissingAlt",
     "linksWithoutText"
   ];
@@ -24,9 +24,14 @@
   async function ensureMainLoaded() {
     if (window.PageAnalyzerTests) return;
     await loadScript(MAIN_JS_URL);
+
     if (!window.PageAnalyzerTests) {
       throw new Error("main.js loaded, but PageAnalyzerTests is not available.");
     }
+  }
+
+  function normalizeStatus(status) {
+    return ["pass", "fail", "neutral"].includes(status) ? status : "neutral";
   }
 
   function runTests(testNames) {
@@ -38,6 +43,7 @@
       if (typeof fn !== "function") {
         results.push({
           title: `Missing test: ${name}`,
+          status: "fail",
           content: "This test name was configured in loader.js but not found in main.js."
         });
         continue;
@@ -48,11 +54,13 @@
 
         results.push({
           title: result?.title || name,
+          status: normalizeStatus(result?.status),
           content: result?.content || ""
         });
       } catch (err) {
         results.push({
           title: `Error in test: ${name}`,
+          status: "fail",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
         });
       }
@@ -61,9 +69,26 @@
     return results;
   }
 
-  function openReport(results) {
-    const reportWindow = window.open("", "_blank");
+  function getSummary(results) {
+    return results.reduce(
+      (acc, result) => {
+        acc[result.status] = (acc[result.status] || 0) + 1;
+        return acc;
+      },
+      { pass: 0, fail: 0, neutral: 0 }
+    );
+  }
 
+  function getBadgeLabel(status) {
+    if (status === "pass") return "PASS";
+    if (status === "fail") return "FAIL";
+    return "NEUTRAL";
+  }
+
+  function openReport(results) {
+    const summary = getSummary(results);
+
+    const reportWindow = window.open("", "_blank");
     if (!reportWindow) {
       alert("Popup blocked. Please allow popups for this site.");
       return;
@@ -84,13 +109,39 @@
             background: #f5f5f5;
             color: #222;
           }
+
           h1 {
             margin-top: 0;
+            margin-bottom: 8px;
           }
+
           .meta {
             margin-bottom: 24px;
             color: #555;
           }
+
+          .summary {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+          }
+
+          .summary-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 16px;
+            min-width: 120px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          }
+
+          .summary-box strong {
+            display: block;
+            font-size: 20px;
+            margin-top: 4px;
+          }
+
           .box {
             background: white;
             border: 1px solid #ddd;
@@ -99,21 +150,58 @@
             margin-bottom: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           }
+
+          .box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+          }
+
           .box h2 {
-            margin-top: 0;
+            margin: 0;
             font-size: 18px;
           }
+
+          .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.03em;
+          }
+
+          .badge-pass {
+            background: #d1fae5;
+            color: #065f46;
+          }
+
+          .badge-fail {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+
+          .badge-neutral {
+            background: #e5e7eb;
+            color: #374151;
+          }
+
           code, pre {
             background: #f0f0f0;
             border-radius: 4px;
           }
+
           code {
             padding: 2px 4px;
           }
+
           pre {
             padding: 12px;
             overflow: auto;
           }
+
           ul {
             padding-left: 20px;
           }
@@ -121,14 +209,34 @@
       </head>
       <body>
         <h1>Page Analysis Report</h1>
+
         <div class="meta">
           <div><strong>URL:</strong> ${escapeHtml(location.href)}</div>
-          <div><strong>Generated:</strong> ${new Date().toLocaleString()}</div>
+          <div><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+          <div><strong>Total tests:</strong> ${results.length}</div>
+        </div>
+
+        <div class="summary">
+          <div class="summary-box">
+            Pass
+            <strong>${summary.pass}</strong>
+          </div>
+          <div class="summary-box">
+            Fail
+            <strong>${summary.fail}</strong>
+          </div>
+          <div class="summary-box">
+            Neutral
+            <strong>${summary.neutral}</strong>
+          </div>
         </div>
 
         ${results.map(r => `
           <div class="box">
-            <h2>${escapeHtml(r.title)}</h2>
+            <div class="box-header">
+              <h2>${escapeHtml(r.title)}</h2>
+              <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
+            </div>
             <div>${r.content}</div>
           </div>
         `).join("")}
