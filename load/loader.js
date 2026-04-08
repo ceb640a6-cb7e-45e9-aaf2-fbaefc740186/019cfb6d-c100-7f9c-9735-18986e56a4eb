@@ -8,7 +8,8 @@
     "headingCount",
     "imageCount",
     "imagesMissingAlt",
-    "linksWithoutText"
+    "linksWithoutText",
+    "oneH1"
   ];
 
   function loadScript(src) {
