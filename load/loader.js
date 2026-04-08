@@ -11,7 +11,7 @@
     "linksWithoutText",
     /* 1031 */ "oneH1",
     /* 1031 */ "headingJumps"
-  ];
+  ].sort();
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
