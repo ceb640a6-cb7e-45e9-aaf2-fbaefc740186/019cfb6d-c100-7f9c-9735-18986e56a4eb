@@ -1141,459 +1141,442 @@ const tests = {
   },
 
   pruefeLinksImFliesstext() {
-  const textOf = el => (el && el.textContent || "").replace(/\s+/g, " ").trim();
+    const textOf = el => (el && el.textContent || "").replace(/\s+/g, " ").trim();
 
-  const isVisible = el => {
-    if (!el || !el.isConnected) return false;
-    const cs = getComputedStyle(el);
-    if (
-      cs.display === "none" ||
-      cs.visibility === "hidden" ||
-      cs.visibility === "collapse" ||
-      parseFloat(cs.opacity) === 0
-    ) {
+    const isVisible = el => {
+      if (!el || !el.isConnected) return false;
+      const cs = getComputedStyle(el);
+      if (
+        cs.display === "none" ||
+        cs.visibility === "hidden" ||
+        cs.visibility === "collapse" ||
+        parseFloat(cs.opacity) === 0
+      ) {
+        return false;
+      }
+      const r = el.getBoundingClientRect();
+      return !!(r.width || r.height);
+    };
+
+    const parseColor = str => {
+      if (!str) return null;
+      const m = String(str).match(/rgba?\(([^)]+)\)/i);
+      if (!m) return null;
+      const parts = m[1].split(",").map(x => parseFloat(x.trim()));
+      if (parts.length < 3 || parts.some(n => Number.isNaN(n))) return null;
+      return {
+        r: parts[0],
+        g: parts[1],
+        b: parts[2],
+        a: parts.length > 3 && !Number.isNaN(parts[3]) ? parts[3] : 1
+      };
+    };
+
+    const colorToStr = c => {
+      if (!c) return "unbekannt";
+      return `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, ${typeof c.a === "number" ? +c.a.toFixed(2) : 1})`;
+    };
+
+    const srgb = v => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+
+    const relLum = c => {
+      if (!c) return null;
+      return 0.2126 * srgb(c.r) + 0.7152 * srgb(c.g) + 0.0722 * srgb(c.b);
+    };
+
+    const contrast = (c1, c2) => {
+      const l1 = relLum(c1);
+      const l2 = relLum(c2);
+      if (l1 == null || l2 == null) return null;
+      const hi = Math.max(l1, l2);
+      const lo = Math.min(l1, l2);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+
+    const sameColor = (a, b) => {
+      if (!a || !b) return false;
+      return (
+        Math.round(a.r) === Math.round(b.r) &&
+        Math.round(a.g) === Math.round(b.g) &&
+        Math.round(a.b) === Math.round(b.b) &&
+        Math.abs((a.a ?? 1) - (b.a ?? 1)) < 0.02
+      );
+    };
+
+    const px = n => Number.parseFloat(String(n || "").replace("px", "")) || 0;
+
+    const normTextDec = cs => {
+      const line = (cs.textDecorationLine || "").toLowerCase().trim();
+      const style = (cs.textDecorationStyle || "").toLowerCase().trim();
+      const thick = (cs.textDecorationThickness || "").toLowerCase().trim();
+      return `${line}|${style}|${thick}`;
+    };
+
+    const hasVisibleBg = cs => {
+      const c = parseColor(cs.backgroundColor);
+      return !!(c && c.a > 0 && !(c.r === 0 && c.g === 0 && c.b === 0 && c.a === 0));
+    };
+
+    const hasVisibleBorderBottom = cs => {
+      return (
+        px(cs.borderBottomWidth) > 0 &&
+        (cs.borderBottomStyle || "none") !== "none" &&
+        !/rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/i.test(cs.borderBottomColor || "")
+      );
+    };
+
+    const hasVisibleOutline = cs => {
+      return px(cs.outlineWidth) > 0 && (cs.outlineStyle || "none") !== "none";
+    };
+
+    const hasVisibleShadow = cs => {
+      return (cs.boxShadow || "none") !== "none" || (cs.textShadow || "none") !== "none";
+    };
+
+    const fontWeightNum = v => {
+      const n = parseInt(v, 10);
+      if (!Number.isNaN(n)) return n;
+      const s = String(v || "").toLowerCase();
+      if (s === "normal") return 400;
+      if (s === "bold") return 700;
+      return 400;
+    };
+
+    const isPotentialTextContainer = el => {
+      if (!el || el.nodeType !== 1) return false;
+      const tag = (el.tagName || "").toLowerCase();
+      return /^(p|li|dd|dt|td|th|blockquote|figcaption|caption|article|section|main|div|span)$/i.test(tag);
+    };
+
+    const closestTextContainer = el => {
+      let cur = el.parentElement;
+      while (cur && cur !== document.body) {
+        if (isPotentialTextContainer(cur)) return cur;
+        cur = cur.parentElement;
+      }
+      return el.parentElement || document.body;
+    };
+
+    const hasBlockChild = el => {
+      return Array.from(el.children || []).some(ch => {
+        const d = getComputedStyle(ch).display;
+        return ["block", "flex", "grid", "table", "list-item"].includes(d);
+      });
+    };
+
+    const hasSiblingTextAround = el => {
+      const p = el.parentNode;
+      if (!p) return false;
+      const nodes = Array.from(p.childNodes);
+      const idx = nodes.indexOf(el);
+      const isTextNodeWithContent = n =>
+        n &&
+        n.nodeType === 3 &&
+        (n.textContent || "").replace(/\s+/g, " ").trim().length > 0;
+
+      for (let i = idx - 1; i >= 0; i--) {
+        if (isTextNodeWithContent(nodes[i])) return true;
+      }
+      for (let i = idx + 1; i < nodes.length; i++) {
+        if (isTextNodeWithContent(nodes[i])) return true;
+      }
       return false;
-    }
-    const r = el.getBoundingClientRect();
-    return !!(r.width || r.height);
-  };
-
-  const parseColor = str => {
-    if (!str) return null;
-    const m = String(str).match(/rgba?\(([^)]+)\)/i);
-    if (!m) return null;
-    const parts = m[1].split(",").map(x => parseFloat(x.trim()));
-    if (parts.length < 3 || parts.some(n => Number.isNaN(n))) return null;
-    return {
-      r: parts[0],
-      g: parts[1],
-      b: parts[2],
-      a: parts.length > 3 && !Number.isNaN(parts[3]) ? parts[3] : 1
-    };
-  };
-
-  const colorToStr = c => {
-    if (!c) return "unbekannt";
-    return `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, ${typeof c.a === "number" ? +c.a.toFixed(2) : 1})`;
-  };
-
-  const srgb = v => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  };
-
-  const relLum = c => {
-    if (!c) return null;
-    return 0.2126 * srgb(c.r) + 0.7152 * srgb(c.g) + 0.0722 * srgb(c.b);
-  };
-
-  const contrast = (c1, c2) => {
-    const l1 = relLum(c1);
-    const l2 = relLum(c2);
-    if (l1 == null || l2 == null) return null;
-    const hi = Math.max(l1, l2);
-    const lo = Math.min(l1, l2);
-    return (hi + 0.05) / (lo + 0.05);
-  };
-
-  const sameColor = (a, b) => {
-    if (!a || !b) return false;
-    return (
-      Math.round(a.r) === Math.round(b.r) &&
-      Math.round(a.g) === Math.round(b.g) &&
-      Math.round(a.b) === Math.round(b.b) &&
-      Math.abs((a.a ?? 1) - (b.a ?? 1)) < 0.02
-    );
-  };
-
-  const px = n => Number.parseFloat(String(n || "").replace("px", "")) || 0;
-
-  const normTextDec = cs => {
-    const line = (cs.textDecorationLine || "").toLowerCase().trim();
-    const style = (cs.textDecorationStyle || "").toLowerCase().trim();
-    const thick = (cs.textDecorationThickness || "").toLowerCase().trim();
-    return `${line}|${style}|${thick}`;
-  };
-
-  const hasVisibleBg = cs => {
-    const c = parseColor(cs.backgroundColor);
-    return !!(c && c.a > 0 && !(c.r === 0 && c.g === 0 && c.b === 0 && c.a === 0));
-  };
-
-  const hasVisibleBorderBottom = cs => {
-    return (
-      px(cs.borderBottomWidth) > 0 &&
-      (cs.borderBottomStyle || "none") !== "none" &&
-      !/rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/i.test(cs.borderBottomColor || "")
-    );
-  };
-
-  const hasVisibleOutline = cs => {
-    return px(cs.outlineWidth) > 0 && (cs.outlineStyle || "none") !== "none";
-  };
-
-  const hasVisibleShadow = cs => {
-    return (cs.boxShadow || "none") !== "none" || (cs.textShadow || "none") !== "none";
-  };
-
-  const fontWeightNum = v => {
-    const n = parseInt(v, 10);
-    if (!Number.isNaN(n)) return n;
-    const s = String(v || "").toLowerCase();
-    if (s === "normal") return 400;
-    if (s === "bold") return 700;
-    return 400;
-  };
-
-  const isPotentialTextContainer = el => {
-    if (!el || el.nodeType !== 1) return false;
-    const tag = (el.tagName || "").toLowerCase();
-    return /^(p|li|dd|dt|td|th|blockquote|figcaption|caption|article|section|main|div|span)$/i.test(tag);
-  };
-
-  const closestTextContainer = el => {
-    let cur = el.parentElement;
-    while (cur && cur !== document.body) {
-      if (isPotentialTextContainer(cur)) return cur;
-      cur = cur.parentElement;
-    }
-    return el.parentElement || document.body;
-  };
-
-  const hasBlockChild = el => {
-    return Array.from(el.children || []).some(ch => {
-      const d = getComputedStyle(ch).display;
-      return ["block", "flex", "grid", "table", "list-item"].includes(d);
-    });
-  };
-
-  const hasSiblingTextAround = el => {
-    const p = el.parentNode;
-    if (!p) return false;
-    const nodes = Array.from(p.childNodes);
-    const idx = nodes.indexOf(el);
-    const isTextNodeWithContent = n => n && n.nodeType === 3 && (n.textContent || "").replace(/\s+/g, " ").trim().length > 0;
-
-    for (let i = idx - 1; i >= 0; i--) {
-      if (isTextNodeWithContent(nodes[i])) return true;
-    }
-    for (let i = idx + 1; i < nodes.length; i++) {
-      if (isTextNodeWithContent(nodes[i])) return true;
-    }
-    return false;
-  };
-
-  const looksLikeInlineTextLink = a => {
-    if (!a || a.tagName.toLowerCase() !== "a") return false;
-    if (!isVisible(a)) return false;
-
-    const txt = textOf(a);
-    if (!txt || txt.length < 2) return false;
-
-    if (a.closest("nav, header, footer, .breadcrumb, [aria-label*='breadcrumb' i]")) return false;
-    if (hasBlockChild(a)) return false;
-
-    const cs = getComputedStyle(a);
-    if (["button", "inline-flex", "flex", "grid", "table", "block"].includes(cs.display)) return false;
-
-    if (a.querySelector("img,button,input,select,textarea")) return false;
-
-    const container = closestTextContainer(a);
-    const containerText = textOf(container);
-
-    if (containerText.length < txt.length + 10) return false;
-    if (!hasSiblingTextAround(a) && !(containerText.replace(txt, "").trim().length > 10)) return false;
-
-    return true;
-  };
-
-  const analyzeLink = a => {
-    const linkCs = getComputedStyle(a);
-    const ctx = closestTextContainer(a);
-    const ctxCs = getComputedStyle(ctx);
-
-    const linkColor = parseColor(linkCs.color);
-    const ctxColor = parseColor(ctxCs.color);
-
-    const cues = [];
-
-    const linkDec = normTextDec(linkCs);
-    const ctxDec = normTextDec(ctxCs);
-
-    const linkHasUnderline = (linkCs.textDecorationLine || "").toLowerCase().includes("underline");
-    const ctxHasUnderline = (ctxCs.textDecorationLine || "").toLowerCase().includes("underline");
-
-    if (linkHasUnderline && !ctxHasUnderline) cues.push("Unterstreichung");
-
-    const fwLink = fontWeightNum(linkCs.fontWeight);
-    const fwCtx = fontWeightNum(ctxCs.fontWeight);
-    if (Math.abs(fwLink - fwCtx) >= 150) cues.push(`andere Schriftstärke (${fwCtx} → ${fwLink})`);
-
-    if ((linkCs.fontStyle || "normal") !== (ctxCs.fontStyle || "normal")) {
-      cues.push(`anderer Schriftstil (${ctxCs.fontStyle} → ${linkCs.fontStyle})`);
-    }
-
-    if ((linkCs.fontFamily || "").split(",")[0] !== (ctxCs.fontFamily || "").split(",")[0]) {
-      cues.push("andere Schriftfamilie");
-    }
-
-    if (Math.abs(px(linkCs.fontSize) - px(ctxCs.fontSize)) >= 1) {
-      cues.push(`andere Schriftgröße (${ctxCs.fontSize} → ${linkCs.fontSize})`);
-    }
-
-    if (hasVisibleBg(linkCs) && !sameColor(parseColor(linkCs.backgroundColor), parseColor(ctxCs.backgroundColor))) {
-      cues.push("Hintergrund hervorgehoben");
-    }
-
-    if (hasVisibleBorderBottom(linkCs) && !hasVisibleBorderBottom(ctxCs)) {
-      cues.push("sichtbare Unterkante/Border");
-    }
-
-    if (hasVisibleOutline(linkCs) && !hasVisibleOutline(ctxCs)) {
-      cues.push("sichtbarer Outline");
-    }
-
-    if (hasVisibleShadow(linkCs) && !hasVisibleShadow(ctxCs)) {
-      cues.push("sichtbarer Schatten");
-    }
-
-    if (linkDec !== ctxDec && !cues.includes("Unterstreichung")) {
-      cues.push("abweichende Textdekoration");
-    }
-
-    const colorDiff = !sameColor(linkColor, ctxColor);
-    const linkVsTextContrast = contrast(linkColor, ctxColor);
-
-    let status = "pass";
-    let reason = "";
-
-    if (!colorDiff && cues.length === 0) {
-      status = "neutral";
-      reason = "Kein klarer stilistischer Unterschied zum umgebenden Text gefunden.";
-    } else if (colorDiff && cues.length === 0) {
-      status = "fail";
-      reason = `Link unterscheidet sich nur über Farbe vom umgebenden Text${linkVsTextContrast != null ? ` (Farbkontrast Link/Text: ${linkVsTextContrast.toFixed(2)}:1)` : ""}.`;
-    } else {
-      status = "pass";
-      reason = `Zusätzliche visuelle Unterscheidung gefunden: ${cues.join(", ")}.`;
-    }
-
-    const diff = {
-      color: {
-        link: linkCs.color || "",
-        context: ctxCs.color || ""
-      },
-      textDecoration: {
-        link: linkCs.textDecorationLine || "",
-        context: ctxCs.textDecorationLine || ""
-      },
-      textDecorationStyle: {
-        link: linkCs.textDecorationStyle || "",
-        context: ctxCs.textDecorationStyle || ""
-      },
-      textDecorationThickness: {
-        link: linkCs.textDecorationThickness || "",
-        context: ctxCs.textDecorationThickness || ""
-      },
-      fontWeight: {
-        link: linkCs.fontWeight || "",
-        context: ctxCs.fontWeight || ""
-      },
-      fontStyle: {
-        link: linkCs.fontStyle || "",
-        context: ctxCs.fontStyle || ""
-      },
-      fontSize: {
-        link: linkCs.fontSize || "",
-        context: ctxCs.fontSize || ""
-      },
-      fontFamily: {
-        link: linkCs.fontFamily || "",
-        context: ctxCs.fontFamily || ""
-      },
-      backgroundColor:
-        hasVisibleBg(linkCs) || hasVisibleBg(ctxCs)
-          ? {
-              link: linkCs.backgroundColor || "",
-              context: ctxCs.backgroundColor || ""
-            }
-          : null,
-      borderBottom:
-        hasVisibleBorderBottom(linkCs) || hasVisibleBorderBottom(ctxCs)
-          ? {
-              link: `${linkCs.borderBottomWidth} ${linkCs.borderBottomStyle} ${linkCs.borderBottomColor}`,
-              context: `${ctxCs.borderBottomWidth} ${ctxCs.borderBottomStyle} ${ctxCs.borderBottomColor}`
-            }
-          : null,
-      outline:
-        hasVisibleOutline(linkCs) || hasVisibleOutline(ctxCs)
-          ? {
-              link: `${linkCs.outlineWidth} ${linkCs.outlineStyle} ${linkCs.outlineColor}`,
-              context: `${ctxCs.outlineWidth} ${ctxCs.outlineStyle} ${ctxCs.outlineColor}`
-            }
-          : null,
-      textShadow:
-        (linkCs.textShadow || "none") !== "none" || (ctxCs.textShadow || "none") !== "none"
-          ? {
-              link: linkCs.textShadow || "",
-              context: ctxCs.textShadow || ""
-            }
-          : null,
-      boxShadow:
-        (linkCs.boxShadow || "none") !== "none" || (ctxCs.boxShadow || "none") !== "none"
-          ? {
-              link: linkCs.boxShadow || "",
-              context: ctxCs.boxShadow || ""
-            }
-          : null
     };
 
-    return {
-      el: a,
-      ctx,
-      text: textOf(a) || "(ohne Text)",
-      path: getDomPath(a),
-      containerPath: getDomPath(ctx),
-      status,
-      reason,
-      cues,
-      colorDiff,
-      linkColor: colorToStr(linkColor),
-      ctxColor: colorToStr(ctxColor),
-      contrast: linkVsTextContrast,
-      diff
-    };
-  };
+    const looksLikeInlineTextLink = a => {
+      if (!a || a.tagName.toLowerCase() !== "a") return false;
+      if (!isVisible(a)) return false;
 
-  const renderDiffs = x => {
-    const labels = {
-      color: "Farbe",
-      textDecoration: "Text Decoration",
-      textDecorationStyle: "Text Decoration Style",
-      textDecorationThickness: "Text Decoration Thickness",
-      fontWeight: "Font Weight",
-      fontStyle: "Font Style",
-      fontSize: "Font Size",
-      fontFamily: "Font Family",
-      backgroundColor: "Hintergrund",
-      borderBottom: "Border Bottom",
-      outline: "Outline",
-      textShadow: "Text Shadow",
-      boxShadow: "Box Shadow"
+      const txt = textOf(a);
+      if (!txt || txt.length < 2) return false;
+
+      if (a.closest("nav, header, footer, .breadcrumb, [aria-label*='breadcrumb' i]")) return false;
+      if (hasBlockChild(a)) return false;
+
+      const cs = getComputedStyle(a);
+      if (["button", "inline-flex", "flex", "grid", "table", "block"].includes(cs.display)) return false;
+
+      if (a.querySelector("img,button,input,select,textarea")) return false;
+
+      const container = closestTextContainer(a);
+      const containerText = textOf(container);
+
+      if (containerText.length < txt.length + 10) return false;
+      if (!hasSiblingTextAround(a) && !(containerText.replace(txt, "").trim().length > 10)) return false;
+
+      return true;
     };
 
-    const rows = Object.entries(x.diff)
-      .filter(([, v]) => v && String(v.link) !== String(v.context))
-      .map(([key, v]) => `
-        <div style="margin-top:4px;">
-          <b>${escapeHtml(labels[key] || key)}:</b>
-          Text = <code>${escapeHtml(v.context || "(leer)")}</code>
-          → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
+    const analyzeLink = a => {
+      const linkCs = getComputedStyle(a);
+      const ctx = closestTextContainer(a);
+      const ctxCs = getComputedStyle(ctx);
+
+      const linkColor = parseColor(linkCs.color);
+      const ctxColor = parseColor(ctxCs.color);
+
+      const cues = [];
+
+      const linkDec = normTextDec(linkCs);
+      const ctxDec = normTextDec(ctxCs);
+
+      const linkHasUnderline = (linkCs.textDecorationLine || "").toLowerCase().includes("underline");
+      const ctxHasUnderline = (ctxCs.textDecorationLine || "").toLowerCase().includes("underline");
+
+      if (linkHasUnderline && !ctxHasUnderline) cues.push("Unterstreichung");
+
+      const fwLink = fontWeightNum(linkCs.fontWeight);
+      const fwCtx = fontWeightNum(ctxCs.fontWeight);
+      if (Math.abs(fwLink - fwCtx) >= 150) cues.push(`andere Schriftstärke (${fwCtx} → ${fwLink})`);
+
+      if ((linkCs.fontStyle || "normal") !== (ctxCs.fontStyle || "normal")) {
+        cues.push(`anderer Schriftstil (${ctxCs.fontStyle} → ${linkCs.fontStyle})`);
+      }
+
+      if ((linkCs.fontFamily || "").split(",")[0] !== (ctxCs.fontFamily || "").split(",")[0]) {
+        cues.push("andere Schriftfamilie");
+      }
+
+      if (Math.abs(px(linkCs.fontSize) - px(ctxCs.fontSize)) >= 1) {
+        cues.push(`andere Schriftgröße (${ctxCs.fontSize} → ${linkCs.fontSize})`);
+      }
+
+      if (hasVisibleBg(linkCs) && !sameColor(parseColor(linkCs.backgroundColor), parseColor(ctxCs.backgroundColor))) {
+        cues.push("Hintergrund hervorgehoben");
+      }
+
+      if (hasVisibleBorderBottom(linkCs) && !hasVisibleBorderBottom(ctxCs)) {
+        cues.push("sichtbare Unterkante/Border");
+      }
+
+      if (hasVisibleOutline(linkCs) && !hasVisibleOutline(ctxCs)) {
+        cues.push("sichtbarer Outline");
+      }
+
+      if (hasVisibleShadow(linkCs) && !hasVisibleShadow(ctxCs)) {
+        cues.push("sichtbarer Schatten");
+      }
+
+      if (linkDec !== ctxDec && !cues.includes("Unterstreichung")) {
+        cues.push("abweichende Textdekoration");
+      }
+
+      const colorDiff = !sameColor(linkColor, ctxColor);
+      const linkVsTextContrast = contrast(linkColor, ctxColor);
+
+      let status = "pass";
+      let reason = "";
+
+      if (!colorDiff && cues.length === 0) {
+        status = "neutral";
+        reason = "Kein klarer stilistischer Unterschied zum umgebenden Text gefunden.";
+      } else if (colorDiff && cues.length === 0) {
+        status = "fail";
+        reason = `Link unterscheidet sich nur über Farbe vom umgebenden Text${linkVsTextContrast != null ? ` (Farbkontrast Link/Text: ${linkVsTextContrast.toFixed(2)}:1)` : ""}.`;
+      } else {
+        status = "pass";
+        reason = `Zusätzliche visuelle Unterscheidung gefunden: ${cues.join(", ")}.`;
+      }
+
+      const diff = {
+        color: {
+          link: linkCs.color || "",
+          context: ctxCs.color || ""
+        },
+        textDecoration: {
+          link: linkCs.textDecorationLine || "",
+          context: ctxCs.textDecorationLine || ""
+        },
+        textDecorationStyle: {
+          link: linkCs.textDecorationStyle || "",
+          context: ctxCs.textDecorationStyle || ""
+        },
+        textDecorationThickness: {
+          link: linkCs.textDecorationThickness || "",
+          context: ctxCs.textDecorationThickness || ""
+        },
+        fontWeight: {
+          link: linkCs.fontWeight || "",
+          context: ctxCs.fontWeight || ""
+        },
+        fontStyle: {
+          link: linkCs.fontStyle || "",
+          context: ctxCs.fontStyle || ""
+        },
+        fontSize: {
+          link: linkCs.fontSize || "",
+          context: ctxCs.fontSize || ""
+        },
+        fontFamily: {
+          link: linkCs.fontFamily || "",
+          context: ctxCs.fontFamily || ""
+        },
+        backgroundColor:
+          hasVisibleBg(linkCs) || hasVisibleBg(ctxCs)
+            ? {
+                link: linkCs.backgroundColor || "",
+                context: ctxCs.backgroundColor || ""
+              }
+            : null,
+        borderBottom:
+          hasVisibleBorderBottom(linkCs) || hasVisibleBorderBottom(ctxCs)
+            ? {
+                link: `${linkCs.borderBottomWidth} ${linkCs.borderBottomStyle} ${linkCs.borderBottomColor}`,
+                context: `${ctxCs.borderBottomWidth} ${ctxCs.borderBottomStyle} ${ctxCs.borderBottomColor}`
+              }
+            : null,
+        outline:
+          hasVisibleOutline(linkCs) || hasVisibleOutline(ctxCs)
+            ? {
+                link: `${linkCs.outlineWidth} ${linkCs.outlineStyle} ${linkCs.outlineColor}`,
+                context: `${ctxCs.outlineWidth} ${ctxCs.outlineStyle} ${ctxCs.outlineColor}`
+              }
+            : null,
+        textShadow:
+          (linkCs.textShadow || "none") !== "none" || (ctxCs.textShadow || "none") !== "none"
+            ? {
+                link: linkCs.textShadow || "",
+                context: ctxCs.textShadow || ""
+              }
+            : null,
+        boxShadow:
+          (linkCs.boxShadow || "none") !== "none" || (ctxCs.boxShadow || "none") !== "none"
+            ? {
+                link: linkCs.boxShadow || "",
+                context: ctxCs.boxShadow || ""
+              }
+            : null
+      };
+
+      return {
+        el: a,
+        text: textOf(a) || "(ohne Text)",
+        path: getDomPath(a),
+        status,
+        reason,
+        colorDiff,
+        linkColor: colorToStr(linkColor),
+        ctxColor: colorToStr(ctxColor),
+        contrast: linkVsTextContrast,
+        diff
+      };
+    };
+
+    const renderDiffs = x => {
+      const labels = {
+        color: "Farbe",
+        textDecoration: "Text Decoration",
+        textDecorationStyle: "Text Decoration Style",
+        textDecorationThickness: "Text Decoration Thickness",
+        fontWeight: "Font Weight",
+        fontStyle: "Font Style",
+        fontSize: "Font Size",
+        fontFamily: "Font Family",
+        backgroundColor: "Hintergrund",
+        borderBottom: "Border Bottom",
+        outline: "Outline",
+        textShadow: "Text Shadow",
+        boxShadow: "Box Shadow"
+      };
+
+      const rows = Object.entries(x.diff)
+        .filter(([, v]) => v && String(v.link) !== String(v.context))
+        .map(([key, v]) => `
+          <div style="margin-top:4px;">
+            <b>${escapeHtml(labels[key] || key)}:</b>
+            Text = <code>${escapeHtml(v.context || "(leer)")}</code>
+            → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
+          </div>
+        `)
+        .join("");
+
+      return rows || `<div style="margin-top:4px;">Keine konkreten Style-Unterschiede im berechneten Stil gefunden.</div>`;
+    };
+
+    const renderItem = (x, i) => {
+      const color =
+        x.status === "fail" ? "#b42318" :
+        x.status === "neutral" ? "#9a6700" :
+        "#187a34";
+
+      return `
+        <div style="padding:10px 0;border-top:1px solid #eee;">
+          <div><b>${i + 1}. ${escapeHtml(x.text)}</b></div>
+          <div style="margin-top:6px;color:${color};">${escapeHtml(x.reason)}</div>
+          <div style="margin-top:6px;">
+            Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> ·
+            Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
+            ${x.contrast != null ? ` · Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}
+          </div>
+          <div style="margin-top:8px;"><b>Style-Unterschiede:</b></div>
+          ${renderDiffs(x)}
+          <div style="margin-top:6px;">DOM-Pfad Link: <code>${escapeHtml(x.path)}</code></div>
         </div>
-      `)
-      .join("");
+      `;
+    };
 
-    return rows || `<div style="margin-top:4px;">Keine konkreten Style-Unterschiede im berechneten Stil gefunden.</div>`;
-  };
+    const allLinks = Array.from(document.querySelectorAll("a[href]"));
+    const inlineLinks = allLinks.filter(looksLikeInlineTextLink);
+    const results = inlineLinks.map(analyzeLink);
 
-  const renderItem = (x, i) => {
-    const color =
-      x.status === "fail" ? "#b42318" :
-      x.status === "neutral" ? "#9a6700" :
-      "#187a34";
+    const fails = results.filter(x => x.status === "fail");
+    const neutrals = results.filter(x => x.status === "neutral");
 
-    return `
-      <div style="padding:10px 0;border-top:1px solid #eee;">
-        <div><b>${i + 1}. ${escapeHtml(x.text)}</b></div>
-        <div style="margin-top:6px;color:${color};">${escapeHtml(x.reason)}</div>
-        <div style="margin-top:6px;">
-          Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> ·
-          Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-          ${x.contrast != null ? ` · Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}
-        </div>
-        <div style="margin-top:6px;">
-          Erkannte Unterscheidungsmerkmale:
-          <code>${escapeHtml(x.cues.length ? x.cues.join(", ") : "keine")}</code>
-        </div>
-        <div style="margin-top:8px;"><b>Style-Unterschiede:</b></div>
-        ${renderDiffs(x)}
-        <div style="margin-top:6px;">DOM-Pfad Link: <code>${escapeHtml(x.path)}</code></div>
-        <div style="margin-top:6px;">Text-Container: <code>${escapeHtml(x.containerPath)}</code></div>
+    let overallStatus = "pass";
+    if (fails.length) overallStatus = "fail";
+    else if (neutrals.length) overallStatus = "neutral";
+
+    const summaryHtml = `
+      <div>
+        Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.
+      </div>
+      <div style="margin-top:8px;">
+        Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
+        Davon als Textlinks im Fließtext bewertet: <b>${inlineLinks.length}</b><br>
+        Nur über Farbe abgehoben: <b>${fails.length}</b><br>
+        Unklare Fälle: <b>${neutrals.length}</b>
       </div>
     `;
-  };
 
-  const allLinks = Array.from(document.querySelectorAll("a[href]"));
-  const inlineLinks = allLinks.filter(looksLikeInlineTextLink);
-  const results = inlineLinks.map(analyzeLink);
+    const failHtml = fails.length
+      ? `
+        <div style="margin-top:12px;">
+          <b>Problematische Links</b>
+          ${fails.map(renderItem).join("")}
+        </div>
+      `
+      : "";
 
-  const fails = results.filter(x => x.status === "fail");
-  const neutrals = results.filter(x => x.status === "neutral");
-  const passes = results.filter(x => x.status === "pass");
+    const neutralHtml = neutrals.length
+      ? `
+        <div style="margin-top:12px;">
+          <b>Unklare Fälle</b>
+          ${neutrals.map(renderItem).join("")}
+        </div>
+      `
+      : "";
 
-  let overallStatus = "pass";
-  if (fails.length) overallStatus = "fail";
-  else if (neutrals.length) overallStatus = "neutral";
+    const emptyHtml = !fails.length && !neutrals.length
+      ? `<div style="margin-top:8px;">Es wurden keine problematischen oder unklaren Inline-Links im Fließtext gefunden.</div>`
+      : "";
 
-  const summaryHtml = `
-    <div>
-      Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.
-    </div>
-    <div style="margin-top:8px;">
-      Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
-      Davon als Textlinks im Fließtext bewertet: <b>${inlineLinks.length}</b><br>
-      Nur über Farbe abgehoben: <b>${fails.length}</b><br>
-      Unklare Fälle: <b>${neutrals.length}</b><br>
-      Mit zusätzlicher visueller Hervorhebung: <b>${passes.length}</b>
-    </div>
-  `;
-
-  const failHtml = fails.length
-    ? `
-      <div style="margin-top:12px;">
-        <b>Problematische Links</b>
-        ${fails.map(renderItem).join("")}
-      </div>
-    `
-    : "";
-
-  const neutralHtml = neutrals.length
-    ? `
-      <div style="margin-top:12px;">
-        <b>Unklare Fälle</b>
-        ${neutrals.map(renderItem).join("")}
-      </div>
-    `
-    : "";
-
-  const passHtml = passes.length
-    ? `
-      <div style="margin-top:12px;">
-        <b>Unauffällige Links</b>
-        ${passes.map(renderItem).join("")}
-      </div>
-    `
-    : "";
-
-  const emptyHtml = !results.length
-    ? `<div style="margin-top:8px;">Es wurden keine relevanten Inline-Links im Fließtext gefunden.</div>`
-    : "";
-
-  return {
-    title: "Links sollen sich durch mehr als nur die Textfarbe von anderem Text abheben",
-    status: overallStatus,
-    content: `
-      ${summaryHtml}
-      ${emptyHtml}
-      ${failHtml}
-      ${neutralHtml}
-      ${passHtml}
-      <div style="margin-top:12px;font-size:12px;color:#555;">
-        Hinweis: Geprüft wird der aktuelle Zustand der Seite. Hover-, Focus- und Active-Zustände werden hier nicht vollständig berücksichtigt.
-      </div>
-    `
-  };
-}
+    return {
+      title: "Links sollen sich durch mehr als nur die Textfarbe von anderem Text abheben",
+      status: overallStatus,
+      content: `
+        ${summaryHtml}
+        ${emptyHtml}
+        ${failHtml}
+        ${neutralHtml}
+        <div style="margin-top:12px;font-size:12px;color:#555;">
+          Hinweis: Geprüft wird der aktuelle Zustand der Seite. Hover-, Focus- und Active-Zustände werden hier nicht vollständig berücksichtigt.
+        </div>
+      `
+    };
+  }
 
 };
 
