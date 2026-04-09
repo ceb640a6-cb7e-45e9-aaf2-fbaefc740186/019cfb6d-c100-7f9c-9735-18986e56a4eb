@@ -60,25 +60,15 @@ const tests = {
         ? "Alle Alt-Texte in Bildern sind befüllt."
         : `
           <p><strong>${emptyAltImages.length}</strong> Bilder haben leere Alt-Texte und müssen <strong>manuell geprüft</strong> werden.</p>
-          <ul>
+          <ol>
             ${emptyAltImages.slice(0, 30).map((img, i) => `
-              <li>Bild ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              <li>${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
-          </ul>
+          </ol>
           ${emptyAltImages.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
         `
     };
   },
-
-  /*pageTitle() { //obsolete because of pruefeDokumenttitel
-    return {
-      title: "Page title",
-      status: document.title ? "pass" : "fail",
-      content: document.title
-        ? `Title: <strong>${escapeHtml(document.title)}</strong>`
-        : "This page has no title."
-    };
-  },*/
 
   linksWithoutText() {
     const links = [...document.querySelectorAll("a")];
@@ -97,16 +87,6 @@ const tests = {
             `).join("")}
           </ul>
         `
-    };
-  },
-
-  imageCount() {
-    const images = document.querySelectorAll("img");
-
-    return {
-      title: "Image count",
-      status: "neutral",
-      content: `Found <strong>${images.length}</strong> image(s).`
     };
   },
 
