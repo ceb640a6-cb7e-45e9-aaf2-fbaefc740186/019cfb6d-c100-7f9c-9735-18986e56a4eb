@@ -1493,7 +1493,7 @@ const tests = {
         `)
         .join("");
 
-      return rows || `<div style="margin-top:4px;">Keine konkreten Style-Unterschiede im berechneten Stil gefunden.</div>`;
+      return rows || '';
     };
 
     const renderItem = (x, i) => {
@@ -1527,8 +1527,8 @@ const tests = {
       </div>
       <div style="margin-top:8px;">
         Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
-        Davon als Textlinks im Fließtext bewertet: <b>${inlineLinks.length}</b><br>
-        Nur über Farbe abgehoben: <b>${fails.length}</b>
+        Textlinks im Fließtext: <b>${inlineLinks.length}</b><br>
+        Problematische Links: <b>${fails.length}</b>
       </div>
     `;
 
@@ -1552,6 +1552,232 @@ const tests = {
         ${emptyHtml}
         ${failHtml}
       `
+    };
+  },
+
+  pruefeListenStruktur() {
+    const strukturFehler = [];
+    const fakeLists = [];
+    const geseheneFakeLists = new Set();
+
+    const bulletTextRe = /^\s*(?:[•◦▪‣⁃∙·●○■–—-]|\d+[.)]|[a-zA-Z][.)])\s+\S/;
+    const bulletBeforeRe = /^(?:["'])?\s*(?:[•◦▪‣⁃∙·●○■–—-]|\d+[.)]|[a-zA-Z][.)])\s*(?:["'])?$/;
+
+    function normalizeText(text) {
+      return String(text || "").replace(/\s+/g, " ").trim();
+    }
+
+    function isHidden(el) {
+      const style = window.getComputedStyle(el);
+      return style.display === "none" || style.visibility === "hidden";
+    }
+
+    function getBeforeContent(el) {
+      try {
+        const content = window.getComputedStyle(el, "::before").content;
+        if (!content || content === "none" || content === "normal") {
+          return "";
+        }
+        return String(content).trim();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function looksLikeFakeListItem(p) {
+      const text = normalizeText(p.textContent);
+      if (bulletTextRe.test(text)) {
+        return true;
+      }
+
+      const beforeContent = getBeforeContent(p);
+      if (beforeContent && bulletBeforeRe.test(beforeContent)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function pushStrukturFehler(el, message) {
+      strukturFehler.push({
+        path: getDomPath(el),
+        message
+      });
+    }
+
+    function pushFakeList(container, items) {
+      const examples = items
+        .slice(0, 3)
+        .map((el) => normalizeText(el.textContent))
+        .filter(Boolean);
+
+      const viaCssBefore = items.some((el) => bulletBeforeRe.test(getBeforeContent(el)));
+      const key = `${getDomPath(container)}__${items.length}__${examples.join("||")}__${viaCssBefore}`;
+
+      if (geseheneFakeLists.has(key)) {
+        return;
+      }
+
+      geseheneFakeLists.add(key);
+
+      fakeLists.push({
+        path: getDomPath(container),
+        count: items.length,
+        examples,
+        viaCssBefore
+      });
+    }
+
+    // 1) Strukturprüfung für <ul> und <ol>
+    document.querySelectorAll("ul, ol").forEach((list) => {
+      const allowedChildTags = new Set(["LI", "SCRIPT", "TEMPLATE", "STYLE"]);
+      const children = Array.from(list.children);
+
+      const invalidChildren = children.filter((child) => !allowedChildTags.has(child.tagName));
+      if (invalidChildren.length > 0) {
+        pushStrukturFehler(
+          list,
+          `<${list.tagName.toLowerCase()}> enthält ungültige direkte Kindelemente: ${invalidChildren
+            .map((el) => `<${el.tagName.toLowerCase()}>`)
+            .join(", ")}`
+        );
+      }
+
+      const directLiChildren = children.filter((child) => child.tagName === "LI");
+      if (directLiChildren.length === 0) {
+        pushStrukturFehler(
+          list,
+          `<${list.tagName.toLowerCase()}> enthält keine direkten <li>-Elemente`
+        );
+      }
+    });
+
+    // 2) Strukturprüfung für <li>
+    document.querySelectorAll("li").forEach((li) => {
+      const parent = li.parentElement;
+      if (!parent || !/^(UL|OL)$/.test(parent.tagName)) {
+        pushStrukturFehler(
+          li,
+          `<li> ist falsch verschachtelt (erwartet direkt innerhalb von <ul> oder <ol>)`
+        );
+      }
+    });
+
+    // 3) Erkennung möglicher Fake-Lists aus <p>-Elementen
+    document.querySelectorAll("p").forEach((p) => {
+      if (isHidden(p)) {
+        return;
+      }
+
+      if (p.closest("li")) {
+        return;
+      }
+
+      if (!looksLikeFakeListItem(p)) {
+        return;
+      }
+
+      const parent = p.parentElement;
+      if (!parent) {
+        return;
+      }
+
+      const pSiblings = Array.from(parent.children).filter((el) => {
+        return el.tagName === "P" && !isHidden(el) && !el.closest("li");
+      });
+
+      const currentIndex = pSiblings.indexOf(p);
+      if (currentIndex === -1) {
+        return;
+      }
+
+      let start = currentIndex;
+      while (start > 0 && looksLikeFakeListItem(pSiblings[start - 1])) {
+        start--;
+      }
+
+      // Nur einmal pro zusammenhängender Gruppe prüfen
+      if (start !== currentIndex) {
+        return;
+      }
+
+      let end = currentIndex;
+      while (end + 1 < pSiblings.length && looksLikeFakeListItem(pSiblings[end + 1])) {
+        end++;
+      }
+
+      const group = pSiblings.slice(start, end + 1);
+
+      // Erst ab mindestens 2 aufeinanderfolgenden Absätzen als mögliche Fake-Liste werten
+      if (group.length >= 2) {
+        pushFakeList(parent, group);
+      }
+    });
+
+    // 4) Status bestimmen
+    let status = "pass";
+    if (strukturFehler.length > 0) {
+      status = "fail";
+    } else if (fakeLists.length > 0) {
+      status = "neutral";
+    }
+
+    // 5) Inhalt erzeugen
+    const totalLists = document.querySelectorAll("ul, ol").length;
+    const totalListItems = document.querySelectorAll("li").length;
+
+    let content = `
+      <p>Geprüft wurden alle <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code> und <code>&lt;li&gt;</code> auf grundlegende korrekte Verwendung und Verschachtelung. Zusätzlich wurden mögliche "Fake-Listen" gesucht, bei denen Aufzählungen mit <code>&lt;p&gt;</code>-Elementen statt echter Listen ausgezeichnet sind.</p>
+      <ul>
+        <li>Gefundene <code>&lt;ul&gt;/&lt;ol&gt;</code>: <strong>${totalLists}</strong></li>
+        <li>Gefundene <code>&lt;li&gt;</code>: <strong>${totalListItems}</strong></li>
+        <li>Strukturfehler: <strong>${strukturFehler.length}</strong></li>
+        <li>Mögliche Fake-Listen: <strong>${fakeLists.length}</strong></li>
+      </ul>
+    `;
+
+    if (strukturFehler.length > 0) {
+      content += `<h4>Strukturfehler</h4><ul>`;
+      strukturFehler.forEach((entry) => {
+        content += `
+          <li>
+            <strong>${escapeHtml(entry.path)}</strong><br>
+            ${escapeHtml(entry.message)}
+          </li>
+        `;
+      });
+      content += `</ul>`;
+    } else {
+      content += `<p>Keine Strukturfehler bei <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code> oder <code>&lt;li&gt;</code> gefunden.</p>`;
+    }
+
+    if (fakeLists.length > 0) {
+      content += `<h4>Mögliche Fake-Listen</h4><ul>`;
+      fakeLists.forEach((entry) => {
+        const examplesHtml = entry.examples.length
+          ? `<br>Beispiele: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
+          : "";
+
+        const cssInfo = entry.viaCssBefore
+          ? ` (Aufzählungszeichen offenbar über <code>::before</code>)`
+          : "";
+
+        content += `
+          <li>
+            <strong>${escapeHtml(entry.path)}</strong><br>
+            ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}.${examplesHtml}
+          </li>
+        `;
+      });
+      content += `</ul>`;
+    } else {
+      content += `<p>Keine offensichtlichen Fake-Listen aus <code>&lt;p&gt;</code>-Elementen gefunden.</p>`;
+    }
+
+    return {
+      title: "Listenstruktur prüfen",
+      status,
+      content
     };
   }
 
