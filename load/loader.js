@@ -163,6 +163,11 @@
             margin-bottom: 8px;
           }
 
+          #summary-chart {
+            height: 350px;
+            width: 350px;
+          }
+
           .meta {
             margin-bottom: 24px;
             color: var(--darker);
@@ -321,7 +326,7 @@
             <strong>${summary.pass}</strong>
           </div>
         </div>
-        <canvas id="summary-chart" width="400" height="400"></canvas>
+        <canvas id="summary-chart"></canvas>
 
         ${results.map(r => `
           <div class="box box-${r.status}">
@@ -337,21 +342,19 @@
         <script>
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: ['Pass', 'Check', 'Fail'],
+            labels: ['Pass', 'Check', 'Fail', 'Test'],
             datasets: [{
               label: 'My Dataset',
-              data: [${summary.pass}, ${summary.check}, ${summary.fail}, 2], // your four values
+              data: [${summary.pass}, ${summary.check}, ${summary.fail}],
               backgroundColor: [
                 '#20c997', // pass
                 '#fcc419', // check
-                '#f06595', // fail
-                '${getRootVar('--check-light')}' // test
+                '#f06595' // fail
               ],
               borderColor: [
                 '#ffffff00',
                 '#ffffff00',
                 '#ffffff00',
-                '#ffffff00'
               ],
               borderWidth: 2
             }]
