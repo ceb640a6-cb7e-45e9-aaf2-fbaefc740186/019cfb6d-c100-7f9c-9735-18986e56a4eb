@@ -4,22 +4,23 @@
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
   const selectedTests = [
-    /* R1031 */ "headingsList",
-    /* R1012 */ "imagesMissingAlt",
-    /* R1013 */ "imagesEmptyAlt",
-    /* R1244 */ "linksWithoutText",
-    /* R1031 */ "oneH1",
-    /* R1031 */ "headingJumps",
-    /* R1242 */ "pruefeDokumenttitel",
-    /* R1411 */ "checkIds",
-    /* R1411 */ "checkDuplicateAttributes",
-    /* R1034 */ "textFromCSS",
-    /* R1241 */ "checkLandmarks",
-    /* R6035 */ "pruefeSichtbareTabellen",
-    /* R6035 */ "pruefeTransparenteTabellen",
-    /* R1311 */ "pruefeLangAttribut",
-    /* R8010 */ "findeKomplettLeereTags",
-    /* R8020 */ "pruefeLinksImFliesstext"
+    /* 1031 */ "headingsList",
+    /* 1012 */ "imagesMissingAlt",
+    /* 1013 */ "imagesEmptyAlt",
+    /* 1244 */ "linksWithoutText",
+    /* 1031 */ "oneH1",
+    /* 1031 */ "headingJumps",
+    /* 1242 */ "pruefeDokumenttitel",
+    /* 1411 */ "checkIds",
+    /* 1411 */ "checkDuplicateAttributes",
+    /* 1034 */ "textFromCSS",
+    /* 1241 */ "checkLandmarks",
+    /* 6035 */ "pruefeSichtbareTabellen",
+    /* 6035 */ "pruefeTransparenteTabellen",
+    /* 1311 */ "pruefeLangAttribut",
+    /* 8010 */ "findeKomplettLeereTags",
+    /* 8020 */ "pruefeLinksImFliesstext",
+    /* 1032 */ "pruefeListenStruktur"
   ].sort();
 
   function loadScript(src) {
