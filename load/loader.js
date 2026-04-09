@@ -163,11 +163,6 @@
             margin-bottom: 8px;
           }
 
-          #summary-chart {
-            height: 350px;
-            width: 350px;
-          }
-
           .meta {
             margin-bottom: 24px;
             color: var(--darker);
@@ -326,7 +321,7 @@
             <strong>${summary.pass}</strong>
           </div>
         </div>
-        <canvas id="summary-chart"></canvas>
+        <canvas id="summary-chart" width="350" height="350"></canvas>
 
         ${results.map(r => `
           <div class="box box-${r.status}">
@@ -342,7 +337,7 @@
         <script>
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: ['Pass', 'Check', 'Fail', 'Test'],
+            labels: ['Pass', 'Check', 'Fail'],
             datasets: [{
               label: 'My Dataset',
               data: [${summary.pass}, ${summary.check}, ${summary.fail}],
@@ -364,10 +359,10 @@
             type: 'doughnut',
             data: data,
             options: {
-              responsive: true,
+              responsive: false,
               plugins: {
                 legend: {
-                  position: 'top',
+                  position: 'right',
                 },
                 tooltip: {
                   enabled: true
