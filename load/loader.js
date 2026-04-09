@@ -320,8 +320,8 @@
             Pass
             <strong>${summary.pass}</strong>
           </div>
-          <canvas id="summary-chart" width="400" height="400"></canvas>
         </div>
+        <canvas id="summary-chart" width="400" height="400"></canvas>
 
         ${results.map(r => `
           <div class="box box-${r.status}">
@@ -345,8 +345,7 @@
                 '#20c997', // pass
                 '#fcc419', // check
                 '#f06595'  // fail
-                '${getRootVar("--check-light")}'  // test
-                ${getRootVar("--fail-light")}  // test
+                '${getRootVar('--check-light')}'  // test
               ],
               borderColor: [
                 '#ffffff00',
