@@ -1607,7 +1607,7 @@ const tests = {
 
     function pushFakeList(container, items) {
       const examples = items
-        .slice(0, 3)
+        .slice(0, 4)
         .map((el) => normalizeText(el.textContent))
         .filter(Boolean);
 
@@ -1719,18 +1719,13 @@ const tests = {
     if (strukturFehler.length > 0) {
       status = "fail";
     } else if (fakeLists.length > 0) {
-      status = "neutral";
+      status = "check";
     }
 
     // 5) Inhalt erzeugen
-    const totalLists = document.querySelectorAll("ul, ol").length;
-    const totalListItems = document.querySelectorAll("li").length;
-
     let content = `
       <p>Geprüft wurden alle <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code> und <code>&lt;li&gt;</code> auf grundlegende korrekte Verwendung und Verschachtelung. Zusätzlich wurden mögliche "Fake-Listen" gesucht, bei denen Aufzählungen mit <code>&lt;p&gt;</code>-Elementen statt echter Listen ausgezeichnet sind.</p>
       <ul>
-        <li>Gefundene <code>&lt;ul&gt;/&lt;ol&gt;</code>: <strong>${totalLists}</strong></li>
-        <li>Gefundene <code>&lt;li&gt;</code>: <strong>${totalListItems}</strong></li>
         <li>Strukturfehler: <strong>${strukturFehler.length}</strong></li>
         <li>Mögliche Fake-Listen: <strong>${fakeLists.length}</strong></li>
       </ul>
@@ -1741,8 +1736,8 @@ const tests = {
       strukturFehler.forEach((entry) => {
         content += `
           <li>
-            <strong>${escapeHtml(entry.path)}</strong><br>
-            ${escapeHtml(entry.message)}
+            <strong>${escapeHtml(entry.message)}</strong><br>
+            Position: <code>${escapeHtml(entry.path)}</code>
           </li>
         `;
       });
@@ -1755,8 +1750,8 @@ const tests = {
       content += `<h4>Mögliche Fake-Listen</h4><ul>`;
       fakeLists.forEach((entry) => {
         const examplesHtml = entry.examples.length
-          ? `<br>Beispiele: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
-          : "";
+          ? `<br>Listeneinträge: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
+          : "(keine Listeneinträge gefunden)";
 
         const cssInfo = entry.viaCssBefore
           ? ` (Aufzählungszeichen offenbar über <code>::before</code>)`
@@ -1764,8 +1759,9 @@ const tests = {
 
         content += `
           <li>
-            <strong>${escapeHtml(entry.path)}</strong><br>
-            ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}.${examplesHtml}
+            <strong>${examplesHtml}</strong><br>
+            ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}<br>
+            Position: <code>${escapeHtml(entry.path)}</code>
           </li>
         `;
       });
