@@ -1551,7 +1551,6 @@ const tests = {
         ${summaryHtml}
         ${emptyHtml}
         ${failHtml}
-        ${neutralHtml}
       `
     };
   }
