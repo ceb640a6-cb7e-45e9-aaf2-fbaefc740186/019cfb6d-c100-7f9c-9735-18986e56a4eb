@@ -164,6 +164,17 @@
             margin-bottom: 8px;
           }
 
+          li {
+            padding: 5px 10px;
+            border: 2px solid var(--gray);
+            margin-top: 10px;
+            border-radius: 4px;
+          }
+
+          img {
+            box-shadow: 5px 5px 15px var(--lighter)
+          }
+
           .meta {
             margin-bottom: 24px;
             color: var(--darker);
