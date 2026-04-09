@@ -39,11 +39,11 @@ const tests = {
         ? "All images have an <code>alt</code> attribute."
         : `
           <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
-          <ul>
+          <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Bild ${i + 1}: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              <li>${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
-          </ul>
+          </ol>
           ${missingAlt.length > 20 ? "<p>Nur die ersten 20 Bilder werden gezeigt.</p>" : ""}
         `
     };
@@ -579,6 +579,476 @@ const tests = {
         <div style="margin-top:8px;">${summaryList}</div>
       `
     };
+  },
+
+  pruefeSichtbareTabellen() {
+    function selectorOf(el) {
+      if (!el) return "(node)";
+      let s = (el.tagName || "").toLowerCase();
+
+      if (el.classList && el.classList.length) {
+        s += "." + Array.from(el.classList).slice(0, 6).join(".");
+      }
+
+      if (el.id) {
+        s += "#" + el.id;
+      }
+
+      return s || "(node)";
+    }
+
+    function localTableElements(table, selector) {
+      return Array.from(table.querySelectorAll(selector)).filter((el) => el.closest("table") === table);
+    }
+
+    function getAlpha(color) {
+      if (!color) return 0;
+
+      const value = String(color).trim().toLowerCase();
+
+      if (value === "transparent") return 0;
+
+      let match = value.match(/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([0-9.]+)\s*\)$/);
+      if (match) return parseFloat(match[1]);
+
+      if (/^rgb\(/.test(value)) return 1;
+
+      match = value.match(/^hsla\(\s*[-0-9.]+\s*,\s*[-0-9.]+%\s*,\s*[-0-9.]+%\s*,\s*([0-9.]+)\s*\)$/);
+      if (match) return parseFloat(match[1]);
+
+      if (/^hsl\(/.test(value)) return 1;
+
+      if (/^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) {
+        if (value.length === 5) return parseInt(value[4] + value[4], 16) / 255;
+        if (value.length === 9) return parseInt(value.slice(7, 9), 16) / 255;
+        return 1;
+      }
+
+      return 1;
+    }
+
+    function hasVisibleBackground(el) {
+      try {
+        return getAlpha(getComputedStyle(el).backgroundColor) > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    function hasVisibleBorder(el) {
+      try {
+        const cs = getComputedStyle(el);
+        const sides = ["Top", "Right", "Bottom", "Left"];
+
+        return sides.some((side) => {
+          const style = cs["border" + side + "Style"];
+          const width = parseFloat(cs["border" + side + "Width"]) || 0;
+          const color = cs["border" + side + "Color"];
+
+          return style !== "none" && style !== "hidden" && width > 0 && getAlpha(color) > 0;
+        });
+      } catch {
+        return false;
+      }
+    }
+
+    function hasVisibleTableStyling(table) {
+      const relevantElements = [
+        table,
+        ...localTableElements(table, "caption,thead,tbody,tfoot,tr,th,td")
+      ];
+
+      return relevantElements.some((el) => hasVisibleBackground(el) || hasVisibleBorder(el));
+    }
+
+    function nearestContext(el) {
+      return el.closest("table,section,article,main,aside,div") || el.parentElement || el;
+    }
+
+    const issues = [];
+    const tables = Array.from(document.querySelectorAll("table"));
+    const visibleTables = tables.filter(hasVisibleTableStyling);
+
+    visibleTables.forEach((table) => {
+      const errors = [];
+
+      const trs = localTableElements(table, "tr");
+      const ths = localTableElements(table, "th");
+      const tds = localTableElements(table, "td");
+
+      if (!trs.length) errors.push("Keine <tr> vorhanden");
+      if (!ths.length) errors.push("Keine <th> vorhanden");
+      if (!tds.length) errors.push("Keine <td> vorhanden");
+
+      Array.from(table.children).forEach((child) => {
+        if (!/^(caption|colgroup|thead|tbody|tfoot|tr|script|template|style)$/i.test(child.tagName)) {
+          errors.push(`<table> enthält ungültiges direktes Kindelement: <${child.tagName.toLowerCase()}>`);
+        }
+      });
+
+      localTableElements(table, "tr").forEach((tr) => {
+        const parent = tr.parentElement;
+        const validParent = parent && /^(table|thead|tbody|tfoot)$/i.test(parent.tagName);
+
+        if (!validParent) {
+          errors.push("<tr> ist falsch verschachtelt (direktes Elternelement muss <table>, <thead>, <tbody> oder <tfoot> sein)");
+        }
+
+        const invalidChildren = Array.from(tr.children).filter((child) => {
+          return !/^(td|th|script|template|style)$/i.test(child.tagName);
+        });
+
+        if (invalidChildren.length) {
+          errors.push(
+            `<tr> enthält ungültige direkte Kindelemente: ${invalidChildren
+              .map((el) => `<${el.tagName.toLowerCase()}>`)
+              .join(", ")}`
+          );
+        }
+
+        const directCells = Array.from(tr.children).filter((child) => /^(td|th)$/i.test(child.tagName));
+
+        if (!directCells.length) {
+          errors.push("<tr> enthält keine direkten <td> oder <th> Elemente");
+        }
+      });
+
+      localTableElements(table, "th,td").forEach((cell) => {
+        const parent = cell.parentElement;
+
+        if (!parent || parent.tagName.toLowerCase() !== "tr") {
+          errors.push(`<${cell.tagName.toLowerCase()}> ist kein direktes Kind eines <tr>`);
+        }
+
+        const tr = cell.closest("tr");
+        if (!tr || tr.closest("table") !== table) {
+          errors.push(`<${cell.tagName.toLowerCase()}> ist falsch verschachtelt (nicht innerhalb eines <tr> dieser Tabelle)`);
+        }
+      });
+
+      const uniqueErrors = [...new Set(errors)];
+
+      if (uniqueErrors.length) {
+        issues.push({
+          label: selectorOf(table),
+          path: getDomPath(table),
+          errors: uniqueErrors
+        });
+      }
+    });
+
+    const orphanIssuesRaw = [];
+
+    Array.from(document.querySelectorAll("tr,th,td")).forEach((el) => {
+      const tag = el.tagName.toLowerCase();
+      const table = el.closest("table");
+
+      if (!table) {
+        let msg = "";
+
+        if (tag === "tr") msg = "<tr> ist kein Kind eines <table>-Kontexts";
+        if (tag === "th") msg = "<th> ist nicht innerhalb einer Tabelle verschachtelt";
+        if (tag === "td") msg = "<td> ist nicht innerhalb einer Tabelle verschachtelt";
+
+        orphanIssuesRaw.push({
+          context: nearestContext(el),
+          label: selectorOf(el),
+          path: getDomPath(el),
+          message: msg
+        });
+
+        return;
+      }
+
+      if (tag === "tr") {
+        const parent = el.parentElement;
+        if (!parent || !/^(table|thead|tbody|tfoot)$/i.test(parent.tagName)) {
+          orphanIssuesRaw.push({
+            context: table,
+            label: selectorOf(el),
+            path: getDomPath(el),
+            message: "<tr> ist nicht direkt in <table>, <thead>, <tbody> oder <tfoot> verschachtelt"
+          });
+        }
+      }
+
+      if (tag === "th" || tag === "td") {
+        const parent = el.parentElement;
+        if (!parent || parent.tagName.toLowerCase() !== "tr") {
+          orphanIssuesRaw.push({
+            context: table,
+            label: selectorOf(el),
+            path: getDomPath(el),
+            message: `<${tag}> ist kein direktes Kind eines <tr>`
+          });
+        }
+      }
+    });
+
+    const orphanMap = new Map();
+
+    orphanIssuesRaw.forEach((item) => {
+      const key = getDomPath(item.context);
+
+      if (!orphanMap.has(key)) {
+        orphanMap.set(key, {
+          label: selectorOf(item.context),
+          path: getDomPath(item.context),
+          errors: []
+        });
+      }
+
+      orphanMap.get(key).errors.push(`${item.label}: ${item.message}`);
+    });
+
+    for (const entry of orphanMap.values()) {
+      entry.errors = [...new Set(entry.errors)];
+      issues.push(entry);
+    }
+
+    if (!issues.length) {
+      return {
+        title: "Struktur sichtbarer Tabellen prüfen",
+        status: visibleTables.length ? "pass" : "neutral",
+        content: visibleTables.length
+          ? `Alle ${visibleTables.length} visuell gestalteten Tabellen sind korrekt aufgebaut und verschachtelt.`
+          : "Keine visuell gestalteten Tabellen gefunden."
+      };
+    }
+
+    const html = `
+      <div>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b></div>
+      <div>Fehlerblöcke: <b>${issues.length}</b></div>
+      <div style="margin-top:10px">
+        ${issues
+          .map(
+            (item, index) => `
+              <div style="padding:8px 0;border-top:1px solid #eee">
+                <div><b>${index + 1}. ${escapeHtml(item.label)}</b></div>
+                <div style="margin-top:6px;font-size:12px;color:#666">
+                  Pfad: <code>${escapeHtml(item.path)}</code>
+                </div>
+                ${item.errors
+                  .map(
+                    (err) => `
+                      <div style="margin-top:6px;font-size:12px;color:#b42318">
+                        ${escapeHtml(err)}
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+
+    return {
+      title: "Struktur sichtbarer Tabellen prüfen",
+      status: "fail",
+      content: html
+    };
+  },
+
+  pruefeTransparenteTabellen() {
+    function selectorOf(el) {
+      if (!el) return "(node)";
+      let s = (el.tagName || "").toLowerCase();
+
+      if (el.classList && el.classList.length) {
+        s += "." + Array.from(el.classList).slice(0, 6).join(".");
+      }
+
+      if (el.id) {
+        s += "#" + el.id;
+      }
+
+      return s || "(node)";
+    }
+
+    function localTableElements(table, selector) {
+      return Array.from(table.querySelectorAll(selector)).filter((el) => el.closest("table") === table);
+    }
+
+    function getAlpha(color) {
+      if (!color) return 0;
+
+      const value = String(color).trim().toLowerCase();
+
+      if (value === "transparent") return 0;
+
+      let match = value.match(/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([0-9.]+)\s*\)$/);
+      if (match) return parseFloat(match[1]);
+
+      if (/^rgb\(/.test(value)) return 1;
+
+      match = value.match(/^hsla\(\s*[-0-9.]+\s*,\s*[-0-9.]+%\s*,\s*[-0-9.]+%\s*,\s*([0-9.]+)\s*\)$/);
+      if (match) return parseFloat(match[1]);
+
+      if (/^hsl\(/.test(value)) return 1;
+
+      if (/^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) {
+        if (value.length === 5) return parseInt(value[4] + value[4], 16) / 255;
+        if (value.length === 9) return parseInt(value.slice(7, 9), 16) / 255;
+        return 1;
+      }
+
+      return 1;
+    }
+
+    function hasVisibleBackground(el) {
+      try {
+        return getAlpha(getComputedStyle(el).backgroundColor) > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    function hasVisibleBorder(el) {
+      try {
+        const cs = getComputedStyle(el);
+        const sides = ["Top", "Right", "Bottom", "Left"];
+
+        return sides.some((side) => {
+          const style = cs["border" + side + "Style"];
+          const width = parseFloat(cs["border" + side + "Width"]) || 0;
+          const color = cs["border" + side + "Color"];
+
+          return style !== "none" && style !== "hidden" && width > 0 && getAlpha(color) > 0;
+        });
+      } catch {
+        return false;
+      }
+    }
+
+    function hasVisibleTableStyling(table) {
+      const relevantElements = [
+        table,
+        ...localTableElements(table, "caption,thead,tbody,tfoot,tr,th,td")
+      ];
+
+      return relevantElements.some((el) => hasVisibleBackground(el) || hasVisibleBorder(el));
+    }
+
+    const tables = Array.from(document.querySelectorAll("table"));
+    const transparentTables = tables.filter((table) => !hasVisibleTableStyling(table));
+    const issues = [];
+
+    transparentTables.forEach((table) => {
+      const errors = [];
+
+      if (localTableElements(table, "th").length) {
+        errors.push('Transparente Tabelle darf kein <th> besitzen');
+      }
+
+      if (localTableElements(table, "caption").length) {
+        errors.push('Transparente Tabelle darf kein <caption> besitzen');
+      }
+
+      if (table.hasAttribute("summary")) {
+        errors.push('Transparente Tabelle darf kein Attribut "summary" besitzen');
+      }
+
+      const headersElements = localTableElements(table, "[headers]");
+      if (headersElements.length) {
+        errors.push(
+          `Transparente Tabelle darf kein Attribut "headers" besitzen (${headersElements
+            .map((el) => selectorOf(el))
+            .join(", ")})`
+        );
+      }
+
+      const idElements = [table, ...localTableElements(table, "[id]")].filter(
+        (el, index, arr) => arr.indexOf(el) === index && el.hasAttribute("id")
+      );
+
+      if (idElements.length) {
+        errors.push(
+          `Transparente Tabelle darf kein Attribut "id" besitzen (${idElements
+            .map((el) => selectorOf(el))
+            .join(", ")})`
+        );
+      }
+
+      if (errors.length) {
+        issues.push({
+          label: selectorOf(table),
+          path: getDomPath(table),
+          errors: [...new Set(errors)]
+        });
+      }
+    });
+
+    if (!issues.length) {
+      return {
+        title: "Visuell transparente Tabellen prüfen",
+        status: transparentTables.length ? "pass" : "neutral",
+        content: transparentTables.length
+          ? `Keine verbotenen Elemente oder Attribute in ${transparentTables.length} visuell transparenten Tabellen gefunden.`
+          : "Keine visuell transparenten Tabellen gefunden."
+      };
+    }
+
+    const html = `
+      <div>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b></div>
+      <div>Fehlerhafte Tabellen: <b>${issues.length}</b></div>
+      <div style="margin-top:10px">
+        ${issues
+          .map(
+            (item, index) => `
+              <div style="padding:8px 0;border-top:1px solid #eee">
+                <div><b>${index + 1}. ${escapeHtml(item.label)}</b></div>
+                <div style="margin-top:6px;font-size:12px;color:#666">
+                  Pfad: <code>${escapeHtml(item.path)}</code>
+                </div>
+                ${item.errors
+                  .map(
+                    (err) => `
+                      <div style="margin-top:6px;font-size:12px;color:#b42318">
+                        ${escapeHtml(err)}
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+
+    return {
+      title: "Visuell transparente Tabellen prüfen",
+      status: "fail",
+      content: html
+    };
+  },
+
+  pruefeLangAttribut() {
+    const htmlEl = document.documentElement;
+    const hasLang = htmlEl && htmlEl.hasAttribute("lang");
+    const langValue = hasLang ? String(htmlEl.getAttribute("lang") || "").trim() : "";
+
+    let status = "pass";
+    let content = "Das <code>&lt;html&gt;</code>-Element hat ein gesetztes und nicht-leeres <code>lang</code>-Attribut.";
+
+    if (!htmlEl) {
+      status = "fail";
+      content = "Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.";
+    } else if (!hasLang) {
+      status = "fail";
+      content = "Dem <code>&lt;html&gt;</code>-Element fehlt das Attribut <code>lang</code>.";
+    } else if (!langValue) {
+      status = "fail";
+      content = "Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.";
+    }
+
+    return {
+      title: "lang-Attribut prüfen",
+      status,
+      content
+    };
   }
 
 };
@@ -627,6 +1097,6 @@ function getDomPath(el) {
   }
 
   return parts.join(" > ");
-};
+}
 
 window.PageAnalyzerTests = tests;
