@@ -4,9 +4,7 @@
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
   const selectedTests = [
-    /*"pageTitle"*/,
     "headingsList",
-    "imageCount",
     "imagesMissingAlt",
     "linksWithoutText",
     /* 1031 */ "oneH1",
@@ -256,19 +254,19 @@
           }
 
           .box-pass {
-            border-left: 6px solid var(--pass-dark);
+            border-left: 7px solid var(--pass-dark);
           }
 
           .box-fail {
-            border-left: 6px solid var(--fail-dark);
+            border-left: 7px solid var(--fail-dark);
           }
 
           .box-neutral {
-            border-left: 6px solid var(--neutral-dark);
+            border-left: 7px solid var(--neutral-dark);
           }
 
           .box-check {
-            border-left: 6px solid var(--check-dark);
+            border-left: 7px solid var(--check-dark);
           }
 
           code, pre {
@@ -308,13 +306,13 @@
             Check
             <strong>${summary.check}</strong>
           </div>
-          <div class="summary-box summary-pass">
-            Pass
-            <strong>${summary.pass}</strong>
-          </div>
           <div class="summary-box summary-neutral">
             Neutral
             <strong>${summary.neutral}</strong>
+          </div>
+          <div class="summary-box summary-pass">
+            Pass
+            <strong>${summary.pass}</strong>
           </div>
         </div>
 
