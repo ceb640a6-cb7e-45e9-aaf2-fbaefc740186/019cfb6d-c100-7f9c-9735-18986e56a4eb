@@ -1371,7 +1371,7 @@ const tests = {
       let reason = "";
 
       if (!colorDiff && cues.length === 0) {
-        status = "neutral";
+        status = "fail";
         reason = "Kein klarer stilistischer Unterschied zum umgebenden Text gefunden.";
       } else if (colorDiff && cues.length === 0) {
         status = "fail";
@@ -1497,23 +1497,17 @@ const tests = {
     };
 
     const renderItem = (x, i) => {
-      const color =
-        x.status === "fail" ? "#b42318" :
-        x.status === "neutral" ? "#9a6700" :
-        "#187a34";
-
       return `
-        <div style="padding:10px 0;border-top:1px solid #eee;">
+        <div style="padding:10px 0;">
           <div><b>${i + 1}. ${escapeHtml(x.text)}</b></div>
-          <div style="margin-top:6px;color:${color};">${escapeHtml(x.reason)}</div>
+          <div style="margin-top:6px;">${escapeHtml(x.reason)}</div>
           <div style="margin-top:6px;">
             Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> ·
             Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
             ${x.contrast != null ? ` · Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}
           </div>
-          <div style="margin-top:8px;"><b>Style-Unterschiede:</b></div>
           ${renderDiffs(x)}
-          <div style="margin-top:6px;">DOM-Pfad Link: <code>${escapeHtml(x.path)}</code></div>
+          <div style="margin-top:6px;">Position: <code>${escapeHtml(x.path)}</code></div>
         </div>
       `;
     };
@@ -1523,11 +1517,9 @@ const tests = {
     const results = inlineLinks.map(analyzeLink);
 
     const fails = results.filter(x => x.status === "fail");
-    const neutrals = results.filter(x => x.status === "neutral");
 
     let overallStatus = "pass";
     if (fails.length) overallStatus = "fail";
-    else if (neutrals.length) overallStatus = "neutral";
 
     const summaryHtml = `
       <div>
@@ -1536,31 +1528,20 @@ const tests = {
       <div style="margin-top:8px;">
         Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
         Davon als Textlinks im Fließtext bewertet: <b>${inlineLinks.length}</b><br>
-        Nur über Farbe abgehoben: <b>${fails.length}</b><br>
-        Unklare Fälle: <b>${neutrals.length}</b>
+        Nur über Farbe abgehoben: <b>${fails.length}</b>
       </div>
     `;
 
     const failHtml = fails.length
       ? `
         <div style="margin-top:12px;">
-          <b>Problematische Links</b>
           ${fails.map(renderItem).join("")}
         </div>
       `
       : "";
 
-    const neutralHtml = neutrals.length
-      ? `
-        <div style="margin-top:12px;">
-          <b>Unklare Fälle</b>
-          ${neutrals.map(renderItem).join("")}
-        </div>
-      `
-      : "";
-
-    const emptyHtml = !fails.length && !neutrals.length
-      ? `<div style="margin-top:8px;">Es wurden keine problematischen oder unklaren Inline-Links im Fließtext gefunden.</div>`
+    const emptyHtml = !fails.length
+      ? `<div style="margin-top:8px;">Es wurden keine problematischen Inline-Links im Fließtext gefunden.</div>`
       : "";
 
     return {
@@ -1571,9 +1552,6 @@ const tests = {
         ${emptyHtml}
         ${failHtml}
         ${neutralHtml}
-        <div style="margin-top:12px;font-size:12px;color:#555;">
-          Hinweis: Geprüft wird der aktuelle Zustand der Seite. Hover-, Focus- und Active-Zustände werden hier nicht vollständig berücksichtigt.
-        </div>
       `
     };
   }
