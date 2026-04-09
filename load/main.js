@@ -584,21 +584,6 @@ const tests = {
   },
 
   pruefeSichtbareTabellen() {
-    function selectorOf(el) {
-      if (!el) return "(node)";
-      let s = (el.tagName || "").toLowerCase();
-
-      if (el.classList && el.classList.length) {
-        s += "." + Array.from(el.classList).slice(0, 6).join(".");
-      }
-
-      if (el.id) {
-        s += "#" + el.id;
-      }
-
-      return s || "(node)";
-    }
-
     function localTableElements(table, selector) {
       return Array.from(table.querySelectorAll(selector)).filter((el) => el.closest("table") === table);
     }
@@ -732,7 +717,7 @@ const tests = {
 
       if (uniqueErrors.length) {
         issues.push({
-          label: selectorOf(table),
+          label: getSelector_codeTag(table),
           path: getDomPath(table),
           errors: uniqueErrors
         });
@@ -754,7 +739,7 @@ const tests = {
 
         orphanIssuesRaw.push({
           context: nearestContext(el),
-          label: selectorOf(el),
+          label: getSelector_codeTag(el),
           path: getDomPath(el),
           message: msg
         });
@@ -767,7 +752,7 @@ const tests = {
         if (!parent || !/^(table|thead|tbody|tfoot)$/i.test(parent.tagName)) {
           orphanIssuesRaw.push({
             context: table,
-            label: selectorOf(el),
+            label: getSelector_codeTag(el),
             path: getDomPath(el),
             message: "<tr> ist nicht direkt in <table>, <thead>, <tbody> oder <tfoot> verschachtelt"
           });
@@ -779,7 +764,7 @@ const tests = {
         if (!parent || parent.tagName.toLowerCase() !== "tr") {
           orphanIssuesRaw.push({
             context: table,
-            label: selectorOf(el),
+            label: getSelector_codeTag(el),
             path: getDomPath(el),
             message: `<${tag}> ist kein direktes Kind eines <tr>`
           });
@@ -794,7 +779,7 @@ const tests = {
 
       if (!orphanMap.has(key)) {
         orphanMap.set(key, {
-          label: selectorOf(item.context),
+          label: getSelector_codeTag(item.context),
           path: getDomPath(item.context),
           errors: []
         });
@@ -854,21 +839,6 @@ const tests = {
   },
 
   pruefeTransparenteTabellen() {
-    function selectorOf(el) {
-      if (!el) return "(node)";
-      let s = (el.tagName || "").toLowerCase();
-
-      if (el.classList && el.classList.length) {
-        s += "." + Array.from(el.classList).slice(0, 6).join(".");
-      }
-
-      if (el.id) {
-        s += "#" + el.id;
-      }
-
-      return s || "(node)";
-    }
-
     function localTableElements(table, selector) {
       return Array.from(table.querySelectorAll(selector)).filter((el) => el.closest("table") === table);
     }
@@ -956,7 +926,7 @@ const tests = {
       if (headersElements.length) {
         errors.push(
           `Transparente Tabelle darf kein Attribut "headers" besitzen (${headersElements
-            .map((el) => selectorOf(el))
+            .map((el) => getSelector_codeTag(el))
             .join(", ")})`
         );
       }
@@ -968,14 +938,14 @@ const tests = {
       if (idElements.length) {
         errors.push(
           `Transparente Tabelle darf kein Attribut "id" besitzen (${idElements
-            .map((el) => selectorOf(el))
+            .map((el) => getSelector_codeTag(el))
             .join(", ")})`
         );
       }
 
       if (errors.length) {
         issues.push({
-          label: selectorOf(table),
+          label: getSelector_codeTag(table),
           path: getDomPath(table),
           errors: [...new Set(errors)]
         });
@@ -1788,6 +1758,21 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function getSelector_codeTag(el) {
+  if (!el) return "(node)";
+  let s = (el.tagName || "").toLowerCase();
+
+  if (el.classList && el.classList.length) {
+    s += "." + Array.from(el.classList).slice(0, 6).join(".");
+  }
+
+  if (el.id) {
+    s += "#" + el.id;
+  }
+
+  return `<code>${(s || "(node)")}</code>`;
 }
 
 function getDomPath(el) {
