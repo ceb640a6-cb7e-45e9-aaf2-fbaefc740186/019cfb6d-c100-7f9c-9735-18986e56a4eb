@@ -340,12 +340,12 @@
             labels: ['Pass', 'Check', 'Fail'],
             datasets: [{
               label: 'My Dataset',
-              data: [${summary.pass}, ${summary.check}, ${summary.fail}, 2, 2], // your four values
+              data: [${summary.pass}, ${summary.check}, ${summary.fail}, 2], // your four values
               backgroundColor: [
                 '#20c997', // pass
                 '#fcc419', // check
-                '#f06595'  // fail
-                '${getRootVar('--check-light')}'  // test
+                '#f06595', // fail
+                '${getRootVar('--check-light')}' // test
               ],
               borderColor: [
                 '#ffffff00',
