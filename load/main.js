@@ -1074,21 +1074,19 @@ const tests = {
         const eintraege = elemente
           .map((el) => {
             return `
-              <div class="item">
-                <div><b>&lt;${escapeHtml(tag)}&gt;</b></div>
-                <div class="sub"><b>Pfad:</b> <code>${escapeHtml(getDomPath(el))}</code></div>
-                <div class="sub"><b>HTML:</b> <code>${escapeHtml(el.outerHTML)}</code></div>
-              </div>
+              <li>
+                <code>${escapeHtml(el.outerHTML)}</code><br>
+                Position: <code>${escapeHtml(getDomPath(el))}</code>
+              </li>
             `;
           })
           .join("");
 
         return `
           <div style="margin-bottom:12px;">
-            <div><b>&lt;${escapeHtml(tag)}&gt;</b> – Treffer: <b>${elemente.length}</b></div>
-            <div style="margin-top:6px;">
+            <ul style="margin-top:6px;">
               ${eintraege}
-            </div>
+            </ul>
           </div>
         `;
       })
