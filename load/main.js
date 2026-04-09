@@ -225,7 +225,7 @@ const tests = {
     if (score < 50) {
       status = "fail";
     } else if (score < 85) {
-      status = "neutral";
+      status = "check";
     }
 
     const parts = [`Gefundener Titel: "${titleText}".`, /*`Bewertung: ${score}/100.`*/''];
@@ -279,8 +279,7 @@ const tests = {
     const issueCount = duplicateIds.length + emptyIds;
 
     let status = "pass";
-    if (issueCount > 0 /*&& issueCount <= 3) status = "neutral";
-    if (issueCount > 3*/) status = "fail";
+    if (issueCount > 0) status = "fail";
 
     let content = "Keine Probleme mit IDs gefunden.";
 
@@ -334,8 +333,7 @@ const tests = {
     });
 
     let status = "pass";
-    if (affectedElements.length === 1) status = "neutral";
-    if (affectedElements.length > 1) status = "fail";
+    if (affectedElements.length > 0) status = "fail";
 
     let content = "Keine doppelten Attribute gefunden.";
 
@@ -532,24 +530,24 @@ const tests = {
       const presentCount = details.filter((item) => item.count > 0).length;
 
       if (presentCount < 3) {
-        status = "neutral";
+        status = "check";
         messages.push(
           `Nur ${presentCount} von 5 geprüften Landmarken wurden gefunden.`
         );
       }
 
       if (header && header.count === 0) {
-        if (status === "pass") status = "neutral";
+        if (status === "pass") status = "check";
         messages.push("Kein seitenweiter <code>header</code> gefunden.");
       }
 
       if (footer && footer.count === 0) {
-        if (status === "pass") status = "neutral";
+        if (status === "pass") status = "check";
         messages.push("Kein seitenweiter <code>footer</code> gefunden.");
       }
 
       if (nav && nav.visibleCount > 1 && nav.namedCount < nav.visibleCount) {
-        if (status === "pass") status = "neutral";
+        if (status === "pass") status = "check";
         messages.push(
           "Mehrere sichtbare <code>nav</code>-Bereiche sind nicht eindeutig benannt."
         );
@@ -809,7 +807,7 @@ const tests = {
     if (!issues.length) {
       return {
         title: "Struktur sichtbarer Tabellen prüfen",
-        status: visibleTables.length ? "pass" : "neutral",
+        status: "pass",
         content: visibleTables.length
           ? `Alle ${visibleTables.length} visuell gestalteten Tabellen sind korrekt aufgebaut und verschachtelt.`
           : "Keine visuell gestalteten Tabellen gefunden."
@@ -983,7 +981,7 @@ const tests = {
     if (!issues.length) {
       return {
         title: "Visuell transparente Tabellen prüfen",
-        status: transparentTables.length ? "pass" : "neutral",
+        status: "pass",
         content: transparentTables.length
           ? `Keine verbotenen Elemente oder Attribute in ${transparentTables.length} visuell transparenten Tabellen gefunden.`
           : "Keine visuell transparenten Tabellen gefunden."
