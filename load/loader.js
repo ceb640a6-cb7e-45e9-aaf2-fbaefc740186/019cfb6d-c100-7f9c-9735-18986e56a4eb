@@ -320,6 +320,7 @@
             Pass
             <strong>${summary.pass}</strong>
           </div>
+          <canvas id="summary-chart" width="400" height="400"></canvas>
         </div>
 
         ${results.map(r => `
@@ -331,6 +332,49 @@
             <div class="box-content">${r.content}</div>
           </div>
         `).join("")}
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          const ctx = document.getElementById('summary-chart').getContext('2d');
+          const data = {
+            labels: ['Green', 'Yellow', 'Gray', 'Red'],
+            datasets: [{
+              label: 'My Dataset',
+              data: [${summary.pass}, ${summary.check}, ${summary.neutral}, ${summary.fail}], // your four values
+              backgroundColor: [
+                ${getRootVar('--pass-dark')},
+                ${getRootVar('--check-dark')},
+                ${getRootVar('--neutral-dark')},
+                ${getRootVar('--fail-dark')}
+              ],
+              borderColor: [
+                '#ffffff00',
+                '#ffffff00',
+                '#ffffff00',
+                '#ffffff00'
+              ],
+              borderWidth: 2
+            }]
+          };
+
+          const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                tooltip: {
+                  enabled: true
+                }
+              }
+            }
+          };
+
+          new Chart(ctx, config);
+        </script>
       </body>
       </html>
     `;
@@ -347,6 +391,10 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function getRootVar(str) {
+    return window.getComputedStyle(document.body).getPropertyValue(str);
   }
 
   async function init() {
