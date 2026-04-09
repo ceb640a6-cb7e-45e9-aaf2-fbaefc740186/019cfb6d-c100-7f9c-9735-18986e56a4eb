@@ -43,7 +43,7 @@
   }
 
   function normalizeStatus(status) {
-    return ["pass", "check", "fail", "neutral"].includes(status) ? status : "neutral";
+    return ["pass", "check", "fail"].includes(status) ? status : "check";
   }
 
   function runTests(testNames) {
@@ -87,7 +87,7 @@
         acc[result.status] = (acc[result.status] || 0) + 1;
         return acc;
       },
-      { pass: 0, check: 0, fail: 0, neutral: 0 }
+      { pass: 0, check: 0, fail: 0 }
     );
   }
 
@@ -95,7 +95,7 @@
     if (status === "pass") return "PASS";
     if (status === "check") return "CHECK";
     if (status === "fail") return "FAIL";
-    return "NEUTRAL";
+    return "CHECK";
   }
 
   function openReport(results) {
@@ -106,6 +106,13 @@
       alert("Popup blocked. Please allow popups for this site.");
       return;
     }
+
+    const ratingTotal = (summary.fail + summary.pass);
+    const totalRating = summary.pass / ratingTotal;
+    let ratingColor = 'pass';
+    if (totalRating <= 0.7) ratingColor = 'check';
+    if (totalRating <= 0.4) ratingColor = 'fail';
+    const ratingOutput = (totalRating*100).toFixed(0);
 
     const html = `
       <!doctype html>
@@ -129,12 +136,6 @@
             --pass: #20c997;
             --pass-dark: #0ca678;
             --pass-black: #087f5b;
-
-            --neutral-white: #f8f9fa;
-            --neutral-light: #dee2e6;
-            --neutral: #adb5bd;
-            --neutral-dark: #495057;
-            --neutral-black: #212529;
             
             --check-white: #fff9db;
             --check-light: #ffe066;
@@ -193,11 +194,6 @@
             border: 3px solid var(--fail-dark);
           }
 
-          .summary-neutral {
-            background: var(--neutral-white);
-            border: 3px solid var(--neutral-dark);
-          }
-
           .summary-check {
             background: var(--check-white);
             border: 3px solid var(--check-dark);
@@ -249,11 +245,6 @@
             color: var(--fail-white);
           }
 
-          .badge-neutral {
-            background: var(--neutral-dark);
-            color: var(--neutral-white);
-          }
-
           .badge-check {
             background: var(--check-dark);
             color: var(--check-white);
@@ -265,10 +256,6 @@
 
           .box-fail {
             border-left: 7px solid var(--fail-dark);
-          }
-
-          .box-neutral {
-            border-left: 7px solid var(--neutral-dark);
           }
 
           .box-check {
@@ -296,13 +283,12 @@
       </head>
       <body>
         <h1>Page Analysis Report</h1>
-
         <div class="meta">
-          <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
-          <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
-          <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
+        <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
+        <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+        <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
         </div>
-
+        
         <div class="summary">
           <div class="summary-box summary-fail">
             Fail
@@ -312,17 +298,15 @@
             Check
             <strong>${summary.check}</strong>
           </div>
-          <div class="summary-box summary-neutral">
-            Neutral
-            <strong>${summary.neutral}</strong>
-          </div>
           <div class="summary-box summary-pass">
             Pass
             <strong>${summary.pass}</strong>
           </div>
         </div>
-        <canvas id="summary-chart" width="350" height="350"></canvas>
 
+        <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
+        <canvas id="summary-chart" width="350" height="350"></canvas>
+            
         ${results.map(r => `
           <div class="box box-${r.status}">
             <div class="box-header">
@@ -339,7 +323,7 @@
           const data = {
             labels: ['Pass', 'Check', 'Fail'],
             datasets: [{
-              label: 'My Dataset',
+              label: 'Testfälle',
               data: [${summary.pass}, ${summary.check}, ${summary.fail}],
               backgroundColor: [
                 '#20c997', // pass
@@ -400,7 +384,7 @@
       await ensureMainLoaded();
       const results = runTests(selectedTests);
       results.sort((a, b) => {
-        const order = { fail: 0, check: 1, neutral: 2, pass: 3 };
+        const order = { fail: 0, check: 1, pass: 2 };
         return order[a.status] - order[b.status];
       });
       openReport(results);
