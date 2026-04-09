@@ -717,7 +717,7 @@ const tests = {
 
       if (uniqueErrors.length) {
         issues.push({
-          label: getSelector_codeTag(table),
+          label: getSelector(table),
           path: getDomPath(table),
           errors: uniqueErrors
         });
@@ -739,7 +739,7 @@ const tests = {
 
         orphanIssuesRaw.push({
           context: nearestContext(el),
-          label: getSelector_codeTag(el),
+          label: getSelector(el),
           path: getDomPath(el),
           message: msg
         });
@@ -752,7 +752,7 @@ const tests = {
         if (!parent || !/^(table|thead|tbody|tfoot)$/i.test(parent.tagName)) {
           orphanIssuesRaw.push({
             context: table,
-            label: getSelector_codeTag(el),
+            label: getSelector(el),
             path: getDomPath(el),
             message: "<tr> ist nicht direkt in <table>, <thead>, <tbody> oder <tfoot> verschachtelt"
           });
@@ -764,7 +764,7 @@ const tests = {
         if (!parent || parent.tagName.toLowerCase() !== "tr") {
           orphanIssuesRaw.push({
             context: table,
-            label: getSelector_codeTag(el),
+            label: getSelector(el),
             path: getDomPath(el),
             message: `<${tag}> ist kein direktes Kind eines <tr>`
           });
@@ -779,7 +779,7 @@ const tests = {
 
       if (!orphanMap.has(key)) {
         orphanMap.set(key, {
-          label: getSelector_codeTag(item.context),
+          label: getSelector(item.context),
           path: getDomPath(item.context),
           errors: []
         });
@@ -926,7 +926,7 @@ const tests = {
       if (headersElements.length) {
         errors.push(
           `Transparente Tabelle darf kein Attribut "headers" besitzen (${headersElements
-            .map((el) => getSelector_codeTag(el))
+            .map((el) => getSelector(el))
             .join(", ")})`
         );
       }
@@ -938,14 +938,14 @@ const tests = {
       if (idElements.length) {
         errors.push(
           `Transparente Tabelle darf kein Attribut "id" besitzen (${idElements
-            .map((el) => getSelector_codeTag(el))
+            .map((el) => getSelector(el))
             .join(", ")})`
         );
       }
 
       if (errors.length) {
         issues.push({
-          label: getSelector_codeTag(table),
+          label: getSelector(table),
           path: getDomPath(table),
           errors: [...new Set(errors)]
         });
@@ -1760,7 +1760,7 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-function getSelector_codeTag(el) {
+function getSelector(el) {
   if (!el) return "(node)";
   let s = (el.tagName || "").toLowerCase();
 
@@ -1772,7 +1772,7 @@ function getSelector_codeTag(el) {
     s += "#" + el.id;
   }
 
-  return `<code>${(s || "(node)")}</code>`;
+  return (s || "(node)");
 }
 
 function getDomPath(el) {
