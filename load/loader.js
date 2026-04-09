@@ -337,15 +337,16 @@
         <script>
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: ['Green', 'Yellow', 'Gray', 'Red'],
+            labels: ['Pass', 'Check', 'Fail'],
             datasets: [{
               label: 'My Dataset',
-              data: [${summary.pass}, ${summary.check}, ${summary.neutral}, ${summary.fail}], // your four values
+              data: [${summary.pass}, ${summary.check}, ${summary.fail}, 2, 2], // your four values
               backgroundColor: [
-                ${getRootVar('--pass-dark')},
-                ${getRootVar('--check-dark')},
-                ${getRootVar('--neutral-dark')},
-                ${getRootVar('--fail-dark')}
+                '#20c997', // pass
+                '#fcc419', // check
+                '#f06595'  // fail
+                '${getRootVar("--check-light")}'  // test
+                ${getRootVar("--fail-light")}  // test
               ],
               borderColor: [
                 '#ffffff00',
