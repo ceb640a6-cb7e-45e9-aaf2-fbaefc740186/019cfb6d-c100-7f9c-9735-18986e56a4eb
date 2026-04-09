@@ -4,20 +4,22 @@
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
   const selectedTests = [
-    "headingsList",
-    "imagesMissingAlt",
-    "linksWithoutText",
-    /* 1031 */ "oneH1",
-    /* 1031 */ "headingJumps",
-    /* 1242 */ "pruefeDokumenttitel",
-    /* 1411 */ "checkIds",
-    /* 1411 */ "checkDuplicateAttributes",
-    /* 1034 */ "textFromCSS",
-    "imagesEmptyAlt",
-    /* 1241 */ "checkLandmarks",
-    /* 6035 */ "pruefeTransparenteTabellen",
-    /* 6035 */ "pruefeSichtbareTabellen",
-    /* 1311 */ "pruefeLangAttribut"
+    /* R1031 */ "headingsList",
+    /* R1012 */ "imagesMissingAlt",
+    /* R1013 */ "imagesEmptyAlt",
+    /* R1244 */ "linksWithoutText",
+    /* R1031 */ "oneH1",
+    /* R1031 */ "headingJumps",
+    /* R1242 */ "pruefeDokumenttitel",
+    /* R1411 */ "checkIds",
+    /* R1411 */ "checkDuplicateAttributes",
+    /* R1034 */ "textFromCSS",
+    /* R1241 */ "checkLandmarks",
+    /* R6035 */ "pruefeSichtbareTabellen",
+    /* R6035 */ "pruefeTransparenteTabellen",
+    /* R1311 */ "pruefeLangAttribut",
+    /* R8010 */ "findeKomplettLeereTags",
+    /* R8020 */ "pruefeLinksImFliesstext"
   ].sort();
 
   function loadScript(src) {
@@ -295,9 +297,9 @@
         <h1>Page Analysis Report</h1>
 
         <div class="meta">
-          <div><strong>URL:</strong> ${escapeHtml(location.href)}</div>
-          <div><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
-          <div><strong>Total tests:</strong> ${results.length}</div>
+          <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
+          <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+          <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
         </div>
 
         <div class="summary">
@@ -325,7 +327,7 @@
               <h2>${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </div>
-            <div>${r.content}</div>
+            <div class="box-content">${r.content}</div>
           </div>
         `).join("")}
       </body>
