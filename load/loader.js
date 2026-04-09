@@ -14,7 +14,10 @@
     /* 1411 */ "checkDuplicateAttributes",
     /* 1034 */ "textFromCSS",
     "imagesEmptyAlt",
-    /* 1241 */ "checkLandmarks"
+    /* 1241 */ "checkLandmarks",
+    /* 6035 */ "pruefeTransparenteTabellen",
+    /* 6035 */ "pruefeSichtbareTabellen",
+    /* 1311 */ "pruefeLangAttribut"
   ].sort();
 
   function loadScript(src) {
