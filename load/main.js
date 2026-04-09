@@ -405,7 +405,7 @@ const tests = {
           selector += `.${Array.from(el.classList).slice(0, 4).join(".")}`;
         }
 
-        results.push(`${selector || "(node)"}: ${matches.join(" | ")}<br>Position: ${getDomPath(el)}`);
+        results.push(`${selector || "(node)"}: ${matches.join(" | ")}<br>Position: <code>${getDomPath(el)}</code>`);
       }
     });
 
@@ -422,8 +422,12 @@ const tests = {
       title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
-        `Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:<br>` +
-        results.join("\n")
+        `Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:<br>
+        <ol>
+          <li>
+          ${results.join("</li><li>")}
+          </li>
+        </ol>`
     };
   },
 
