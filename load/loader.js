@@ -318,12 +318,12 @@
             list-style: none;
           }
 
-          details .toggleText {
+          details > summary .toggleText {
             padding-left: 20px;
             position: relative;
           }
 
-          details .toggleText::before {
+          details > summary .toggleText::before {
             content: '⮞ '; /*⮞ᐅᐳ*/
             position: absolute;
             left: 0;
@@ -331,7 +331,7 @@
             color: var(--dark);
           }
 
-          details[open] .toggleText::before {
+          details[open] > summary .toggleText::before {
             content: '⮟ '; /*⮟ᐁᐯ*/
             position: absolute;
             left: 0;
