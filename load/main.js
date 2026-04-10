@@ -2322,7 +2322,12 @@ function highlightEl(el) {
 }
 
 function cloneEl(el) {
-  return el.parentElement.outerHTML;
+  /*return el.parentElement.outerHTML;*/
+
+  el.classList.add("highlight-temp");
+  const html = el.parentElement.outerHTML;
+  el.classList.remove("highlight-temp");
+  return html;
 }
 
 function getSelector(el) {
