@@ -1748,11 +1748,9 @@ const tests = {
     };
   },
 
-  pruefeAutocompleteAttribute() {
-    const title = "Autocomplete-Attribute prüfen";
-
-    const relevantSelector = "input, textarea, select";
-    const allFields = Array.from(document.querySelectorAll(relevantSelector));
+  pruefeAutocomplete13135() {
+    const selector = "input, textarea, select";
+    const allElements = Array.from(document.querySelectorAll(selector));
 
     const ignoredInputTypes = new Set([
       "hidden",
@@ -1764,17 +1762,17 @@ const tests = {
       "range",
       "color",
       "checkbox",
-      "radio"
+      "radio",
+      "search"
     ]);
 
-    const relevantInputTypes = new Set([
+    const candidateInputTypes = new Set([
       "text",
-      "search",
       "email",
       "tel",
       "url",
-      "number",
       "password",
+      "number",
       "date",
       "month",
       "week",
@@ -1782,9 +1780,7 @@ const tests = {
       "datetime-local"
     ]);
 
-    // Keine vollständig spezifikationsgetreue Liste,
-    // sondern eine bewusst praxisnahe Menge häufiger und sinnvoller Werte.
-    const validFieldTokens = new Set([
+    const validAutocompleteTokens = new Set([
       "name",
       "honorific-prefix",
       "given-name",
@@ -1841,53 +1837,224 @@ const tests = {
       "impp"
     ]);
 
-    const contactHintMap = [
-      { matcher: /email|e-mail|mail/i, expected: "email" },
-      { matcher: /phone|tel|telefon|mobile|mobil/i, expected: "tel" },
-      { matcher: /first.?name|vorname|given/i, expected: "given-name" },
-      { matcher: /last.?name|nachname|surname|family/i, expected: "family-name" },
-      { matcher: /full.?name|name/i, expected: "name" },
-      { matcher: /company|firma|organization/i, expected: "organization" },
-      { matcher: /street|straße|strasse|address/i, expected: "street-address" },
-      { matcher: /zip|postal|plz/i, expected: "postal-code" },
-      { matcher: /city|ort|town/i, expected: "address-level2" },
-      { matcher: /country|land/i, expected: "country-name" },
-      { matcher: /user.?name|login/i, expected: "username" },
-      { matcher: /password|passwort/i, expected: "current-password" }
+    const purposeRules = [
+      {
+        key: "email",
+        expected: "email",
+        typeHint: ["email"],
+        patterns: [
+          /\be-?mail\b/i,
+          /\bemail\b/i,
+          /\bmail\b/i
+        ]
+      },
+      {
+        key: "tel",
+        expected: "tel",
+        typeHint: ["tel"],
+        patterns: [
+          /\btelefon\b/i,
+          /\bphone\b/i,
+          /\btel\b/i,
+          /\bmobile\b/i,
+          /\bmobil\b/i,
+          /\bhandy\b/i
+        ]
+      },
+      {
+        key: "given-name",
+        expected: "given-name",
+        patterns: [
+          /\bvorname\b/i,
+          /\bfirst.?name\b/i,
+          /\bgiven.?name\b/i
+        ]
+      },
+      {
+        key: "family-name",
+        expected: "family-name",
+        patterns: [
+          /\bnachname\b/i,
+          /\blast.?name\b/i,
+          /\bsurname\b/i,
+          /\bfamily.?name\b/i
+        ]
+      },
+      {
+        key: "name",
+        expected: "name",
+        patterns: [
+          /\bvoller?\s+name\b/i,
+          /\bfull.?name\b/i,
+          /\bname\b/i
+        ]
+      },
+      {
+        key: "username",
+        expected: "username",
+        patterns: [
+          /\bbenutzername\b/i,
+          /\busername\b/i,
+          /\blogin\b/i,
+          /\buser.?id\b/i
+        ]
+      },
+      {
+        key: "current-password",
+        expected: "current-password",
+        typeHint: ["password"],
+        patterns: [
+          /\bpasswort\b/i,
+          /\bpassword\b/i
+        ]
+      },
+      {
+        key: "organization",
+        expected: "organization",
+        patterns: [
+          /\bfirma\b/i,
+          /\bunternehmen\b/i,
+          /\bcompany\b/i,
+          /\borganization\b/i,
+          /\borganis(?:ation|ation)\b/i
+        ]
+      },
+      {
+        key: "street-address",
+        expected: "street-address",
+        patterns: [
+          /\bstra(?:ß|ss)e\b/i,
+          /\bstreet\b/i,
+          /\baddress\b/i,
+          /\badresse\b/i
+        ]
+      },
+      {
+        key: "address-level2",
+        expected: "address-level2",
+        patterns: [
+          /\bort\b/i,
+          /\bstadt\b/i,
+          /\bcity\b/i,
+          /\btown\b/i
+        ]
+      },
+      {
+        key: "postal-code",
+        expected: "postal-code",
+        patterns: [
+          /\bplz\b/i,
+          /\bzip\b/i,
+          /\bpostal\b/i,
+          /\bpostleitzahl\b/i
+        ]
+      },
+      {
+        key: "country-name",
+        expected: "country-name",
+        patterns: [
+          /\bland\b/i,
+          /\bcountry\b/i
+        ]
+      },
+      {
+        key: "cc-name",
+        expected: "cc-name",
+        patterns: [
+          /\bkarteninhaber\b/i,
+          /\bcardholder\b/i,
+          /\bname on card\b/i
+        ]
+      },
+      {
+        key: "cc-number",
+        expected: "cc-number",
+        patterns: [
+          /\bkreditkarte\b/i,
+          /\bcard.?number\b/i,
+          /\bkartennummer\b/i,
+          /\bcc-?number\b/i
+        ]
+      },
+      {
+        key: "cc-exp",
+        expected: "cc-exp",
+        patterns: [
+          /\bablaufdatum\b/i,
+          /\bexpiry\b/i,
+          /\bexpiration\b/i,
+          /\bgültig bis\b/i
+        ]
+      },
+      {
+        key: "cc-csc",
+        expected: "cc-csc",
+        patterns: [
+          /\bcvv\b/i,
+          /\bcvc\b/i,
+          /\bcsc\b/i,
+          /\bsicherheitscode\b/i
+        ]
+      },
+      {
+        key: "bday",
+        expected: "bday",
+        patterns: [
+          /\bgeburtsdatum\b/i,
+          /\bdate of birth\b/i,
+          /\bbirthday\b/i
+        ]
+      }
     ];
 
-    function isRelevantField(el) {
-      if (!el || el.disabled) return false;
+    const exclusionPatterns = [
+      /\bi am human\b/i,
+      /\bnot a robot\b/i,
+      /\bcaptcha\b/i,
+      /\bsecurity check\b/i,
+      /\bsicherheitsabfrage\b/i,
+      /\bsearch\b/i,
+      /\bsuche\b/i,
+      /\bfilter\b/i,
+      /\bkommentar\b/i,
+      /\bcomment\b/i,
+      /\bnachricht\b/i,
+      /\bmessage\b/i,
+      /\bfeedback\b/i,
+      /\bquantity\b/i,
+      /\bmenge\b/i,
+      /\bcoupon\b/i,
+      /\bgutschein\b/i,
+      /\bpromo\b/i,
+      /\bvoucher\b/i
+    ];
 
-      const tag = el.tagName.toLowerCase();
-
-      if (tag === "textarea" || tag === "select") {
-        return true;
-      }
-
-      if (tag === "input") {
-        const type = (el.getAttribute("type") || "text").toLowerCase();
-        if (ignoredInputTypes.has(type)) return false;
-        return relevantInputTypes.has(type) || type === "";
-      }
-
-      return false;
-    }
-
-    function getFieldLabelText(el) {
+    function getFieldText(el) {
       const parts = [];
 
-      const id = el.id;
+      const id = el.getAttribute("id");
       if (id) {
-        const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
-        if (label) parts.push(label.textContent || "");
+        try {
+          const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+          if (label && label.textContent) parts.push(label.textContent);
+        } catch (e) {}
       }
 
-      const parentLabel = el.closest("label");
-      if (parentLabel) parts.push(parentLabel.textContent || "");
+      const wrappingLabel = el.closest("label");
+      if (wrappingLabel && wrappingLabel.textContent) {
+        parts.push(wrappingLabel.textContent);
+      }
 
       const ariaLabel = el.getAttribute("aria-label");
       if (ariaLabel) parts.push(ariaLabel);
+
+      const ariaLabelledBy = el.getAttribute("aria-labelledby");
+      if (ariaLabelledBy) {
+        ariaLabelledBy.split(/\s+/).forEach(function (refId) {
+          const ref = document.getElementById(refId);
+          if (ref && ref.textContent) parts.push(ref.textContent);
+        });
+      }
 
       const placeholder = el.getAttribute("placeholder");
       if (placeholder) parts.push(placeholder);
@@ -1895,22 +2062,49 @@ const tests = {
       const name = el.getAttribute("name");
       if (name) parts.push(name);
 
-      const idAttr = el.getAttribute("id");
-      if (idAttr) parts.push(idAttr);
+      if (id) parts.push(id);
 
       return parts.join(" ").replace(/\s+/g, " ").trim();
     }
 
-    function inferExpectedAutocomplete(el) {
-      const type = (el.getAttribute("type") || "").toLowerCase();
-      if (type === "email") return "email";
-      if (type === "tel") return "tel";
-      if (type === "password") return "current-password";
-      if (type === "url") return "url";
+    function isRelevantControl(el) {
+      if (!el || el.disabled) return false;
 
-      const hintText = getFieldLabelText(el);
-      for (const rule of contactHintMap) {
-        if (rule.matcher.test(hintText)) {
+      const tag = el.tagName.toLowerCase();
+
+      if (tag === "select") return true;
+
+      if (tag === "textarea") {
+        return false;
+      }
+
+      if (tag === "input") {
+        const type = (el.getAttribute("type") || "text").toLowerCase();
+        if (ignoredInputTypes.has(type)) return false;
+        return candidateInputTypes.has(type) || type === "";
+      }
+
+      return false;
+    }
+
+    function isExcludedByContext(el, fieldText) {
+      if (!fieldText) return false;
+      return exclusionPatterns.some(function (pattern) {
+        return pattern.test(fieldText);
+      });
+    }
+
+    function inferPurpose(el, fieldText) {
+      const type = (el.getAttribute("type") || "").toLowerCase();
+
+      for (const rule of purposeRules) {
+        if (rule.typeHint && rule.typeHint.includes(type)) {
+          return rule.expected;
+        }
+      }
+
+      for (const rule of purposeRules) {
+        if (rule.patterns.some(function (pattern) { return pattern.test(fieldText); })) {
           return rule.expected;
         }
       }
@@ -1919,186 +2113,175 @@ const tests = {
     }
 
     function validateAutocompleteValue(value) {
-      const result = {
-        valid: true,
-        normalized: value.trim().toLowerCase(),
-        reason: ""
-      };
-
-      const normalized = result.normalized;
+      const normalized = String(value || "").trim().toLowerCase();
 
       if (!normalized) {
-        result.valid = false;
-        result.reason = "Leerer Wert";
-        return result;
+        return { valid: false, normalized: normalized, reason: "Leerer Wert" };
       }
 
       if (normalized === "on" || normalized === "off") {
-        return result;
+        return { valid: true, normalized: normalized, reason: "" };
       }
 
       const tokens = normalized.split(/\s+/).filter(Boolean);
+      let i = 0;
 
-      let index = 0;
+      if (tokens[i] && /^section-[a-z0-9_-]+$/i.test(tokens[i])) i++;
+      if (tokens[i] === "shipping" || tokens[i] === "billing") i++;
 
-      if (tokens[index] && /^section-[a-z0-9_-]+$/i.test(tokens[index])) {
-        index++;
+      let remaining = tokens.slice(i);
+      if (!remaining.length) {
+        return { valid: false, normalized: normalized, reason: "Kein Feldzweck angegeben" };
       }
 
-      if (tokens[index] === "shipping" || tokens[index] === "billing") {
-        index++;
-      }
-
-      const remaining = tokens.slice(index);
-
-      if (remaining.length === 0) {
-        result.valid = false;
-        result.reason = "Kein Feld-Typ angegeben";
-        return result;
-      }
-
-      // Sonderfall: webauthn darf nur zusätzlich am Ende stehen
-      let fieldTokens = remaining;
       if (remaining[remaining.length - 1] === "webauthn") {
-        fieldTokens = remaining.slice(0, -1);
+        remaining = remaining.slice(0, -1);
       }
 
-      const candidate = fieldTokens.join(" ");
+      const fieldToken = remaining.join(" ");
 
-      if (!validFieldTokens.has(candidate)) {
-        result.valid = false;
-        result.reason = `Unbekannter oder unüblicher Wert: "${candidate}"`;
-        return result;
+      if (!validAutocompleteTokens.has(fieldToken)) {
+        return {
+          valid: false,
+          normalized: normalized,
+          reason: `Unbekannter oder nicht unterstützter Wert "${fieldToken}"`
+        };
       }
 
-      return result;
+      return { valid: true, normalized: normalized, reason: "" };
     }
 
-    const relevantFields = allFields.filter(isRelevantField);
-    const issues = [];
+    function matchesExpectedPurpose(normalizedAutocomplete, expected) {
+      if (!expected) return true;
+      if (normalizedAutocomplete === "on" || normalizedAutocomplete === "off") return false;
+      return normalizedAutocomplete === expected || normalizedAutocomplete.endsWith(" " + expected);
+    }
+
+    const inspected = [];
+    const failures = [];
     const warnings = [];
-    const passes = [];
+    const excluded = [];
 
-    for (const el of relevantFields) {
-      const tag = el.tagName.toLowerCase();
-      const type = (el.getAttribute("type") || "").toLowerCase();
-      const path = getDomPath(el);
-      const attr = el.getAttribute("autocomplete");
-      const expected = inferExpectedAutocomplete(el);
-
-      if (attr === null) {
-        issues.push({
-          path,
-          cloned: cloneEl(el),
-          message: `Kein autocomplete-Attribut vorhanden${expected ? `; erwartet wäre z. B. "${expected}"` : ""}.`
-        });
-        continue;
+    allElements.forEach(function (el) {
+      if (!isRelevantControl(el)) {
+        return;
       }
 
-      const validation = validateAutocompleteValue(attr);
+      const fieldText = getFieldText(el);
+      const path = getDomPath(el);
+
+      if (isExcludedByContext(el, fieldText)) {
+        excluded.push({
+          path: path,
+          reason: "Ausgenommen, da das Feld nach Beschriftung/Kontext nicht wie ein personenbezogenes Nutzerfeld wirkt."
+        });
+        return;
+      }
+
+      const expectedPurpose = inferPurpose(el, fieldText);
+
+      if (!expectedPurpose) {
+        excluded.push({
+          path: path,
+          reason: "Nicht geprüft, da kein eindeutiger personenbezogener Eingabezweck erkennbar ist."
+        });
+        return;
+      }
+
+      inspected.push({
+        el: el,
+        path: path,
+        expectedPurpose: expectedPurpose,
+        fieldText: fieldText
+      });
+    });
+
+    inspected.forEach(function (entry) {
+      const el = entry.el;
+      const path = entry.path;
+      const expectedPurpose = entry.expectedPurpose;
+      const autocomplete = el.getAttribute("autocomplete");
+
+      if (autocomplete === null) {
+        failures.push({
+          path: path,
+          message: `Für dieses personenbezogene Feld fehlt autocomplete. Erwartet wäre z. B. "${expectedPurpose}".`
+        });
+        return;
+      }
+
+      const validation = validateAutocompleteValue(autocomplete);
 
       if (!validation.valid) {
-        issues.push({
-          path,
-          cloned: cloneEl(el),
-          message: `Ungültiger autocomplete-Wert "${attr}" (${validation.reason}).`
+        failures.push({
+          path: path,
+          message: `Ungültiger autocomplete-Wert "${autocomplete}" (${validation.reason}).`
         });
-        continue;
+        return;
       }
 
-      const normalized = validation.normalized;
-
-      if (
-        expected &&
-        normalized !== "on" &&
-        normalized !== "off" &&
-        !normalized.endsWith(expected) &&
-        normalized !== expected
-      ) {
+      if (!matchesExpectedPurpose(validation.normalized, expectedPurpose)) {
         warnings.push({
-          path,
-          cloned: cloneEl(el),
-          message: `Autocomplete ist gesetzt auf "${attr}", wirkt aber für dieses Feld unpassend; erwartet wäre eher "${expected}".`
+          path: path,
+          message: `autocomplete="${autocomplete}" ist vorhanden, passt aber vermutlich nicht zum erkannten Zweck "${expectedPurpose}".`
         });
-        continue;
+        return;
       }
-
-      // Zusätzliche Heuristik für Passwortfelder
-      if (tag === "input" && type === "password") {
-        if (normalized === "on" || normalized === "off") {
-          warnings.push({
-            path,
-            message: `Passwortfeld nutzt "${attr}". Häufig sinnvoller sind "current-password" oder "new-password".`
-          });
-          continue;
-        }
-      }
-
-      passes.push({
-        path,
-        cloned: cloneEl(el),
-        message: `Autocomplete ist vorhanden und plausibel: "${attr}".`
-      });
-    }
+    });
 
     let status = "pass";
-    if (issues.length > 0) {
+
+    if (failures.length > 0) {
       status = "fail";
-    } else if (warnings.length > 0 || relevantFields.length === 0) {
-      status = "neutral";
+    } else if (warnings.length > 0 || inspected.length === 0) {
+      status = "check";
     }
 
-    if (relevantFields.length === 0) {
-      return {
-        title,
-        status: "neutral",
-        content: "Es wurden keine relevanten Formularfelder für die Autocomplete-Prüfung gefunden."
-      };
-    }
-
-    function renderItems(items) {
+    function renderList(items) {
       return `<ul>${items
         .map(
           (item) =>
-            `<li><strong>${escapeHtml(item.message)}</strong><br>
-              Position: <code>${escapeHtml(item.path)}</code><br>
-              
-              <details class="clone">
+          `<li><strong>${escapeHtml(item.message)}</strong><br>
+            Position: <code>${escapeHtml(item.path)}</code><br>
+            <details class="clone">
               <summary><p class="toggleText">Element-Vorschau anzeigen</p></summary>
               <div class="clonedElement">
                 ${item.cloned}
               </div>
-              </details>
-            </li>`
+            </details>
+          </li>`
         )
         .join("")}</ul>`;
     }
 
     let content = `
-      <p>Geprüft wurden <strong>${relevantFields.length}</strong> relevante Formularfelder auf ihre <code>autocomplete</code>-Attribute.</p>
-      <p>
-        Problematische Felder: <strong>${issues.length}</strong><br>
-        Zu prüfende Felder: <strong>${warnings.length}</strong><br>
-        Unauffällig Felder: <strong>${passes.length}</strong>
-      </p>
+    <p>
+      Geprüft wurden <strong>${inspected.length}</strong> wahrscheinlich personenbezogene Eingabefelder<br>
+      Nicht einbezogen: <strong>${excluded.length}</strong> Felder ohne klaren Personenbezug oder mit erkanntem Sonderzweck.<br>
+      Fehler: <strong>${warnings.length}</strong>, Hinweise: <strong>${warnings.length}</strong>
+    </p>
     `;
 
-    if (issues.length > 0) {
-      content += `<h4>Problematische Felder</h4>${renderItems(issues)}`;
+    if (failures.length > 0) {
+      content += "<h4>Fehler</h4>" + renderList(failures);
     }
 
     if (warnings.length > 0) {
-      content += `<h4>Zu prüfende Felder</h4>${renderItems(warnings)}`;
+      content += "<h4>Hinweise</h4>" + renderList(warnings);
     }
 
-    if (issues.length === 0 && warnings.length === 0) {
-      content += `<p>Alle geprüften Formularfelder besitzen ein plausibles autocomplete-Attribut.</p>`;
+    if (failures.length === 0 && warnings.length === 0 && inspected.length > 0) {
+      content += "<p>Für die erkannten personenbezogenen Eingabefelder wurden passende autocomplete-Angaben gefunden.</p>";
+    }
+
+    if (inspected.length === 0) {
+      content += "<p>Es wurden keine eindeutig personenbezogenen Eingabefelder erkannt, die unter diese Prüfung fallen.</p>";
     }
 
     return {
-      title,
-      status,
-      content
+      title: "Autocomplete-Attribute prüfen",
+      status: status,
+      content: content
     };
   }
 
