@@ -3,6 +3,9 @@
 (function () {
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
+  const RESULTS_SORT_AtoZ = false;
+  const RESULTS_SORT_FAILtoPASS = false;
+
   const selectedTests = [
     /* 1031 */ "headingsList",
     /* 1012 */ "imagesMissingAlt",
@@ -20,8 +23,11 @@
     /* 1311 */ "pruefeLangAttribut",
     /* 8010 */ "findeKomplettLeereTags",
     /* 8020 */ "pruefeLinksImFliesstext",
-    /* 1032 */ "pruefeListenStruktur"
-  ].sort();
+    /* 1032 */ "pruefeListenStruktur",
+    /* 2135 */ "pruefeAutocompleteAttribute"
+  ];
+
+  if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -386,18 +392,20 @@
       .replaceAll("'", "&#039;");
   }
 
-  function getRootVar(str) {
+  /*function getRootVar(str) {
     return window.getComputedStyle(document.body).getPropertyValue(str);
-  }
+  }*/
 
   async function init() {
     try {
       await ensureMainLoaded();
       const results = runTests(selectedTests);
-      results.sort((a, b) => {
-        const order = { fail: 0, check: 1, pass: 2 };
-        return order[a.status] - order[b.status];
-      });
+      if (RESULTS_SORT_FAILtoPASS) {
+        results.sort((a, b) => {
+          const order = { fail: 0, check: 1, pass: 2 };
+          return order[a.status] - order[b.status];
+        });
+      }
       openReport(results);
     } catch (err) {
       console.error("Page analyzer failed:", err);
