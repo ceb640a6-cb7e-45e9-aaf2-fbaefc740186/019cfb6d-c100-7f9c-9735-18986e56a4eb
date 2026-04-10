@@ -241,7 +241,7 @@ const tests = {
     };
   },
   
-  checkIds() {
+  /*checkIds() {
     const visible = (el) => {
       if (!el || !el.isConnected) return false;
       if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
@@ -289,6 +289,92 @@ const tests = {
         `Doppelte IDs: ${duplicateIds.length}, leere IDs: ${emptyIds}.`;
     }
 
+    return {
+      title: "Prüfe IDs",
+      status,
+      content
+    };
+  },*/
+
+  checkIds() {
+    const visible = (el) => {
+      if (!el || !el.isConnected) return false;
+      if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.opacity === "0"
+      ) {
+        return false;
+      }
+
+      if (!el.offsetParent && style.position !== "fixed") return false;
+
+      return true;
+    };
+
+    const elementsWithId = Array.from(document.querySelectorAll("[id]")).filter(visible);
+
+    // Elemente speichern
+    const idMap = new Map();
+    const emptyElements = [];
+
+    elementsWithId.forEach((el) => {
+      const id = el.getAttribute("id") || "";
+
+      if (!id.trim()) {
+        emptyElements.push(el);
+        return;
+      }
+
+      if (!idMap.has(id)) {
+        idMap.set(id, []);
+      }
+
+      idMap.get(id).push(el);
+    });
+
+    // 👉 Nur IDs mit mehr als einem Element
+    const duplicateIds = Array.from(idMap.entries())
+      .filter(([, elements]) => elements.length > 1);
+
+    const issueCount = duplicateIds.length + emptyElements.length;
+
+    let status = "pass";
+    if (issueCount > 0) status = "fail";
+
+    let content = "Keine Probleme mit IDs gefunden.";
+
+    if (issueCount > 0) {
+      content = '';
+      content += `<p>Doppelte IDs: <strong>${duplicateIds.length}</strong>${(emptyElements.length > 0) ? '</p>' : '<br>'}`;
+      if (duplicateIds.length > 0) {
+        content += `${
+          Array.from(idMap, ([key, value]) => {
+          `<details class="clone">
+            <summary><p class="toggleText">Elemente anzeigen mit <code>#${key}</code></p></summary>
+            ${value.forEach(el => {
+              `<div class="clonedElement">${cloneEl(el)}</div>`
+            })}
+          </details>`
+          })
+        }`;
+      }
+      content += `${(emptyElements.length > 0) ? '<p>' : ''}Leere IDs: <strong>${emptyElements.length}</strong></p>`;
+      if (emptyElements.length > 0) {
+        content += `${
+        `<details class="clone">
+          <summary><p class="toggleText">Elemente anzeigen mit leerer ID</code></p></summary>
+          ${emptyElements.forEach(el => {
+            `<div class="clonedElement">${cloneEl(el)}</div>`
+          })}
+        </details>`}`;
+      }
+    }
+
+    // 👉 Falls du sie zurückgeben willst:
     return {
       title: "Prüfe IDs",
       status,
