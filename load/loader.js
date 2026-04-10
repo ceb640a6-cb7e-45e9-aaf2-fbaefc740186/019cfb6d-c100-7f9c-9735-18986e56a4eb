@@ -365,6 +365,9 @@
 
         <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
         <canvas id="summary-chart" width="350" height="350"></canvas>
+
+        <button onclick="openBoxes()">Alle Tests ausklappen</button>
+        <button onclick="closeBoxes()">Alle Tests zuklappen</button>
             
         ${results.map(r => `
           <details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
@@ -378,6 +381,15 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+          function openBoxes() {
+            document.querySelectorAll('details.box').forEach(el => el.setAttribute('open', ''));
+          }
+          
+          function closeBoxes() {
+            document.querySelectorAll('details.box').forEach(el => el.removeAttribute('open'));
+          }
+
+
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
             labels: ['Pass', 'Check', 'Fail'],
