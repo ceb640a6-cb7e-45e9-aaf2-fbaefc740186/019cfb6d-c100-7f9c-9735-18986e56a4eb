@@ -92,6 +92,7 @@ const tests = {
 
   oneH1() {
     const count = document.querySelectorAll('h1').length;
+    /*document.querySelectorAll('h1').forEach(el => highlightEl(el));*/
 
     return {
       title: "Only one H1",
@@ -1745,6 +1746,347 @@ const tests = {
       status,
       content
     };
+  },
+
+  pruefeAutocompleteAttribute() {
+    const title = "Autocomplete-Attribute prüfen";
+
+    const relevantSelector = "input, textarea, select";
+    const allFields = Array.from(document.querySelectorAll(relevantSelector));
+
+    const ignoredInputTypes = new Set([
+      "hidden",
+      "submit",
+      "reset",
+      "button",
+      "image",
+      "file",
+      "range",
+      "color",
+      "checkbox",
+      "radio"
+    ]);
+
+    const relevantInputTypes = new Set([
+      "text",
+      "search",
+      "email",
+      "tel",
+      "url",
+      "number",
+      "password",
+      "date",
+      "month",
+      "week",
+      "time",
+      "datetime-local"
+    ]);
+
+    // Keine vollständig spezifikationsgetreue Liste,
+    // sondern eine bewusst praxisnahe Menge häufiger und sinnvoller Werte.
+    const validFieldTokens = new Set([
+      "name",
+      "honorific-prefix",
+      "given-name",
+      "additional-name",
+      "family-name",
+      "honorific-suffix",
+      "nickname",
+      "username",
+      "new-password",
+      "current-password",
+      "one-time-code",
+      "organization-title",
+      "organization",
+      "street-address",
+      "address-line1",
+      "address-line2",
+      "address-line3",
+      "address-level4",
+      "address-level3",
+      "address-level2",
+      "address-level1",
+      "country",
+      "country-name",
+      "postal-code",
+      "cc-name",
+      "cc-given-name",
+      "cc-additional-name",
+      "cc-family-name",
+      "cc-number",
+      "cc-exp",
+      "cc-exp-month",
+      "cc-exp-year",
+      "cc-csc",
+      "cc-type",
+      "transaction-currency",
+      "transaction-amount",
+      "language",
+      "bday",
+      "bday-day",
+      "bday-month",
+      "bday-year",
+      "sex",
+      "url",
+      "photo",
+      "tel",
+      "tel-country-code",
+      "tel-national",
+      "tel-area-code",
+      "tel-local",
+      "tel-local-prefix",
+      "tel-local-suffix",
+      "tel-extension",
+      "email",
+      "impp"
+    ]);
+
+    const contactHintMap = [
+      { matcher: /email|e-mail|mail/i, expected: "email" },
+      { matcher: /phone|tel|telefon|mobile|mobil/i, expected: "tel" },
+      { matcher: /first.?name|vorname|given/i, expected: "given-name" },
+      { matcher: /last.?name|nachname|surname|family/i, expected: "family-name" },
+      { matcher: /full.?name|name/i, expected: "name" },
+      { matcher: /company|firma|organization/i, expected: "organization" },
+      { matcher: /street|straße|strasse|address/i, expected: "street-address" },
+      { matcher: /zip|postal|plz/i, expected: "postal-code" },
+      { matcher: /city|ort|town/i, expected: "address-level2" },
+      { matcher: /country|land/i, expected: "country-name" },
+      { matcher: /user.?name|login/i, expected: "username" },
+      { matcher: /password|passwort/i, expected: "current-password" }
+    ];
+
+    function isRelevantField(el) {
+      if (!el || el.disabled) return false;
+
+      const tag = el.tagName.toLowerCase();
+
+      if (tag === "textarea" || tag === "select") {
+        return true;
+      }
+
+      if (tag === "input") {
+        const type = (el.getAttribute("type") || "text").toLowerCase();
+        if (ignoredInputTypes.has(type)) return false;
+        return relevantInputTypes.has(type) || type === "";
+      }
+
+      return false;
+    }
+
+    function getFieldLabelText(el) {
+      const parts = [];
+
+      const id = el.id;
+      if (id) {
+        const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+        if (label) parts.push(label.textContent || "");
+      }
+
+      const parentLabel = el.closest("label");
+      if (parentLabel) parts.push(parentLabel.textContent || "");
+
+      const ariaLabel = el.getAttribute("aria-label");
+      if (ariaLabel) parts.push(ariaLabel);
+
+      const placeholder = el.getAttribute("placeholder");
+      if (placeholder) parts.push(placeholder);
+
+      const name = el.getAttribute("name");
+      if (name) parts.push(name);
+
+      const idAttr = el.getAttribute("id");
+      if (idAttr) parts.push(idAttr);
+
+      return parts.join(" ").replace(/\s+/g, " ").trim();
+    }
+
+    function inferExpectedAutocomplete(el) {
+      const type = (el.getAttribute("type") || "").toLowerCase();
+      if (type === "email") return "email";
+      if (type === "tel") return "tel";
+      if (type === "password") return "current-password";
+      if (type === "url") return "url";
+
+      const hintText = getFieldLabelText(el);
+      for (const rule of contactHintMap) {
+        if (rule.matcher.test(hintText)) {
+          return rule.expected;
+        }
+      }
+
+      return null;
+    }
+
+    function validateAutocompleteValue(value) {
+      const result = {
+        valid: true,
+        normalized: value.trim().toLowerCase(),
+        reason: ""
+      };
+
+      const normalized = result.normalized;
+
+      if (!normalized) {
+        result.valid = false;
+        result.reason = "Leerer Wert";
+        return result;
+      }
+
+      if (normalized === "on" || normalized === "off") {
+        return result;
+      }
+
+      const tokens = normalized.split(/\s+/).filter(Boolean);
+
+      let index = 0;
+
+      if (tokens[index] && /^section-[a-z0-9_-]+$/i.test(tokens[index])) {
+        index++;
+      }
+
+      if (tokens[index] === "shipping" || tokens[index] === "billing") {
+        index++;
+      }
+
+      const remaining = tokens.slice(index);
+
+      if (remaining.length === 0) {
+        result.valid = false;
+        result.reason = "Kein Feld-Typ angegeben";
+        return result;
+      }
+
+      // Sonderfall: webauthn darf nur zusätzlich am Ende stehen
+      let fieldTokens = remaining;
+      if (remaining[remaining.length - 1] === "webauthn") {
+        fieldTokens = remaining.slice(0, -1);
+      }
+
+      const candidate = fieldTokens.join(" ");
+
+      if (!validFieldTokens.has(candidate)) {
+        result.valid = false;
+        result.reason = `Unbekannter oder unüblicher Wert: "${candidate}"`;
+        return result;
+      }
+
+      return result;
+    }
+
+    const relevantFields = allFields.filter(isRelevantField);
+    const issues = [];
+    const warnings = [];
+    const passes = [];
+
+    for (const el of relevantFields) {
+      const tag = el.tagName.toLowerCase();
+      const type = (el.getAttribute("type") || "").toLowerCase();
+      const path = getDomPath(el);
+      const attr = el.getAttribute("autocomplete");
+      const expected = inferExpectedAutocomplete(el);
+
+      if (attr === null) {
+        issues.push({
+          path,
+          message: `Kein autocomplete-Attribut vorhanden${expected ? `; erwartet wäre z. B. "${expected}"` : ""}.`
+        });
+        continue;
+      }
+
+      const validation = validateAutocompleteValue(attr);
+
+      if (!validation.valid) {
+        issues.push({
+          path,
+          message: `Ungültiger autocomplete-Wert "${attr}" (${validation.reason}).`
+        });
+        continue;
+      }
+
+      const normalized = validation.normalized;
+
+      if (
+        expected &&
+        normalized !== "on" &&
+        normalized !== "off" &&
+        !normalized.endsWith(expected) &&
+        normalized !== expected
+      ) {
+        warnings.push({
+          path,
+          message: `Autocomplete ist gesetzt auf "${attr}", wirkt aber für dieses Feld unpassend; erwartet wäre eher "${expected}".`
+        });
+        continue;
+      }
+
+      // Zusätzliche Heuristik für Passwortfelder
+      if (tag === "input" && type === "password") {
+        if (normalized === "on" || normalized === "off") {
+          warnings.push({
+            path,
+            message: `Passwortfeld nutzt "${attr}". Häufig sinnvoller sind "current-password" oder "new-password".`
+          });
+          continue;
+        }
+      }
+
+      passes.push({
+        path,
+        message: `Autocomplete ist vorhanden und plausibel: "${attr}".`
+      });
+    }
+
+    let status = "pass";
+    if (issues.length > 0) {
+      status = "fail";
+    } else if (warnings.length > 0 || relevantFields.length === 0) {
+      status = "neutral";
+    }
+
+    if (relevantFields.length === 0) {
+      return {
+        title,
+        status: "neutral",
+        content: "Es wurden keine relevanten Formularfelder für die Autocomplete-Prüfung gefunden."
+      };
+    }
+
+    function renderItems(items) {
+      return `<ul>${items
+        .map(
+          (item) =>
+            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}</li>`
+        )
+        .join("")}</ul>`;
+    }
+
+    let content = `
+      <p>Geprüft wurden <strong>${relevantFields.length}</strong> relevante Formularfelder.</p>
+      <p>
+        Fehler: <strong>${issues.length}</strong>,
+        Hinweise: <strong>${warnings.length}</strong>,
+        unauffällig: <strong>${passes.length}</strong>
+      </p>
+    `;
+
+    if (issues.length > 0) {
+      content += `<h4>Fehler</h4>${renderItems(issues)}`;
+    }
+
+    if (warnings.length > 0) {
+      content += `<h4>Hinweise</h4>${renderItems(warnings)}`;
+    }
+
+    if (issues.length === 0 && warnings.length === 0) {
+      content += `<p>Alle geprüften Formularfelder besitzen ein plausibles autocomplete-Attribut.</p>`;
+    }
+
+    return {
+      title,
+      status,
+      content
+    };
   }
 
 };
@@ -1756,6 +2098,12 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function highlightEl(el) {
+  el.style.border = "5px solid #f0f";
+  el.style.background = "#f0f8";
+  el.style.boxShadow = "0 0 10px #f0f8";
 }
 
 function getSelector(el) {
