@@ -828,28 +828,22 @@ const tests = {
 
     const html = `
       <p>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b><br>
-      Fehlerblöcke: <b>${issues.length}</b></p>
-      <div style="margin-top:10px">
+      Gefundene Probleme: <b>${issues.length}</b></p>
         ${issues
           .map(
             (item, index) => `
-              <div style="padding:8px 0;">
-                <p><b>${index + 1}. ${escapeHtml(item.label)}</b></p>
-                <ol>
+              <li>
+                <b>${escapeHtml(item.label)}</b><br>
                 ${item.errors
                 .map(
-                  (err) => `<li>${escapeHtml(err)}</li>`
+                  (err) => `${escapeHtml(err)}`
                 )
-                .join("")}
-                </ol>
-                <div style="margin-top:6px;">
-                  <p>Pfad: <code>${escapeHtml(item.path)}</code></p>
-                </div>
-              </div>
+                .join("<br>")}<br>
+                Pfad: <code>${escapeHtml(item.path)}</code>
+              </li>
             `
           )
-          .join("")}
-      </div>
+        .join("")}
     `;
 
     return {
@@ -985,28 +979,22 @@ const tests = {
 
     const html = `
       <p>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b><br>
-      Fehlerhafte Tabellen: <b>${issues.length}</b></p>
-      <div style="margin-top:10px">
+      Gefundene Probleme: <b>${issues.length}</b></p>
         ${issues
           .map(
             (item, index) => `
-              <div style="padding:8px 0;">
-                <p><b>${index + 1}. ${escapeHtml(item.label)}</b></p>
-                <ol>
+              <li>
+                <b>${escapeHtml(item.label)}</b><br>
                 ${item.errors
                 .map(
-                  (err) => `<li style="margin-top:6px;">${escapeHtml(err)}</li>`
+                  (err) => `${escapeHtml(err)}`
                 )
-                .join("")}
-                </ol>
-                <div style="margin-top:6px">
-                  <p>Pfad: <code>${escapeHtml(item.path)}</code></p>
-                </div>
-              </div>
+                .join("<br>")}<br>
+                Pfad: <code>${escapeHtml(item.path)}</code>
+              </li>
             `
           )
-          .join("")}
-      </div>
+        .join("")}
     `;
 
     return {
@@ -1732,7 +1720,7 @@ const tests = {
       content += `<h4>Mögliche Fake-Listen</h4><ul>`;
       fakeLists.forEach((entry) => {
         const examplesHtml = entry.examples.length
-          ? `<br>Listeneinträge: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
+          ? `Listeneinträge: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
           : "(keine Listeneinträge gefunden)";
 
         const cssInfo = entry.viaCssBefore
@@ -1741,9 +1729,9 @@ const tests = {
 
         content += `
           <li>
-            <p><strong>${examplesHtml}</strong><br>
+            <strong>${examplesHtml}</strong><br>
             ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}<br>
-            Position: <code>${escapeHtml(entry.path)}</code></p>
+            Position: <code>${escapeHtml(entry.path)}</code>
           </li>
         `;
       });
