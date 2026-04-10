@@ -2060,7 +2060,7 @@ const tests = {
       return `<ul>${items
         .map(
           (item) =>
-            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}<br>${escapeHtml(item.cloned)}</li>`
+            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}<br>${item.cloned}</li>`
         )
         .join("")}</ul>`;
     }
