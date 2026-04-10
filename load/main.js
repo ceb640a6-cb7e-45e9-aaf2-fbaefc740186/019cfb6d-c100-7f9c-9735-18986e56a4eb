@@ -65,8 +65,6 @@ const tests = {
 
   oneH1() {
     const count = document.querySelectorAll('h1').length;
-    /*document.querySelectorAll('h1').forEach(el => highlightEl(el));*/
-
     return {
       title: "Only one H1",
       status: (count === 1) ? "pass" : "fail",
@@ -76,32 +74,6 @@ const tests = {
     };
   },
 
-  /*headingsList() {
-    return {
-      title: "Headings list",
-      status: headings.length === 0 ? "fail" : "pass",
-      content: headings.length === 0
-        ? "<p>No headings found on the page.</p>"
-        : `
-          <p><strong>${headings.length}</strong> heading(s) found.</p>
-          <ul>
-            ${headings.map((el, i) => {
-              const level = parseInt(el.tagName.substring(1), 10);
-              const text = (el.textContent || "").trim() || "(no text)";
-              const indent = (level - 1) * 16;
-
-              return `
-                <li style="margin-left:${indent}px">
-                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
-                </li>
-              `;
-            }).join("")}
-          </ul>
-        `
-    };
-  },*/
-
-  /*headingJumps() {*/
   checkHeadings() {
     const headings = [...document.querySelectorAll("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
@@ -160,7 +132,7 @@ const tests = {
 
     return {
       title: "Heading hierarchy jumps",
-      status: jumps.length === 0 ? "pass" : "fail",
+      status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
       content: `${headingJumps_content}${headingList_content}`
     };
   },
@@ -629,7 +601,7 @@ const tests = {
       status,
       content: `
         ${messages.map((msg) => `<div>${msg}</div>`).join("")}
-        <div style="margin-top:8px;">${summaryList}</div>
+        <div style="margin-top:8px;"><p>${summaryList}</p></div>
       `
     };
   },
@@ -849,31 +821,29 @@ const tests = {
         title: "Struktur sichtbarer Tabellen prüfen",
         status: "pass",
         content: visibleTables.length
-          ? `Alle ${visibleTables.length} visuell gestalteten Tabellen sind korrekt aufgebaut und verschachtelt.`
-          : "Keine visuell gestalteten Tabellen gefunden."
+          ? `<p>Alle ${visibleTables.length} visuell gestalteten Tabellen sind korrekt aufgebaut und verschachtelt.</p>`
+          : "<p>Keine visuell gestalteten Tabellen gefunden.</p>"
       };
     }
 
     const html = `
-      <div>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b></div>
-      <div>Fehlerblöcke: <b>${issues.length}</b></div>
+      <p>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b><br>
+      Fehlerblöcke: <b>${issues.length}</b></p>
       <div style="margin-top:10px">
         ${issues
           .map(
             (item, index) => `
               <div style="padding:8px 0;">
-                <div><b>${index + 1}. ${escapeHtml(item.label)}</b></div>
+                <p><b>${index + 1}. ${escapeHtml(item.label)}</b></p>
+                <ol>
                 ${item.errors
-                  .map(
-                    (err) => `
-                      <div style="margin-top:6px;">
-                        ${escapeHtml(err)}
-                      </div>
-                    `
-                  )
-                  .join("")}
+                .map(
+                  (err) => `<li>${escapeHtml(err)}</li>`
+                )
+                .join("")}
+                </ol>
                 <div style="margin-top:6px;">
-                  Pfad: <code>${escapeHtml(item.path)}</code>
+                  <p>Pfad: <code>${escapeHtml(item.path)}</code></p>
                 </div>
               </div>
             `
@@ -1008,31 +978,29 @@ const tests = {
         title: "Visuell transparente Tabellen prüfen",
         status: "pass",
         content: transparentTables.length
-          ? `Keine verbotenen Elemente oder Attribute in ${transparentTables.length} visuell transparenten Tabellen gefunden.`
-          : "Keine visuell transparenten Tabellen gefunden."
+          ? `<p>Keine verbotenen Elemente oder Attribute in ${transparentTables.length} visuell transparenten Tabellen gefunden.</p>`
+          : "<p>Keine visuell transparenten Tabellen gefunden.</p>"
       };
     }
 
     const html = `
-      <div>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b></div>
-      <div>Fehlerhafte Tabellen: <b>${issues.length}</b></div>
+      <p>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b><br>
+      Fehlerhafte Tabellen: <b>${issues.length}</b></p>
       <div style="margin-top:10px">
         ${issues
           .map(
             (item, index) => `
               <div style="padding:8px 0;">
-                <div><b>${index + 1}. ${escapeHtml(item.label)}</b></div>
+                <p><b>${index + 1}. ${escapeHtml(item.label)}</b></p>
+                <ol>
                 ${item.errors
-                  .map(
-                    (err) => `
-                      <div style="margin-top:6px;">
-                        ${escapeHtml(err)}
-                      </div>
-                    `
-                  )
-                  .join("")}
+                .map(
+                  (err) => `<li style="margin-top:6px;">${escapeHtml(err)}</li>`
+                )
+                .join("")}
+                </ol>
                 <div style="margin-top:6px">
-                  Pfad: <code>${escapeHtml(item.path)}</code>
+                  <p>Pfad: <code>${escapeHtml(item.path)}</code></p>
                 </div>
               </div>
             `
@@ -1054,17 +1022,17 @@ const tests = {
     const langValue = hasLang ? String(htmlEl.getAttribute("lang") || "").trim() : "";
 
     let status = "pass";
-    let content = "Das <code>&lt;html&gt;</code>-Element hat ein gesetztes und nicht-leeres <code>lang</code>-Attribut.";
+    let content = "<p>Das <code>&lt;html&gt;</code>-Element hat ein gesetztes und nicht-leeres <code>lang</code>-Attribut.</p>";
 
     if (!htmlEl) {
       status = "fail";
-      content = "Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.";
+      content = "<p>Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.</p>";
     } else if (!hasLang) {
       status = "fail";
-      content = "Dem <code>&lt;html&gt;</code>-Element fehlt das Attribut <code>lang</code>.";
+      content = "<p>Dem <code>&lt;html&gt;</code>-Element fehlt das Attribut <code>lang</code>.</p>";
     } else if (!langValue) {
       status = "fail";
-      content = "Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.";
+      content = "<p>Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.</p>";
     }
 
     return {
@@ -1101,9 +1069,7 @@ const tests = {
       return {
         title: "Leere Tags ohne Attribute",
         status: "pass",
-        content: `
-          <div>Es wurden keine leeren Tags ohne Attribute gefunden.</div>
-        `
+        content: `<p>Es wurden keine leeren Tags ohne Attribute gefunden.</p>`
       };
     }
 
@@ -1121,7 +1087,6 @@ const tests = {
     const detailsHtml = sortierteTags
       .map((tag) => {
         const elemente = gruppiertNachTag[tag];
-
         const eintraege = elemente
           .map((el) => {
             return `
@@ -1147,12 +1112,10 @@ const tests = {
       title: "Leere Tags ohne Attribute",
       status: "check",
       content: `
-        <div>
-          Es wurden <b>${leereElemente.length}</b> leere Tags ohne Attribute gefunden.
-        </div>
+        <p>Es wurden <b>${leereElemente.length}</b> leere Tags ohne Attribute gefunden.</p>
         <div class="sub" style="margin-top:8px;">
-          Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.
-          Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.
+          <p>Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.<br>
+          Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.</p>
         </div>
         <div style="margin-top:12px;">
           ${detailsHtml}
@@ -1507,9 +1470,9 @@ const tests = {
         .filter(([, v]) => v && String(v.link) !== String(v.context))
         .map(([key, v]) => `
           <div style="margin-top:4px;">
-            <b>${escapeHtml(labels[key] || key)}:</b>
+            <p><b>${escapeHtml(labels[key] || key)}:</b>
             Text = <code>${escapeHtml(v.context || "(leer)")}</code>
-            → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
+            → Link = <code>${escapeHtml(v.link || "(leer)")}</code></p>
           </div>
         `)
         .join("");
@@ -1519,17 +1482,15 @@ const tests = {
 
     const renderItem = (x, i) => {
       return `
-        <div style="padding:10px 0;">
-          <div><b>${i + 1}. ${escapeHtml(x.text)}</b></div>
-          <div style="margin-top:6px;">${escapeHtml(x.reason)}</div>
-          <div style="margin-top:6px;">
-            Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> ·
-            Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-            ${x.contrast != null ? ` · Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}
-          </div>
+        <li>
+          <p><b>${escapeHtml(x.text)}</b></p>
+          <p>${escapeHtml(x.reason)}</p>
+          <p>Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
+          Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
+          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b></p>` : ""}
           ${renderDiffs(x)}
-          <div style="margin-top:6px;">Position: <code>${escapeHtml(x.path)}</code></div>
-        </div>
+          <p>Position: <code>${escapeHtml(x.path)}</code></p>
+        </li>
       `;
     };
 
@@ -1543,26 +1504,26 @@ const tests = {
     if (fails.length) overallStatus = "fail";
 
     const summaryHtml = `
-      <div>
-        Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.
-      </div>
+      <p>Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.</p>
       <div style="margin-top:8px;">
-        Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
+        <p>Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
         Textlinks im Fließtext: <b>${inlineLinks.length}</b><br>
-        Problematische Links: <b>${fails.length}</b>
+        Problematische Links: <b>${fails.length}</b></p>
       </div>
     `;
 
     const failHtml = fails.length
       ? `
         <div style="margin-top:12px;">
-          ${fails.map(renderItem).join("")}
+          <ol>
+            ${fails.map(renderItem).join("")}
+          </ol>
         </div>
       `
       : "";
 
     const emptyHtml = !fails.length
-      ? `<div style="margin-top:8px;">Es wurden keine problematischen Inline-Links im Fließtext gefunden.</div>`
+      ? `<div style="margin-top:8px;"><p>Es wurden keine problematischen Inline-Links im Fließtext gefunden.</p></div>`
       : "";
 
     return {
@@ -1780,9 +1741,9 @@ const tests = {
 
         content += `
           <li>
-            <strong>${examplesHtml}</strong><br>
+            <p><strong>${examplesHtml}</strong><br>
             ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}<br>
-            Position: <code>${escapeHtml(entry.path)}</code>
+            Position: <code>${escapeHtml(entry.path)}</code></p>
           </li>
         `;
       });
