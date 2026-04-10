@@ -181,9 +181,8 @@
           }
 
           .highlight-temp {
-            border: 4px solid #f0f;
-            background: #f0f8;
-            box-shadow: 0 0 10px #f0f8;
+            border: 2px solid var(--fail-dark);
+            box-shadow: 0 0 10px var(--fail);
           }
 
           .meta {
