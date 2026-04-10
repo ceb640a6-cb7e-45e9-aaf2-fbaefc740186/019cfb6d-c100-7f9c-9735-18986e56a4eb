@@ -235,7 +235,6 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 12px;
           }
 
           .box h2 {
@@ -370,7 +369,7 @@
         ${results.map(r => `
           <details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
             <summary class="box-header">
-              <h2>${escapeHtml(r.title)}</h2>
+              <h2 class="toggleText">${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </summary>
             <div class="box-content">${r.content}</div>
