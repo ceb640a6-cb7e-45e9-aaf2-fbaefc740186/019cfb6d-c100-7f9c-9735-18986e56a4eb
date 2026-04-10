@@ -3,8 +3,8 @@
 (function () {
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
-  const RESULTS_SORT_AtoZ = false;
-  const RESULTS_SORT_FAILtoPASS = false;
+  const RESULTS_SORT_AtoZ = true;
+  const RESULTS_SORT_FAILtoPASS = true;
 
   const selectedTests = [
     /* 1031 */ "headingsList",
