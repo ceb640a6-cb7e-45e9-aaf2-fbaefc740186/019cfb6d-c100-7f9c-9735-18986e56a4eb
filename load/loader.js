@@ -180,6 +180,12 @@
             box-shadow: 5px 5px 15px var(--lighter)
           }
 
+          .highlight-temp {
+            border: 4px solid #f0f;
+            background: #f0f8;
+            box-shadow: 0 0 10px #f0f8;
+          }
+
           .meta {
             margin-bottom: 24px;
             color: var(--darker);
