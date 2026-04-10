@@ -6,7 +6,7 @@
   const RESULTS_SORT_AtoZ = true;
   const RESULTS_SORT_FAILtoPASS = true;
 
-  const selectedTests = [
+  let selectedTests = [
     /* 1031 */ "headingsList",
     /* 1012 */ "imagesMissingAlt",
     /* 1013 */ "imagesEmptyAlt",
