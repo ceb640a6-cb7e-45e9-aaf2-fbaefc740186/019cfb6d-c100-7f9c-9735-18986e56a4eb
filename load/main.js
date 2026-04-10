@@ -2026,7 +2026,12 @@ const tests = {
       /\bcoupon\b/i,
       /\bgutschein\b/i,
       /\bpromo\b/i,
-      /\bvoucher\b/i
+      /\bvoucher\b/i,
+      /\bkundennummer\b/i,
+      (/\bcustomer.?number\b/i),
+      (/\bclient.?id\b/i),
+      (/\baccount.?number\b/i),
+      (/\bvertragsnummer\b/i)
     ];
 
     function getFieldText(el) {
@@ -2261,7 +2266,7 @@ const tests = {
     <p>
       Geprüft wurden <strong>${inspected.length}</strong> wahrscheinlich personenbezogene Eingabefelder<br>
       Nicht einbezogen: <strong>${excluded.length}</strong> Felder ohne klaren Personenbezug oder mit erkanntem Sonderzweck.<br>
-      Fehler: <strong>${warnings.length}</strong>, Hinweise: <strong>${warnings.length}</strong>
+      Fehler: <strong>${failures.length}</strong><br>Hinweise: <strong>${warnings.length}</strong>
     </p>
     `;
 
