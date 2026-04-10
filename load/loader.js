@@ -367,7 +367,13 @@
         <canvas id="summary-chart" width="350" height="350"></canvas>
 
         <button onclick="openBoxes()">Alle Tests ausklappen</button>
-        <button onclick="closeBoxes()">Alle Tests zuklappen</button>
+        <button onclick="closeBoxes()">Alle Tests zuklappen</button><br>
+        <button onclick="openBoxes('-fail')">Fail ausklappen</button>
+        <button onclick="closeBoxes('-fail')">Fail zuklappen</button><br>
+        <button onclick="openBoxes('-check')">Check ausklappen</button>
+        <button onclick="closeBoxes('-check')">Check zuklappen</button><br>
+        <button onclick="openBoxes('-pass')">Pass ausklappen</button>
+        <button onclick="closeBoxes('-pass')">Pass zuklappen</button><br>
             
         ${results.map(r => `
           <details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
@@ -381,14 +387,13 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-          function openBoxes() {
-            document.querySelectorAll('details.box').forEach(el => el.setAttribute('open', ''));
+          function openBoxes(scope = '') {
+            document.querySelectorAll('details.box' + scope).forEach(el => el.setAttribute('open', ''));
           }
           
-          function closeBoxes() {
-            document.querySelectorAll('details.box').forEach(el => el.removeAttribute('open'));
+          function closeBoxes(scope = '') {
+            document.querySelectorAll('details.box' + scope).forEach(el => el.removeAttribute('open'));
           }
-
 
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
