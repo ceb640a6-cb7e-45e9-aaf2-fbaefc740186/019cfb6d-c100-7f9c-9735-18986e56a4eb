@@ -1748,7 +1748,7 @@ const tests = {
     };
   },
 
-  pruefeAutocomplete13135() {
+  pruefeAutocompleteAttribute() {
     const selector = "input, textarea, select";
     const allElements = Array.from(document.querySelectorAll(selector));
 
