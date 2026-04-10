@@ -2205,6 +2205,7 @@ const tests = {
       if (autocomplete === null) {
         failures.push({
           path: path,
+          cloned: cloneEl(el),
           message: `Für dieses personenbezogene Feld fehlt autocomplete. Erwartet wäre z. B. "${expectedPurpose}".`
         });
         return;
@@ -2215,6 +2216,7 @@ const tests = {
       if (!validation.valid) {
         failures.push({
           path: path,
+          cloned: cloneEl(el),
           message: `Ungültiger autocomplete-Wert "${autocomplete}" (${validation.reason}).`
         });
         return;
@@ -2223,6 +2225,7 @@ const tests = {
       if (!matchesExpectedPurpose(validation.normalized, expectedPurpose)) {
         warnings.push({
           path: path,
+          cloned: cloneEl(el),
           message: `autocomplete="${autocomplete}" ist vorhanden, passt aber vermutlich nicht zum erkannten Zweck "${expectedPurpose}".`
         });
         return;
