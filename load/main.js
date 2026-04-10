@@ -1,33 +1,6 @@
 // main.js
 
 const tests = {
-  headingsList() {
-    const heads = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
-
-    return {
-      title: "Headings list",
-      status: heads.length === 0 ? "fail" : "pass",
-      content: heads.length === 0
-        ? "No headings found on the page."
-        : `
-          <p><strong>${heads.length}</strong> heading(s) found.</p>
-          <ul>
-            ${heads.map((el, i) => {
-              const level = parseInt(el.tagName.substring(1), 10);
-              const text = (el.textContent || "").trim() || "(no text)";
-              const indent = (level - 1) * 16;
-
-              return `
-                <li style="margin-left:${indent}px">
-                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
-                </li>
-              `;
-            }).join("")}
-          </ul>
-        `
-    };
-  },
-
   imagesMissingAlt() {
     const images = [...document.querySelectorAll("img")];
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
@@ -57,7 +30,7 @@ const tests = {
       title: "Bilder mit leerem Alt-Tag",
       status: emptyAltImages.length === 0 ? "pass" : "check",
       content: emptyAltImages.length === 0
-        ? "Alle Alt-Texte in Bildern sind befüllt."
+        ? "<p>Alle Alt-Texte in Bildern sind befüllt.</p>"
         : `
           <p><strong>${emptyAltImages.length}</strong> Bilder haben leere Alt-Texte und müssen <strong>manuell geprüft</strong> werden.</p>
           <ol>
@@ -78,7 +51,7 @@ const tests = {
       title: "Links without text",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
-        ? "No empty links found."
+        ? "<p>No empty links found.</p>"
         : `
           <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
           <ul>
@@ -103,6 +76,31 @@ const tests = {
     };
   },
 
+  headingsList() {
+    return {
+      title: "Headings list",
+      status: headings.length === 0 ? "fail" : "pass",
+      content: headings.length === 0
+        ? "<p>No headings found on the page.</p>"
+        : `
+          <p><strong>${headings.length}</strong> heading(s) found.</p>
+          <ul>
+            ${headings.map((el, i) => {
+              const level = parseInt(el.tagName.substring(1), 10);
+              const text = (el.textContent || "").trim() || "(no text)";
+              const indent = (level - 1) * 16;
+
+              return `
+                <li style="margin-left:${indent}px">
+                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+                </li>
+              `;
+            }).join("")}
+          </ul>
+        `
+    };
+  },
+
   headingJumps() {
     const headings = [...document.querySelectorAll("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
@@ -124,11 +122,27 @@ const tests = {
       }
     }
 
-    return {
-      title: "Heading hierarchy jumps",
-      status: jumps.length === 0 ? "pass" : "fail",
-      content: jumps.length === 0
-        ? "No heading hierarchy jumps found."
+    let headingList_content = (headings.length === 0)
+        ? "<p>No headings found on the page.</p>"
+        : `
+          <p><strong>${headings.length}</strong> heading(s) found.</p>
+          <ul>
+            ${headings.map((el, i) => {
+              const level = parseInt(el.tagName.substring(1), 10);
+              const text = (el.textContent || "").trim() || "(no text)";
+              const indent = (level - 1) * 16;
+
+              return `
+                <li style="margin-left:${indent}px">
+                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+                </li>
+              `;
+            }).join("")}
+          </ul>
+        `;
+
+    let headingJumps_content = (jumps.length === 0)
+        ? "<p>No heading hierarchy jumps found.</p>"
         : `
           <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
           <ol>
@@ -142,6 +156,11 @@ const tests = {
           </ol>
           ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
         `
+
+    return {
+      title: "Heading hierarchy jumps",
+      status: jumps.length === 0 ? "pass" : "fail",
+      content: `${headingJumps_content}${headingList_content}`
     };
   },
 
@@ -166,7 +185,7 @@ const tests = {
       return {
         title: "Dokumenttitel prüfen",
         status: "fail",
-        content: "Kein Dokumenttitel vorhanden."
+        content: "<p>Kein Dokumenttitel vorhanden.</p>"
       };
     }
 
@@ -175,7 +194,7 @@ const tests = {
       fehler.push("Titel ist sehr kurz.");
     }
 
-    if (titleText.length > 80) {
+    if (titleText.length > 80 && titleText.length <= 120) {
       score -= 10;
       hinweise.push("Titel ist relativ lang.");
     }
@@ -192,16 +211,16 @@ const tests = {
 
     if (looksLikeFile) {
       score -= 35;
-      fehler.push("Titel wirkt wie URL oder Dateiname.");
+      fehler.push("Titel wirkt wie eine URL oder Dateiname.");
     }
 
     if (hasEmojiOrDecoration) {
-      score -= 15;
+      score -= 10;
       hinweise.push("Titel enthält dekorative Zeichen oder Emojis.");
     }
 
     if (hasManySpecials) {
-      score -= 10;
+      score -= 15;
       hinweise.push("Titel enthält viele Sonderzeichen.");
     }
 
@@ -229,7 +248,7 @@ const tests = {
       status = "check";
     }
 
-    const parts = [`Gefundener Titel: "${titleText}".`, /*`Bewertung: ${score}/100.`*/''];
+    const parts = [`Gefundener Titel: "${titleText}".`, `Wertung: ${score}/100.`];
     if (fehler.length) { parts.push("Probleme: " + fehler.join(" ")); }
     if (hinweise.length) { parts.push("Hinweise: " + hinweise.join(" ")); }
     if (status === "pass") { parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert."); }
@@ -237,64 +256,9 @@ const tests = {
     return {
       title: "Dokumenttitel prüfen",
       status,
-      content: parts.join("<br>")
+      content: `<p>${parts.join("<br>")}</p>`
     };
   },
-  
-  /*checkIds() {
-    const visible = (el) => {
-      if (!el || !el.isConnected) return false;
-      if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
-
-      const style = window.getComputedStyle(el);
-      if (
-        style.display === "none" ||
-        style.visibility === "hidden" ||
-        style.opacity === "0"
-      ) {
-        return false;
-      }
-
-      if (!el.offsetParent && style.position !== "fixed") return false;
-
-      return true;
-    };
-
-    const elementsWithId = Array.from(document.querySelectorAll("[id]")).filter(visible);
-
-    const idMap = new Map();
-    let emptyIds = 0;
-
-    elementsWithId.forEach((el) => {
-      const id = el.getAttribute("id") || "";
-
-      if (!id.trim()) {
-        emptyIds++;
-        return;
-      }
-
-      idMap.set(id, (idMap.get(id) || 0) + 1);
-    });
-
-    const duplicateIds = Array.from(idMap.entries()).filter(([, count]) => count > 1);
-    const issueCount = duplicateIds.length + emptyIds;
-
-    let status = "pass";
-    if (issueCount > 0) status = "fail";
-
-    let content = "Keine Probleme mit IDs gefunden.";
-
-    if (issueCount > 0) {
-      content =
-        `Doppelte IDs: ${duplicateIds.length}, leere IDs: ${emptyIds}.`;
-    }
-
-    return {
-      title: "Prüfe IDs",
-      status,
-      content
-    };
-  },*/
 
   checkIds() {
     const visible = (el) => {
@@ -343,11 +307,12 @@ const tests = {
     let status = "pass";
     if (issueCount > 0) status = "fail";
 
-    let content = "Keine Probleme mit IDs gefunden.";
+    let content = "<p>Keine Probleme mit IDs gefunden.</p>";
 
     if (issueCount > 0) {
       content = "";
-      content += `<p>Doppelte IDs: <strong>${duplicateIds.length}</strong>${emptyElements.length > 0 ? "</p>" : "<br>"}`;
+      content += `<p>Doppelte IDs: <strong>${duplicateIds.length}</strong><br>
+      Leere IDs: <strong>${emptyElements.length}</strong></p>`;
 
       if (duplicateIds.length > 0) {
         content += duplicateIds.map(([key, elements]) => {
@@ -361,8 +326,6 @@ const tests = {
           `;
         }).join("");
       }
-
-      content += `${emptyElements.length > 0 ? "<p>" : ""}Leere IDs: <strong>${emptyElements.length}</strong></p>`;
 
       if (emptyElements.length > 0) {
         content += `
@@ -423,10 +386,10 @@ const tests = {
     let status = "pass";
     if (affectedElements.length > 0) status = "fail";
 
-    let content = "Keine doppelten Attribute gefunden.";
+    let content = "<p>Keine doppelten Attribute gefunden.</p>";
 
     if (affectedElements.length > 0) {
-      content = `Elemente mit doppelten Attributen gefunden: ${affectedElements.length}.`;
+      content = `<p>Elemente mit doppelten Attributen gefunden: ${affectedElements.length}.</p>`;
     }
 
     return {
@@ -501,8 +464,7 @@ const tests = {
       return {
         title: "CSS-Text in Pseudo-Elementen",
         status: "pass",
-        content:
-          'Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.'
+        content: '<p>Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.</p>'
       };
     }
 
@@ -510,7 +472,7 @@ const tests = {
       title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
-        `Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:<br>
+        `<p>Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:</p>
         <ol>
           <li>
           ${results.join("</li><li>")}
@@ -2328,7 +2290,7 @@ const tests = {
 
     if (failures.length > 0) {
       status = "fail";
-    } else if (warnings.length > 0 || inspected.length === 0) {
+    } else if (warnings.length > 0) {
       status = "check";
     }
 
