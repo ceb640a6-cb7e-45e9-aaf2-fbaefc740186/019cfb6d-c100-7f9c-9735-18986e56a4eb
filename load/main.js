@@ -76,7 +76,7 @@ const tests = {
     };
   },
 
-  headingsList() {
+  /*headingsList() {
     return {
       title: "Headings list",
       status: headings.length === 0 ? "fail" : "pass",
@@ -99,9 +99,10 @@ const tests = {
           </ul>
         `
     };
-  },
+  },*/
 
-  headingJumps() {
+  /*headingJumps() {*/
+  checkHeadings() {
     const headings = [...document.querySelectorAll("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
 
