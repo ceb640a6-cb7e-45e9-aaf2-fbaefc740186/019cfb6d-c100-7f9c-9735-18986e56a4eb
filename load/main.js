@@ -2060,7 +2060,16 @@ const tests = {
       return `<ul>${items
         .map(
           (item) =>
-            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}<br>${item.cloned}</li>`
+            `<li><strong>${escapeHtml(item.message)}</strong><br>
+              Position: <code>${escapeHtml(item.path)}</code><br>
+              
+              <details class="clone">
+              <summary><p class="toggleText">Element-Vorschau anzeigen</p></summary>
+              <div class="clonedElement">
+                ${item.cloned}
+              </div>
+              </details>
+            </li>`
         )
         .join("")}</ul>`;
     }
