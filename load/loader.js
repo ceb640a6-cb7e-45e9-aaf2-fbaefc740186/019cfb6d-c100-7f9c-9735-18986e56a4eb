@@ -7,12 +7,10 @@
   const RESULTS_SORT_FAILtoPASS = true;
 
   let selectedTests = [
-    /* 1031 */ /*"headingsList",*/
     /* 1012 */ "imagesMissingAlt",
     /* 1013 */ "imagesEmptyAlt",
     /* 1244 */ "linksWithoutText",
     /* 1031 */ "oneH1",
-    /* 1031 */ /*"headingJumps",*/
     /* 1031 */ "checkHeadings",
     /* 1242 */ "pruefeDokumenttitel",
     /* 1411 */ "checkIds",
