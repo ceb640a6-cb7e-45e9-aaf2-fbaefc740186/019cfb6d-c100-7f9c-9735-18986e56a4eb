@@ -317,7 +317,6 @@ const tests = {
 
     const elementsWithId = Array.from(document.querySelectorAll("[id]")).filter(visible);
 
-    // Elemente speichern
     const idMap = new Map();
     const emptyElements = [];
 
@@ -336,7 +335,6 @@ const tests = {
       idMap.get(id).push(el);
     });
 
-    // 👉 Nur IDs mit mehr als einem Element
     const duplicateIds = Array.from(idMap.entries())
       .filter(([, elements]) => elements.length > 1);
 
@@ -348,33 +346,36 @@ const tests = {
     let content = "Keine Probleme mit IDs gefunden.";
 
     if (issueCount > 0) {
-      content = '';
-      content += `<p>Doppelte IDs: <strong>${duplicateIds.length}</strong>${(emptyElements.length > 0) ? '</p>' : '<br>'}`;
+      content = "";
+      content += `<p>Doppelte IDs: <strong>${duplicateIds.length}</strong>${emptyElements.length > 0 ? "</p>" : "<br>"}`;
+
       if (duplicateIds.length > 0) {
-        content += `${
-          Array.from(idMap, ([key, value]) => {
-          `<details class="clone">
-            <summary><p class="toggleText">Elemente anzeigen mit <code>#${key}</code></p></summary>
-            ${value.forEach(el => {
-              `<div class="clonedElement">${cloneEl(el)}</div>`
-            })}
-          </details>`
-          })
-        }`;
+        content += duplicateIds.map(([key, elements]) => {
+          return `
+            <details class="clone">
+              <summary><p class="toggleText">Elemente anzeigen mit <code>#${key}</code></p></summary>
+              ${elements.map(el => `
+                <div class="clonedElement">${cloneEl(el)}</div>
+              `).join("")}
+            </details>
+          `;
+        }).join("");
       }
-      content += `${(emptyElements.length > 0) ? '<p>' : ''}Leere IDs: <strong>${emptyElements.length}</strong></p>`;
+
+      content += `${emptyElements.length > 0 ? "<p>" : ""}Leere IDs: <strong>${emptyElements.length}</strong></p>`;
+
       if (emptyElements.length > 0) {
-        content += `${
-        `<details class="clone">
-          <summary><p class="toggleText">Elemente anzeigen mit leerer ID</code></p></summary>
-          ${emptyElements.forEach(el => {
-            `<div class="clonedElement">${cloneEl(el)}</div>`
-          })}
-        </details>`}`;
+        content += `
+          <details class="clone">
+            <summary><p class="toggleText">Elemente anzeigen mit leerer ID</p></summary>
+            ${emptyElements.map(el => `
+              <div class="clonedElement">${cloneEl(el)}</div>
+            `).join("")}
+          </details>
+        `;
       }
     }
 
-    // 👉 Falls du sie zurückgeben willst:
     return {
       title: "Prüfe IDs",
       status,
