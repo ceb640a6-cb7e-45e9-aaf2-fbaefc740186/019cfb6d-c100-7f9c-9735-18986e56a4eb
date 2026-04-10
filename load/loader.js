@@ -296,6 +296,49 @@
           ul {
             padding-left: 20px;
           }
+          
+          .clonedElement {
+            user-select: none;
+            display: inline-block;
+            pointer-events: none;
+            background: var(--white);
+            border-radius: 6px;
+            border: 2px solid var(--lighter);
+            padding: 5px 10px;
+            box-shadow: 5px 5px 15px var(--lighter)
+          }
+
+          /*https://symbolonly.com/arrow-symbols.html*/
+          summary::marker,
+          summary::-webkit-details-marker {
+            list-style: none;
+            display: none;
+          }
+
+          summary {
+            list-style: none;
+          }
+
+          details .toggleText {
+            padding-left: 20px;
+            position: relative;
+          }
+
+          details .toggleText::before {
+            content: '⮞ '; /*⮞ᐅᐳ*/
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--dark);
+          }
+
+          details[open] .toggleText::before {
+            content: '⮟ '; /*⮟ᐁᐯ*/
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--dark);
+          }
         </style>
       </head>
       <body>
@@ -325,13 +368,13 @@
         <canvas id="summary-chart" width="350" height="350"></canvas>
             
         ${results.map(r => `
-          <div class="box box-${r.status}">
-            <div class="box-header">
+          <details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
+            <summary class="box-header">
               <h2>${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
-            </div>
+            </summary>
             <div class="box-content">${r.content}</div>
-          </div>
+          </details>
         `).join("")}
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
