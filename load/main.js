@@ -1989,6 +1989,7 @@ const tests = {
       if (attr === null) {
         issues.push({
           path,
+          cloned: cloneEl(el),
           message: `Kein autocomplete-Attribut vorhanden${expected ? `; erwartet wäre z. B. "${expected}"` : ""}.`
         });
         continue;
@@ -1999,6 +2000,7 @@ const tests = {
       if (!validation.valid) {
         issues.push({
           path,
+          cloned: cloneEl(el),
           message: `Ungültiger autocomplete-Wert "${attr}" (${validation.reason}).`
         });
         continue;
@@ -2015,6 +2017,7 @@ const tests = {
       ) {
         warnings.push({
           path,
+          cloned: cloneEl(el),
           message: `Autocomplete ist gesetzt auf "${attr}", wirkt aber für dieses Feld unpassend; erwartet wäre eher "${expected}".`
         });
         continue;
@@ -2033,6 +2036,7 @@ const tests = {
 
       passes.push({
         path,
+        cloned: cloneEl(el),
         message: `Autocomplete ist vorhanden und plausibel: "${attr}".`
       });
     }
@@ -2056,26 +2060,26 @@ const tests = {
       return `<ul>${items
         .map(
           (item) =>
-            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}</li>`
+            `<li><code>${escapeHtml(item.path)}</code>: ${escapeHtml(item.message)}<br>${escapeHtml(item.cloned)}</li>`
         )
         .join("")}</ul>`;
     }
 
     let content = `
-      <p>Geprüft wurden <strong>${relevantFields.length}</strong> relevante Formularfelder.</p>
+      <p>Geprüft wurden <strong>${relevantFields.length}</strong> relevante Formularfelder auf ihre <code>autocomplete</code>-Attribute.</p>
       <p>
-        Fehler: <strong>${issues.length}</strong>,
-        Hinweise: <strong>${warnings.length}</strong>,
-        unauffällig: <strong>${passes.length}</strong>
+        Problematische Felder: <strong>${issues.length}</strong><br>
+        Zu prüfende Felder: <strong>${warnings.length}</strong><br>
+        Unauffällig Felder: <strong>${passes.length}</strong>
       </p>
     `;
 
     if (issues.length > 0) {
-      content += `<h4>Fehler</h4>${renderItems(issues)}`;
+      content += `<h4>Problematische Felder</h4>${renderItems(issues)}`;
     }
 
     if (warnings.length > 0) {
-      content += `<h4>Hinweise</h4>${renderItems(warnings)}`;
+      content += `<h4>Zu prüfende Felder</h4>${renderItems(warnings)}`;
     }
 
     if (issues.length === 0 && warnings.length === 0) {
@@ -2104,6 +2108,10 @@ function highlightEl(el) {
   el.style.border = "5px solid #f0f";
   el.style.background = "#f0f8";
   el.style.boxShadow = "0 0 10px #f0f8";
+}
+
+function cloneEl(el) {
+  return el.parentElement.outerHTML;
 }
 
 function getSelector(el) {
