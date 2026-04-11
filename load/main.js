@@ -6,6 +6,7 @@ const tests = {
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
 
     return {
+      id: 'R1012',
       title: "Bilder ohne Alt-Tag",
       status: missingAlt.length === 0 ? "pass" : "fail",
       content: missingAlt.length === 0
@@ -27,6 +28,7 @@ const tests = {
     const emptyAltImages = images.filter(img => img.hasAttribute("alt") && img.getAttribute("alt").trim() === "");
 
     return {
+      id: 'R1013',
       title: "Bilder mit leerem Alt-Tag",
       status: emptyAltImages.length === 0 ? "pass" : "check",
       content: emptyAltImages.length === 0
@@ -48,6 +50,7 @@ const tests = {
     const badLinks = links.filter(a => !a.textContent.trim() && !a.getAttribute("aria-label"));
 
     return {
+      id: 'R1244',
       title: "Links without text",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
@@ -66,6 +69,7 @@ const tests = {
   oneH1() {
     const count = document.querySelectorAll('h1').length;
     return {
+      id: 'R1031',
       title: "Only one H1",
       status: (count === 1) ? "pass" : "fail",
       content: (count === 1)
@@ -131,6 +135,7 @@ const tests = {
         `
 
     return {
+      id: 'R1031',
       title: "Heading hierarchy jumps",
       status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
       content: `${headingJumps_content}${headingList_content}`
@@ -156,6 +161,7 @@ const tests = {
 
     if (isEmpty) {
       return {
+        id: 'R1242',
         title: "Dokumenttitel prüfen",
         status: "fail",
         content: "<p>Kein Dokumenttitel vorhanden.</p>"
@@ -227,6 +233,7 @@ const tests = {
     if (status === "pass") { parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert."); }
 
     return {
+      id: 'R1242',
       title: "Dokumenttitel prüfen",
       status,
       content: `<p>${parts.join("<br>")}</p>`
@@ -313,6 +320,7 @@ const tests = {
     }
 
     return {
+      id: 'R1411',
       title: "Prüfe IDs",
       status,
       content
@@ -366,6 +374,7 @@ const tests = {
     }
 
     return {
+      id: 'R1411',
       title: "Doppelte Attribute",
       status,
       content
@@ -435,6 +444,7 @@ const tests = {
 
     if (results.length === 0) {
       return {
+        id: 'R1034',
         title: "CSS-Text in Pseudo-Elementen",
         status: "pass",
         content: '<p>Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.</p>'
@@ -442,6 +452,7 @@ const tests = {
     }
 
     return {
+      id: 'R1034',
       title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
@@ -596,7 +607,8 @@ const tests = {
       })
       .join("<br>");
 
-    return {
+      return {
+      id: 'R1241',
       title: "Landmarken",
       status,
       content: `
@@ -818,6 +830,7 @@ const tests = {
 
     if (!issues.length) {
       return {
+        id: 'R6035',
         title: "Struktur sichtbarer Tabellen prüfen",
         status: "pass",
         content: visibleTables.length
@@ -847,6 +860,7 @@ const tests = {
     `;
 
     return {
+      id: 'R6035',
       title: "Struktur sichtbarer Tabellen prüfen",
       status: "fail",
       content: html
@@ -969,6 +983,7 @@ const tests = {
 
     if (!issues.length) {
       return {
+        id: 'R6035',
         title: "Visuell transparente Tabellen prüfen",
         status: "pass",
         content: transparentTables.length
@@ -998,6 +1013,7 @@ const tests = {
     `;
 
     return {
+      id: 'R6035',
       title: "Visuell transparente Tabellen prüfen",
       status: "fail",
       content: html
@@ -1024,6 +1040,7 @@ const tests = {
     }
 
     return {
+      id: 'R1311',
       title: "lang-Attribut prüfen",
       status,
       content
@@ -1055,6 +1072,7 @@ const tests = {
 
     if (leereElemente.length === 0) {
       return {
+        id: 'R8010',
         title: "Leere Tags ohne Attribute",
         status: "pass",
         content: `<p>Es wurden keine leeren Tags ohne Attribute gefunden.</p>`
@@ -1097,6 +1115,7 @@ const tests = {
       .join("");
 
     return {
+      id: 'R8010',
       title: "Leere Tags ohne Attribute",
       status: "check",
       content: `
@@ -1515,6 +1534,7 @@ const tests = {
       : "";
 
     return {
+      id: 'R8020',
       title: "Links sollen sich durch mehr als nur die Textfarbe von anderem Text abheben",
       status: overallStatus,
       content: `
@@ -1741,6 +1761,7 @@ const tests = {
     }
 
     return {
+      id: 'R1032',
       title: "Listenstruktur prüfen",
       status,
       content
@@ -2286,6 +2307,7 @@ const tests = {
     }
 
     return {
+      id: 'R2135',
       title: "Autocomplete-Attribute prüfen",
       status: status,
       content: content
