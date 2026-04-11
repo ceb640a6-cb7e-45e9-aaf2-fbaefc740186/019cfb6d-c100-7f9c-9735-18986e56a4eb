@@ -59,6 +59,7 @@
 
       if (typeof fn !== "function") {
         results.push({
+          id: `Error`,
           title: `Missing test: ${name}`,
           status: "fail",
           content: "This test name was configured in loader.js but not found in main.js."
@@ -70,12 +71,14 @@
         const result = fn();
 
         results.push({
+          id: result?.id || name,
           title: result?.title || name,
           status: normalizeStatus(result?.status),
           content: result?.content || ""
         });
       } catch (err) {
         results.push({
+          id: `Error`,
           title: `Error in test: ${name}`,
           status: "fail",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
