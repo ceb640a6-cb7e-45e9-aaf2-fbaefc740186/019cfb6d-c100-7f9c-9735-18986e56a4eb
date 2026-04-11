@@ -385,7 +385,10 @@
               <h2 class="toggleText">${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </summary>
-            <div class="box-content">${r.content}</div>
+            <div class="box-content"
+              ${r.content}
+              <small class="reqId">${escapeHtml(r.id)}</small>
+            </div>
           </details>
         `).join("")}
 
