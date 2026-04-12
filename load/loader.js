@@ -269,7 +269,7 @@
             border: 3px solid var(--light);
             border-radius: 8px;
             padding: 16px;
-            margin-bottom: 16px;
+            margin: 16px;
           }
 
           .box-header {
