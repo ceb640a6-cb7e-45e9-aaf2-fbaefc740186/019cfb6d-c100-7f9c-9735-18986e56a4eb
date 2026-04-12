@@ -5,7 +5,7 @@
 
   const RESULTS_SORT_AtoZ = true;
   const RESULTS_SORT_FAILtoPASS = true;
-
+  /*random comment*/
   let selectedTests = [
     /* 1012 */ "imagesMissingAlt",
     /* 1013 */ "imagesEmptyAlt",

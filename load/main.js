@@ -4,7 +4,7 @@ const tests = {
   imagesMissingAlt() {
     const images = [...document.querySelectorAll("img")];
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
-
+    /*random comment*/
     return {
       id: 'R1012',
       title: "Bilder ohne Alt-Tag",
