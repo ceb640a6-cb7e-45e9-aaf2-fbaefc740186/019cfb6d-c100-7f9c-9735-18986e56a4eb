@@ -496,8 +496,8 @@
       .replaceAll("'", "&#039;");
   }
 
-  /*function getRootVar(str) {
-    return window.getComputedStyle(document.body).getPropertyValue(str);
+  /*function getRootVar(cssVar) {
+    return window.getComputedStyle(document.body).getPropertyValue(cssVar);
   }*/
 
   async function init() {
