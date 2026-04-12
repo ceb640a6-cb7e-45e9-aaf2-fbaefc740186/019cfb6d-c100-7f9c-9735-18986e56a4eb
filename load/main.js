@@ -830,7 +830,7 @@ const tests = {
 
     if (!issues.length) {
       return {
-        id: 'R6035',
+        id: 'R1035',
         title: "Struktur sichtbarer Tabellen prüfen",
         status: "pass",
         content: visibleTables.length
@@ -860,7 +860,7 @@ const tests = {
     `;
 
     return {
-      id: 'R6035',
+      id: 'R1035',
       title: "Struktur sichtbarer Tabellen prüfen",
       status: "fail",
       content: html
@@ -983,7 +983,7 @@ const tests = {
 
     if (!issues.length) {
       return {
-        id: 'R6035',
+        id: 'R1037',
         title: "Visuell transparente Tabellen prüfen",
         status: "pass",
         content: transparentTables.length
@@ -1013,7 +1013,7 @@ const tests = {
     `;
 
     return {
-      id: 'R6035',
+      id: 'R1037',
       title: "Visuell transparente Tabellen prüfen",
       status: "fail",
       content: html
@@ -2311,6 +2311,86 @@ const tests = {
       title: "Autocomplete-Attribute prüfen",
       status: status,
       content: content
+    };
+  },
+
+  pruefeLabelInName() {
+    const elements = document.querySelectorAll(`
+      button,
+      a[href],
+      input[type="button"],
+      input[type="submit"],
+      input[type="reset"]
+    `);
+
+    const issues = [];
+
+    elements.forEach((el) => {
+      const visibleText = (el.innerText || el.value || "").trim();
+
+      let accessibleName = "";
+
+      if (el.hasAttribute("aria-label")) {
+        accessibleName = el.getAttribute("aria-label").trim();
+      } else if (el.hasAttribute("aria-labelledby")) {
+        const ids = el.getAttribute("aria-labelledby").split(/\s+/);
+        accessibleName = ids
+          .map((id) => document.getElementById(id)?.innerText || "")
+          .join(" ")
+          .trim();
+      } else if (el.alt) {
+        accessibleName = el.alt.trim();
+      } else {
+        accessibleName = visibleText;
+      }
+
+      if (visibleText) {
+        const visibleLower = visibleText.toLowerCase();
+        const accessibleLower = accessibleName.toLowerCase();
+
+        if (!accessibleLower.includes(visibleLower)) {
+          issues.push({
+            el: el,
+            tagName: el.tagName.toLowerCase(),
+            visibleText,
+            accessibleName: accessibleName || "(leer)"
+          });
+        }
+      }
+    });
+
+    if (issues.length === 0) {
+      return {
+        title: "Sichtbare Beschriftung im Namen",
+        status: "pass",
+        content: "Es wurden keine Probleme mit zugänglichen Namen in Bedienelementen erkannt oder gefunden."
+      };
+    }
+
+    const listItems = issues
+      .map((issue) => `
+        <li>
+          <strong>Element:</strong> &lt;${issue.tagName}&gt;<br>
+          <strong>Sichtbare Beschriftung:</strong> ${escapeHtml(issue.visibleText)}<br>
+          <strong>Zugänglicher Name:</strong> ${escapeHtml(issue.accessibleName)}
+
+          <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(issue.el)}</div>
+            </details>
+        </li>
+      `)
+    .join("");
+
+    return {
+      title: "Sichtbare Beschriftung im Namen",
+      status: "fail",
+      content: `
+        <p>Es wurden ${issues.length} Problem(e) gefunden:</p>
+        <ol>
+          ${listItems}
+        </ol>
+      `
     };
   }
 
