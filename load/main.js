@@ -73,8 +73,8 @@ const tests = {
       title: "Only one H1",
       status: (count === 1) ? "pass" : "fail",
       content: (count === 1)
-        ? `Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong>`
-        : ((count <= 0) ? "This page has no heading h1." : 'This page has more than one h1 heading.')
+        ? `<p>Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
+        : ((count <= 0) ? "<p>This page has no heading h1.</p>" : '<p>This page has more than one h1 heading.</p>')
     };
   },
 
