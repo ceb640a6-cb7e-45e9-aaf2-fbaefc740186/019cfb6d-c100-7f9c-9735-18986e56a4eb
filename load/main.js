@@ -59,7 +59,13 @@ const tests = {
           <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
           <ul>
             ${badLinks.slice(0, 20).map(a => `
-              <li>${escapeHtml(a.outerHTML.slice(0, 200))}</li>
+              <li>${escapeHtml(a.outerHTML.slice(0, 200))}<br>
+              Position: ${getDomPath(a)}<br>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(a)}</div>
+              </details>
+              </li>
             `).join("")}
           </ul>
         `
@@ -603,9 +609,9 @@ const tests = {
       }
     }
 
-    if (messages.length === 0) {
+    /*if (messages.length === 0) {
       messages.push("Die geprüften Landmarken wurden in sinnvoller Form gefunden.");
-    }
+    }*/
 
     const summaryList = details
       .map((item) => {
@@ -618,13 +624,21 @@ const tests = {
       })
       .join("<br>");
 
+      const noIssues = (messages.length === 0);
+      let msgOutput = "<p>Die geprüften Landmarken wurden in sinnvoller Form gefunden.</p>";
+      let msgOutHead = 'Keine Probleme';
+      if (status === "check") msgOutHead = 'Anmerkungen';
+      if (status === "fail") msgOutHead = 'Probleme';
+      if (!noIssues) {
+        msgOutput = `<p><strong>${summaryList}</strong></p><ul>${messages.map((msg) => `<li>${msg}</li>`).join("")}</ul>`;
+      }
+
       return {
       id: 'R1241',
       title: "Landmarken",
       status,
       content: `
-        ${messages.map((msg) => `<div>${msg}</div>`).join("")}
-        <div style="margin-top:8px;"><p>${summaryList}</p></div>
+        <p>${summaryList}</p>${msgOutput}
       `
     };
   },
@@ -1485,29 +1499,30 @@ const tests = {
       };
 
       const rows = Object.entries(x.diff)
-        .filter(([, v]) => v && String(v.link) !== String(v.context))
-        .map(([key, v]) => `
-          <div style="margin-top:4px;">
-            <p><b>${escapeHtml(labels[key] || key)}:</b>
-            Text = <code>${escapeHtml(v.context || "(leer)")}</code>
-            → Link = <code>${escapeHtml(v.link || "(leer)")}</code></p>
-          </div>
-        `)
-        .join("");
+      .filter(([, v]) => v && String(v.link) !== String(v.context))
+      .map(([key, v]) => `
+          <b>${escapeHtml(labels[key] || key)}:</b>
+          Text = <code>${escapeHtml(v.context || "(leer)")}</code>
+          → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
+      `)
+      .join("<br>");
 
-      return rows || '';
+      let returnRows = false;
+      if (rows) returnRows = true;
+      rows = `<p>${rows}</p>`;
+      return (returnRows ? rows : '');
     };
 
     const renderItem = (x, i) => {
       return `
         <li>
-          <b>${escapeHtml(x.text)}</b><br>
+          <p><b>${escapeHtml(x.text)}</b><br>
           ${escapeHtml(x.reason)}<br>
           Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
           Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b><br>` : ""}
-          ${renderDiffs(x)}<br>
-          Position: <code>${escapeHtml(x.path)}</code>
+          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}<br>
+          Position: <code>${escapeHtml(x.path)}</code></p>
+          ${renderDiffs(x)}
 
           <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
@@ -1534,11 +1549,9 @@ const tests = {
     `;
 
     const failHtml = fails.length
-      ? `
-        <ol>
+      ? `<ol>
           ${fails.map(renderItem).join("")}
-        </ol>
-      `
+        </ol>`
       : "";
 
     const emptyHtml = !fails.length
