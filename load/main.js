@@ -67,14 +67,20 @@ const tests = {
   },
 
   oneH1() {
-    const count = document.querySelectorAll('h1').length;
+    const heads = [...document.querySelectorAll('h1')];
     return {
       id: 'R1031',
       title: "Only one H1",
-      status: (count === 1) ? "pass" : "fail",
-      content: (count === 1)
+      status: (heads.length === 1) ? "pass" : "fail",
+      content: (heads.length === 1)
         ? `<p>Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
-        : ((count <= 0) ? "<p>This page has no heading h1.</p>" : '<p>This page has more than one h1 heading.</p>')
+        : ((heads.length <= 0) ? "<p>This page has no heading h1.</p>" : `<p>This page has ${heads.length} h1 headings.</p>
+        <ol>
+        ${heads.map(el => `
+          <li>${el.textContent}</li>
+        `).join("")}
+        </ol>
+        `)
     };
   },
 
@@ -126,7 +132,7 @@ const tests = {
             ${jumps.slice(0, 20).map((jump, i) => `
               <li>
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
-                ${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")} zu ${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}<br>
+                <strong>${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")}</strong> zu <strong>${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}</strong><br>
                 In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
               </li>
             `).join("")}
@@ -138,7 +144,12 @@ const tests = {
       id: 'R1031',
       title: "Heading hierarchy jumps",
       status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
-      content: `${headingJumps_content}${headingList_content}`
+      content: `${headingJumps_content}
+        <details>
+          <summary><p class="toggleText">Alle ${headings.length} Überschriften anzeigen</code></p></summary>
+          ${headingList_content}
+        </details>
+      `
     };
   },
 
@@ -841,7 +852,7 @@ const tests = {
 
     const html = `
       <p>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b><br>
-      Gefundene Probleme: <b>${issues.length}</b></p>
+      Gefundene Probleme: <b>${issues.length}</b></p><ol>
         ${issues
           .map(
             (item, index) => `
@@ -856,7 +867,7 @@ const tests = {
               </li>
             `
           )
-        .join("")}
+        .join("")}</ol>
     `;
 
     return {
@@ -994,7 +1005,7 @@ const tests = {
 
     const html = `
       <p>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b><br>
-      Gefundene Probleme: <b>${issues.length}</b></p>
+      Gefundene Probleme: <b>${issues.length}</b></p><ol>
         ${issues
           .map(
             (item, index) => `
@@ -1009,7 +1020,7 @@ const tests = {
               </li>
             `
           )
-        .join("")}
+        .join("")}</ol>
     `;
 
     return {
@@ -1490,13 +1501,18 @@ const tests = {
     const renderItem = (x, i) => {
       return `
         <li>
-          <p><b>${escapeHtml(x.text)}</b></p>
-          <p>${escapeHtml(x.reason)}</p>
-          <p>Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
+          <b>${escapeHtml(x.text)}</b><br>
+          ${escapeHtml(x.reason)}<br>
+          Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
           Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b></p>` : ""}
-          ${renderDiffs(x)}
-          <p>Position: <code>${escapeHtml(x.path)}</code></p>
+          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b><br>` : ""}
+          ${renderDiffs(x)}<br>
+          Position: <code>${escapeHtml(x.path)}</code>
+
+          <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</code></p></summary>
+              <div class="clonedElement">${cloneEl(x.el)}</div>
+            </details>
         </li>
       `;
     };
@@ -1512,25 +1528,21 @@ const tests = {
 
     const summaryHtml = `
       <p>Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.</p>
-      <div style="margin-top:8px;">
-        <p>Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
-        Textlinks im Fließtext: <b>${inlineLinks.length}</b><br>
-        Problematische Links: <b>${fails.length}</b></p>
-      </div>
+      <p>Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
+      Textlinks im Fließtext: <b>${inlineLinks.length}</b><br>
+      Problematische Links: <b>${fails.length}</b></p>
     `;
 
     const failHtml = fails.length
       ? `
-        <div style="margin-top:12px;">
-          <ol>
-            ${fails.map(renderItem).join("")}
-          </ol>
-        </div>
+        <ol>
+          ${fails.map(renderItem).join("")}
+        </ol>
       `
       : "";
 
     const emptyHtml = !fails.length
-      ? `<div style="margin-top:8px;"><p>Es wurden keine problematischen Inline-Links im Fließtext gefunden.</p></div>`
+      ? `<p>Es wurden keine problematischen Inline-Links im Fließtext gefunden.</p>`
       : "";
 
     return {
@@ -2361,6 +2373,7 @@ const tests = {
 
     if (issues.length === 0) {
       return {
+        id: 'R1253',
         title: "Sichtbare Beschriftung im Namen",
         status: "pass",
         content: "Es wurden keine Probleme mit zugänglichen Namen in Bedienelementen erkannt oder gefunden."
@@ -2383,6 +2396,7 @@ const tests = {
     .join("");
 
     return {
+      id: 'R1253',
       title: "Sichtbare Beschriftung im Namen",
       status: "fail",
       content: `
