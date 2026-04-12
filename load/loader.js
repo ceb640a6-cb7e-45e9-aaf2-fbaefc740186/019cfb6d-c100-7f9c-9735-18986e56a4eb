@@ -17,13 +17,14 @@
     /* 1411 */ "checkDuplicateAttributes",
     /* 1034 */ "textFromCSS",
     /* 1241 */ "checkLandmarks",
-    /* 6035 */ "pruefeSichtbareTabellen",
-    /* 6035 */ "pruefeTransparenteTabellen",
+    /* 1035 */ "pruefeSichtbareTabellen",
+    /* 1037 */ "pruefeTransparenteTabellen",
     /* 1311 */ "pruefeLangAttribut",
     /* 8010 */ "findeKomplettLeereTags",
     /* 8020 */ "pruefeLinksImFliesstext",
     /* 1032 */ "pruefeListenStruktur",
-    /* 2135 */ "pruefeAutocompleteAttribute"
+    /* 2135 */ "pruefeAutocompleteAttribute",
+    /* 1253 */ "pruefeLabelInName"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
@@ -122,9 +123,43 @@
     if (totalRating <= 0.4) ratingColor = 'fail';
     const ratingOutput = (totalRating*100).toFixed(0);
 
+    (async () => {
+      function load(src) {
+        return new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.onload = res;
+          s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+
+      // Load html2canvas if needed
+      if (!window.html2canvas) {
+        await load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+      }
+
+      // Render page
+      const canvas = await html2canvas(document.body, {
+        useCORS: true,
+        scale: 1
+      });
+
+      const src = canvas.toDataURL('image/jpeg', 0.8);
+      try {
+        await navigator.clipboard.writeText(src);
+        console.log("Copied src to clipboard!");
+      } catch (e) {
+        console.warn("Clipboard copy failed:", e);
+      }
+
+      // 3. Return it
+      return src;
+    })();
+
     const html = `
       <!doctype html>
-      <html lang="en">
+      <html lang="de">
       <head>
         <meta charset="UTF-8" />
         <title>Page Analysis Report</title>
