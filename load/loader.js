@@ -61,6 +61,7 @@
       if (typeof fn !== "function") {
         results.push({
           id: `Error`,
+          reqLink: 'No link',
           title: `Missing test: ${name}`,
           status: "fail",
           content: "This test name was configured in loader.js but not found in main.js."
@@ -73,6 +74,7 @@
 
         results.push({
           id: result?.id || name,
+          reqLink: result?.reqLink || 'No link',
           title: result?.title || name,
           status: normalizeStatus(result?.status),
           content: result?.content || ""
@@ -80,6 +82,7 @@
       } catch (err) {
         results.push({
           id: `Error`,
+          reqLink: 'No link',
           title: `Error in test: ${name}`,
           status: "fail",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
@@ -425,7 +428,8 @@
             </summary>
             <div class="box-content">
               ${r.content}
-              <small class="reqId">${escapeHtml(r.id)}</small>
+              <small class="reqId">${escapeHtml(r.id)}</small><br>
+              <a class="reqLink">${escapeHtml(r.reqLink)}</a>
             </div>
           </details>
         `).join("")}
