@@ -429,7 +429,7 @@
             <div class="box-content">
               ${r.content}
               <small class="reqId">${escapeHtml(r.id)}</small><br>
-              <a class="reqLink">${escapeHtml(r.reqLink)}</a>
+              <a class="reqLink" href="${escapeHtml(r.reqLink)}">${escapeHtml(r.reqLink)}</a>
             </div>
           </details>
         `).join("")}
