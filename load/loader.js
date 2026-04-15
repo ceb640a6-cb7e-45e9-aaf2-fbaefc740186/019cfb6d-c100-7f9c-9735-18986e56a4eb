@@ -61,7 +61,7 @@
       if (typeof fn !== "function") {
         results.push({
           id: `Error`,
-          reqLink: 'No link',
+          reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
           title: `Missing test: ${name}`,
           status: "fail",
           content: "This test name was configured in loader.js but not found in main.js."
@@ -74,7 +74,7 @@
 
         results.push({
           id: result?.id || name,
-          reqLink: result?.reqLink || 'No link',
+          reqLink: result?.reqLink || ['https://www.geogebra.org/calculator', 'Link-Text'],
           title: result?.title || name,
           status: normalizeStatus(result?.status),
           content: result?.content || ""
@@ -82,7 +82,7 @@
       } catch (err) {
         results.push({
           id: `Error`,
-          reqLink: 'No link',
+          reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
           title: `Error in test: ${name}`,
           status: "fail",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
@@ -429,7 +429,7 @@
             <div class="box-content">
               ${r.content}
               <small class="reqId">${escapeHtml(r.id)}</small><br>
-              <a class="reqLink" href="${escapeHtml(r.reqLink)}">${escapeHtml(r.reqLink)}</a>
+              <a class="reqLink" href="${escapeHtml(r.reqLink[0])}">${escapeHtml(r.reqLink[1])}</a>
             </div>
           </details>
         `).join("")}
