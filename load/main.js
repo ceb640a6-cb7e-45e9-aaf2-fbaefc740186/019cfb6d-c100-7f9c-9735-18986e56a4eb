@@ -2443,6 +2443,469 @@ const tests = {
         </ol>
       `
     };
+  },
+
+  pruefeFormularBeschriftungen() {
+    const selector = [
+      'input:not([type="hidden"]):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"])',
+      'select',
+      'textarea'
+    ].join(',');
+
+    const elements = Array.from(document.querySelectorAll(selector));
+
+    function isElementVisible(el) {
+      if (!el || !(el instanceof Element)) return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        style.visibility === 'collapse' ||
+        parseFloat(style.opacity) === 0
+      ) {
+        return false;
+      }
+
+      if (el.hidden || el.getAttribute('aria-hidden') === 'true') {
+        return false;
+      }
+
+      const rects = el.getClientRects();
+      return rects.length > 0;
+    }
+
+    function isTextNodeVisible(textNode) {
+      if (!textNode || !textNode.textContent || !textNode.textContent.trim()) {
+        return false;
+      }
+
+      const parent = textNode.parentElement;
+      if (!parent || !isElementVisible(parent)) {
+        return false;
+      }
+
+      const range = document.createRange();
+      range.selectNodeContents(textNode);
+
+      const rects = range.getClientRects();
+      return rects.length > 0;
+    }
+
+    function getVisibleTextFromElement(el) {
+      if (!el || !isElementVisible(el)) return '';
+
+      const walker = document.createTreeWalker(
+        el,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            return node.textContent.trim()
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT;
+          }
+        }
+      );
+
+      const parts = [];
+      let node;
+
+      while ((node = walker.nextNode())) {
+        if (isTextNodeVisible(node)) {
+          parts.push(node.textContent.trim());
+        }
+      }
+
+      return parts.join(' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function getLabelByFor(el) {
+      if (!el.id) return null;
+
+      const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+      if (!label) return null;
+
+      const text = getVisibleTextFromElement(label);
+      if (!text) return null;
+
+      return {
+        type: 'label[for]',
+        text,
+        source: label
+      };
+    }
+
+    function getWrappingLabel(el) {
+      const label = el.closest('label');
+      if (!label) return null;
+
+      const text = getVisibleTextFromElement(label);
+      if (!text) return null;
+
+      return {
+        type: 'wrapping label',
+        text,
+        source: label
+      };
+    }
+
+    function getAriaLabelledby(el) {
+      const value = el.getAttribute('aria-labelledby');
+      if (!value) return null;
+
+      const ids = value.trim().split(/\s+/).filter(Boolean);
+      const texts = [];
+      const sources = [];
+
+      ids.forEach((id) => {
+        const ref = document.getElementById(id);
+        if (!ref) return;
+
+        const text = getVisibleTextFromElement(ref);
+        if (!text) return;
+
+        texts.push(text);
+        sources.push(ref);
+      });
+
+      if (!texts.length) return null;
+
+      return {
+        type: 'aria-labelledby',
+        text: texts.join(' ').replace(/\s+/g, ' ').trim(),
+        source: sources[0]
+      };
+    }
+
+    function getNearbyVisibleText(el) {
+      const candidates = [];
+
+      if (el.parentElement) candidates.push(el.parentElement);
+
+      const prev = el.previousElementSibling;
+      if (prev) candidates.push(prev);
+
+      let current = el.parentElement;
+      let depth = 0;
+      while (current && depth < 2) {
+        const possible = current.querySelector('legend');
+        if (possible) candidates.push(possible);
+        current = current.parentElement;
+        depth++;
+      }
+
+      for (const candidate of candidates) {
+        const text = getVisibleTextFromElement(candidate);
+        if (!text) continue;
+
+        const cleaned = text.replace(/\s+/g, ' ').trim();
+        if (cleaned && cleaned.length <= 200) {
+          return {
+            type: 'nearby text',
+            text: cleaned,
+            source: candidate
+          };
+        }
+      }
+
+      return null;
+    }
+
+    function getVisibleLabelInfo(el) {
+      return (
+        getLabelByFor(el) ||
+        getWrappingLabel(el) ||
+        getAriaLabelledby(el) ||
+        getNearbyVisibleText(el)
+      );
+    }
+
+    function getElementDescription(el) {
+      const tag = el.tagName.toLowerCase();
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      const name = el.getAttribute('name') || '';
+      const id = el.id || '';
+
+      let desc = `<code>${escapeHtml(tag)}${type ? `[type="${escapeHtml(type)}"]` : ''}</code>`;
+      if (id) desc += `, id="<code>${escapeHtml(id)}</code>"`;
+      if (name) desc += `, name="<code>${escapeHtml(name)}</code>"`;
+
+      return desc;
+    }
+
+    const relevantElements = elements.filter(isElementVisible);
+    const issues = [];
+    const warnings = [];
+    const passes = [];
+
+    relevantElements.forEach((el) => {
+      const labelInfo = getVisibleLabelInfo(el);
+      const domPath = getDomPath(el);
+      const elementDesc = getElementDescription(el);
+
+      if (!labelInfo) {
+        issues.push(`
+          <li>
+            ${elementDesc}<br>
+            Pfad: <code>${escapeHtml(domPath)}</code><br>
+            Problem: Keine sichtbare Beschriftung gefunden.
+          </li>
+        `);
+        return;
+      }
+
+      const hasProgrammaticAssociation =
+        labelInfo.type === 'label[for]' ||
+        labelInfo.type === 'wrapping label' ||
+        labelInfo.type === 'aria-labelledby';
+
+      if (!hasProgrammaticAssociation) {
+        warnings.push(`
+          <li>
+            ${elementDesc}<br>
+            Pfad: <code>${escapeHtml(domPath)}</code><br>
+            Gefundene sichtbare Beschriftung: "${escapeHtml(labelInfo.text)}"<br>
+            Hinweis: Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.
+          </li>
+        `);
+        return;
+      }
+
+      passes.push(`
+        <li>
+          ${elementDesc}<br>
+          Pfad: <code>${escapeHtml(domPath)}</code><br>
+          Beschriftung: "${escapeHtml(labelInfo.text)}" (${escapeHtml(labelInfo.type)})
+        </li>
+      `);
+    });
+
+    if (!relevantElements.length) {
+      return {
+        id: 'R1332',
+        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        title: "Sichtbare Beschriftungen von Formularelementen",
+        status: "check",
+        content: "Es wurden keine sichtbaren relevanten Formularelemente gefunden."
+      };
+    }
+
+    let status = "pass";
+    if (issues.length) {
+      status = "fail";
+    } else if (warnings.length) {
+      status = "check";
+    }
+
+    const summary = `
+      <p>
+        Geprüfte sichtbare Formularelemente: <strong>${relevantElements.length}</strong><br>
+        Mit sichtbarer und technisch zugeordneter Beschriftung: <strong>${passes.length}</strong><br>
+        Manuell prüfen: <strong>${warnings.length}</strong><br>
+        Ohne erkennbare sichtbare Beschriftung: <strong>${issues.length}</strong>
+      </p>
+    `;
+
+    const details = `
+      ${issues.length ? `<h4>Nicht bestanden</h4><ul>${issues.join('')}</ul>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen</h4><ul>${warnings.join('')}</ul>` : ''}
+      ${passes.length ? `<h4>Bestanden</h4><ul>${passes.join('')}</ul>` : ''}
+    `;
+
+    return {
+      id: 'R1332',
+      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      title: "Sichtbare Beschriftungen von Formularelementen",
+      status,
+      content: summary + details
+    };
+  },
+
+  pruefeUnzugeordneteBeschriftungen() {
+    const formSelector = 'input, select, textarea';
+
+    function isElementVisible(el) {
+      if (!el || !(el instanceof Element)) return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        parseFloat(style.opacity) === 0
+      ) {
+        return false;
+      }
+
+      if (el.hidden || el.getAttribute('aria-hidden') === 'true') {
+        return false;
+      }
+
+      return el.getClientRects().length > 0;
+    }
+
+    function getVisibleText(el) {
+      if (!el || !isElementVisible(el)) return '';
+      return (el.innerText || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function isFormControl(el) {
+      return el.matches(formSelector);
+    }
+
+    function hasNestedFormControl(label) {
+      return !!label.querySelector(formSelector);
+    }
+
+    function getLabelAssociation(label) {
+      // Fall 1: for-Attribut
+      const forId = label.getAttribute('for');
+      if (forId) {
+        const target = document.getElementById(forId);
+        if (target && isFormControl(target)) {
+          return {
+            type: 'for',
+            valid: true,
+            target
+          };
+        } else {
+          return {
+            type: 'for',
+            valid: false,
+            target: null
+          };
+        }
+      }
+
+      // Fall 2: verschachteltes Input
+      if (hasNestedFormControl(label)) {
+        return {
+          type: 'nested',
+          valid: true,
+          target: label.querySelector(formSelector)
+        };
+      }
+
+      return {
+        type: 'none',
+        valid: false,
+        target: null
+      };
+    }
+
+    // klassische Labels
+    const labels = Array.from(document.querySelectorAll('label'));
+
+    // "label-ähnliche" Elemente (optional heuristisch)
+    const pseudoLabels = Array.from(
+      document.querySelectorAll('[class*="label"], .control-label, [aria-labelledby]')
+    ).filter(el => el.tagName.toLowerCase() !== 'label');
+
+    const issues = [];
+    const warnings = [];
+    const passes = [];
+
+    function describe(el) {
+      const tag = el.tagName.toLowerCase();
+      const cls = el.className ? ` class="${escapeHtml(el.className)}"` : '';
+      return `<code>${tag}${cls}</code>`;
+    }
+
+    // 🔍 echte <label>
+    labels.forEach(label => {
+      if (!isElementVisible(label)) return;
+
+      const text = getVisibleText(label);
+      if (!text) return;
+
+      const assoc = getLabelAssociation(label);
+      const domPath = getDomPath(label);
+
+      if (!assoc.valid) {
+        issues.push(`
+          <li>
+            ${describe(label)}<br>
+            Pfad: <code>${escapeHtml(domPath)}</code><br>
+            Text: "${escapeHtml(text)}"<br>
+            Problem: Label ist keinem Formularfeld korrekt zugeordnet.
+          </li>
+        `);
+        return;
+      }
+
+      passes.push(`
+        <li>
+          ${describe(label)}<br>
+          Pfad: <code>${escapeHtml(domPath)}</code><br>
+          Beschriftet ein Formularfeld (${assoc.type})
+        </li>
+      `);
+    });
+
+    // 🔍 pseudo Labels (z. B. dein Beispiel)
+    pseudoLabels.forEach(el => {
+      if (!isElementVisible(el)) return;
+
+      const text = getVisibleText(el);
+      if (!text) return;
+
+      const domPath = getDomPath(el);
+
+      // Prüfe, ob irgendein Input referenziert wird
+      const id = el.id;
+      let referenced = false;
+
+      if (id) {
+        const refs = document.querySelectorAll(`[aria-labelledby~="${CSS.escape(id)}"]`);
+        if (refs.length) referenced = true;
+      }
+
+      // Prüfe, ob direkt daneben ein Input ist (heuristisch)
+      const nearbyInput =
+        el.nextElementSibling && isFormControl(el.nextElementSibling);
+
+      if (!referenced && !nearbyInput) {
+        warnings.push(`
+          <li>
+            ${describe(el)}<br>
+            Pfad: <code>${escapeHtml(domPath)}</code><br>
+            Text: "${escapeHtml(text)}"<br>
+            Hinweis: Sieht aus wie eine Beschriftung, ist aber keinem Formularfeld technisch zugeordnet.
+          </li>
+        `);
+      }
+    });
+
+    const total = labels.length;
+
+    let status = "pass";
+    if (issues.length) {
+      status = "fail";
+    } else if (warnings.length) {
+      status = "check";
+    }
+
+    const summary = `
+      <p>
+        Gefundene Labels: <strong>${total}</strong><br>
+        Korrekt zugeordnet: <strong>${passes.length}</strong><br>
+        Problematische Labels: <strong>${issues.length}</strong><br>
+        Verdächtige Beschriftungen: <strong>${warnings.length}</strong>
+      </p>
+    `;
+
+    const details = `
+      ${issues.length ? `<h4>Nicht korrekt zugeordnet</h4><ul>${issues.join('')}</ul>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen (visuelle Beschriftungen ohne Technik)</h4><ul>${warnings.join('')}</ul>` : ''}
+      ${passes.length ? `<h4>Korrekte Labels</h4><ul>${passes.join('')}</ul>` : ''}
+    `;
+
+    return {
+      id: 'R1332',
+      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      title: "Zuordnung von Beschriftungen zu Formularfeldern",
+      status,
+      content: summary + details
+    };
   }
 
 };
