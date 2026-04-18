@@ -1517,7 +1517,7 @@ const tests = {
         boxShadow: "Box Shadow"
       };
 
-      const rows = Object.entries(x.diff)
+      let rows = Object.entries(x.diff)
       .filter(([, v]) => v && String(v.link) !== String(v.context))
       .map(([key, v]) => `
           <b>${escapeHtml(labels[key] || key)}:</b>
@@ -2637,7 +2637,7 @@ const tests = {
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(label)}</div>
+              <div class="clonedElement">${cloneEl(el)}</div>
             </details>
           </li>
         `);
