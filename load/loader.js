@@ -146,6 +146,12 @@
             --daker: #343a40;
             --black: #212529;
 
+            --link-white: #e7f5ff;
+            --link-light: #74c0fc;
+            --link: #339af0;
+            --link-dark: #1c7ed6;
+            --link-black: #1864ab;
+
             --pass-white: #e6fcf5;
             --pass-light: #63e6be;
             --pass: #20c997;
@@ -175,7 +181,7 @@
             font-family: Arial, sans-serif;
             line-height: 1.5;
             margin: 0;
-            padding: 24px;
+            padding: 30px 20px;
             background: var(--lighter);
             color: var(--black);
           }
@@ -183,6 +189,10 @@
           h1 {
             margin-top: 0;
             margin-bottom: 8px;
+          }
+
+          a {
+            color: var(--link-dark);
           }
 
           li {
@@ -194,12 +204,20 @@
           }
 
           img {
-            box-shadow: 5px 5px 15px var(--lighter)
+            border-radius: 4px;
+            border: 1px solid var(--light);
+            margin: 5px 5px 5px 0;
+          }
+
+          .content {
+            max-width: 1300px;
+            margin: 0 auto;
           }
 
           .highlight-temp {
             border: 2px solid var(--fail-dark);
             box-shadow: 0 0 10px var(--fail);
+            border-radius: 4px;
           }
 
           .meta {
@@ -335,7 +353,6 @@
           
           td {
             padding: 10px;
-            background: var(--white);
           }
           
           .clonedElement {
@@ -384,57 +401,55 @@
         </style>
       </head>
       <body>
-        <h1>Page Analysis Report</h1>
-        <div class="meta">
-          <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
-          <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
-          <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
-        </div>
-        
-        <table>
-          <tr>
-            <td>
-              <div class="summary">
-                ${summary.crash > 0 ? `
-                <div class="summary-box summary-crash">
-                  Crash
-                  <strong>${summary.crash}</strong>
-                </div>` : ''}
-                <div class="summary-box summary-fail">
-                  Fail
-                  <strong>${summary.fail}</strong>
+        <div class="content">
+          <h1>Page Analysis Report</h1>
+          <div class="meta">
+            <div class="metaUrl"><strong>URL:</strong> <a href="${escapeHtml(location.href)}">${escapeHtml(location.href)}</a></div>
+            <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+            <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
+          </div>
+          
+          <table>
+            <tr>
+              <td>
+                <div class="summary">
+                  ${summary.crash > 0 ? `
+                  <div class="summary-box summary-crash">
+                    Crash
+                    <strong>${summary.crash}</strong>
+                  </div>` : ''}
+                  <div class="summary-box summary-fail">
+                    Fail
+                    <strong>${summary.fail}</strong>
+                  </div>
+                  <div class="summary-box summary-check">
+                    Check
+                    <strong>${summary.check}</strong>
+                  </div>
+                  <div class="summary-box summary-pass">
+                    Pass
+                    <strong>${summary.pass}</strong>
+                  </div>
                 </div>
-                <div class="summary-box summary-check">
-                  Check
-                  <strong>${summary.check}</strong>
-                </div>
-                <div class="summary-box summary-pass">
-                  Pass
-                  <strong>${summary.pass}</strong>
-                </div>
-              </div>
-            </td>
-            <td>
-            
-            </td>
-          </tr>
-        </table>
-        
+              </td>
+              <td>
+                <canvas id="summary-chart" width="350" height="350"></canvas>
+              </td>
+            </tr>
+          </table>
+          
+          <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
 
-        <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
-        <canvas id="summary-chart" width="350" height="350"></canvas>
-
-        <button onclick="openBoxes()">Alle Tests ausklappen</button>
-        <button onclick="closeBoxes()">Alle Tests zuklappen</button><br>
-        <button onclick="openBoxes('-fail')">Fail ausklappen</button>
-        <button onclick="closeBoxes('-fail')">Fail zuklappen</button><br>
-        <button onclick="openBoxes('-check')">Check ausklappen</button>
-        <button onclick="closeBoxes('-check')">Check zuklappen</button><br>
-        <button onclick="openBoxes('-pass')">Pass ausklappen</button>
-        <button onclick="closeBoxes('-pass')">Pass zuklappen</button><br>
-            
-        ${results.map(r => `
-          <details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
+          <button onclick="openBoxes()">Alle Tests ausklappen</button>
+          <button onclick="closeBoxes()">Alle Tests zuklappen</button><br>
+          <button onclick="openBoxes('-fail')">Fail ausklappen</button>
+          <button onclick="closeBoxes('-fail')">Fail zuklappen</button><br>
+          <button onclick="openBoxes('-check')">Check ausklappen</button>
+          <button onclick="closeBoxes('-check')">Check zuklappen</button><br>
+          <button onclick="openBoxes('-pass')">Pass ausklappen</button>
+          <button onclick="closeBoxes('-pass')">Pass zuklappen</button><br>
+              
+          ${results.map(r => `<details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
             <summary class="box-header">
               <h2 class="toggleText">${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
@@ -444,12 +459,14 @@
                 ${r.content}
               </div>
               <div class="reqInfo">
-                <p class="reqId">${escapeHtml(r.id)}</p><br>
-                <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
+                <p><span class="reqId">${escapeHtml(r.id)}</span><br>
+                  <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
+                </p>
               </div>
             </div>
           </details>
         `).join("")}
+        </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>

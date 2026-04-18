@@ -16,7 +16,7 @@ const tests = {
           <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
           <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              <li><a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.outerHTML.slice(0, 200))}</a><br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
           ${missingAlt.length > 20 ? "<p>Nur die ersten 20 Bilder werden gezeigt.</p>" : ""}
@@ -36,7 +36,7 @@ const tests = {
       content: emptyAltImages.length === 0
         ? "<p>Alle Alt-Texte in Bildern sind befüllt.</p>"
         : `
-          <p><strong>${emptyAltImages.length}</strong> Bilder haben leere Alt-Texte und müssen <strong>manuell geprüft</strong> werden.</p>
+          <p><strong>${emptyAltImages.length}</strong> Bilder haben einen leeren <code>alt</code>-Tag und müssen <strong>manuell geprüft</strong> werden.</p>
           <ol>
             ${emptyAltImages.slice(0, 30).map((img, i) => `
               <li>${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
@@ -60,17 +60,17 @@ const tests = {
         ? "<p>No empty links found.</p>"
         : `
           <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
-          <ul>
+          <ol>
             ${badLinks.slice(0, 20).map(a => `
-              <li>${escapeHtml(a.outerHTML.slice(0, 200))}<br>
-              Position: ${getDomPath(a)}<br>
+              <li><a href="${escapeHtml(a.src)}" target="_blank">${escapeHtml(a.outerHTML.slice(0, 200))}</a><br>
+              Position: <code>${getDomPath(a)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="clonedElement">${cloneEl(a)}</div>
               </details>
               </li>
             `).join("")}
-          </ul>
+          </ol>
         `
     };
   },
@@ -84,10 +84,16 @@ const tests = {
       status: (heads.length === 1) ? "pass" : "fail",
       content: (heads.length === 1)
         ? `<p>Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
-        : ((heads.length <= 0) ? "<p>This page has no heading h1.</p>" : `<p>This page has ${heads.length} h1 headings.</p>
+        : ((heads.length <= 0) ? "<p>This page has no heading h1.</p>" : `<p>This page has <strong>${heads.length}</strong> <code>h1</code> headings.</p>
         <ol>
         ${heads.map(el => `
-          <li>${el.textContent}</li>
+          <li><strong>${el.textContent}<strong><br>
+          Position: <code>${getDomPath(el)}</code>
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</p></summary>
+            <div class="clonedElement">${cloneEl(el)}</div>
+          </details>
+          </li>
         `).join("")}
         </ol>
         `)
@@ -115,23 +121,25 @@ const tests = {
       }
     }
 
+    let prevHLevel = +headings[0].tagName.substring(1);
     let headingList_content = (headings.length === 0)
         ? "<p>No headings found on the page.</p>"
         : `
           <p><strong>${headings.length}</strong> heading(s) found.</p>
-          <ul>
+          <ol>
             ${headings.map((el, i) => {
               const level = parseInt(el.tagName.substring(1), 10);
               const text = (el.textContent || "").trim() || "(no text)";
               const indent = (level - 1) * 16;
+              const isJump = (level > (prevHLevel + 1));
 
               return `
-                <li style="margin-left:${indent}px">
+                <li style="margin-left:${indent}px" ${isJump ? 'class="highlight-temp"' : ''}>
                   <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
                 </li>
               `;
             }).join("")}
-          </ul>
+          </ol>
         `;
 
     let headingJumps_content = (jumps.length === 0)
@@ -1074,10 +1082,10 @@ const tests = {
       content = "<p>Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.</p>";
     } else if (!hasLang) {
       status = "fail";
-      content = "<p>Dem <code>&lt;html&gt;</code>-Element fehlt das Attribut <code>lang</code>.</p>";
+      content = `<p>Attribut <code>lang</code> fehlt für das <code>&lt;html&gt;</code>-Element.<br>${getElTag(htmlEl)}</p>`;
     } else if (!langValue) {
       status = "fail";
-      content = "<p>Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.</p>";
+      content = `<p>Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.<br>${getElTag(htmlEl)}</p>`;
     }
 
     return {
@@ -1140,7 +1148,8 @@ const tests = {
           .map((el) => {
             return `
               <li>
-                <code>${escapeHtml(el.outerHTML)}</code><br>
+                <strong>${getElTag(el)}</strong>
+                Element: <code>${escapeHtml(el.outerHTML)}</code><br>
                 Position: <code>${escapeHtml(getDomPath(el))}</code>
               </li>
             `;
@@ -1149,9 +1158,9 @@ const tests = {
 
         return `
           <div style="margin-bottom:12px;">
-            <ul style="margin-top:6px;">
+            <ol style="margin-top:6px;">
               ${eintraege}
-            </ul>
+            </ol>
           </div>
         `;
       })
@@ -1544,9 +1553,9 @@ const tests = {
           ${renderDiffs(x)}
 
           <details class="clone">
-              <summary><p class="toggleText">Element anzeigen</code></p></summary>
-              <div class="clonedElement">${cloneEl(x.el)}</div>
-            </details>
+            <summary><p class="toggleText">Element anzeigen</code></p></summary>
+            <div class="clonedElement">${cloneEl(x.el)}</div>
+          </details>
         </li>
       `;
     };
@@ -1635,6 +1644,7 @@ const tests = {
 
     function pushStrukturFehler(el, message) {
       strukturFehler.push({
+        el: el,
         path: getDomPath(el),
         message
       });
@@ -1656,6 +1666,7 @@ const tests = {
       geseheneFakeLists.add(key);
 
       fakeLists.push({
+        el: container,
         path: getDomPath(container),
         count: items.length,
         examples,
@@ -1663,7 +1674,7 @@ const tests = {
       });
     }
 
-    // 1) Strukturprüfung für <ul> und <ol>
+    // Strukturprüfung für <ul> und <ol>
     document.querySelectorAll("ul, ol").forEach((list) => {
       const allowedChildTags = new Set(["LI", "SCRIPT", "TEMPLATE", "STYLE"]);
       const children = Array.from(list.children);
@@ -1760,29 +1771,33 @@ const tests = {
     // 5) Inhalt erzeugen
     let content = `
       <p>Geprüft wurden alle <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code> und <code>&lt;li&gt;</code> auf grundlegende korrekte Verwendung und Verschachtelung. Zusätzlich wurden mögliche "Fake-Listen" gesucht, bei denen Aufzählungen mit <code>&lt;p&gt;</code>-Elementen statt echter Listen ausgezeichnet sind.</p>
-      <ul>
-        <li>Strukturfehler: <strong>${strukturFehler.length}</strong></li>
-        <li>Mögliche Fake-Listen: <strong>${fakeLists.length}</strong></li>
-      </ul>
+      <p>
+        Strukturfehler: <strong>${strukturFehler.length}</strong><br>
+        Mögliche Fake-Listen: <strong>${fakeLists.length}</strong>
+      </p>
     `;
 
     if (strukturFehler.length > 0) {
-      content += `<h4>Strukturfehler</h4><ul>`;
+      content += `<h4>Strukturfehler</h4><ol>`;
       strukturFehler.forEach((entry) => {
         content += `
           <li>
             <strong>${escapeHtml(entry.message)}</strong><br>
             Position: <code>${escapeHtml(entry.path)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</code></p></summary>
+              <div class="clonedElement">${cloneEl(entry.el)}</div>
+            </details>
           </li>
         `;
       });
-      content += `</ul>`;
+      content += `</ol>`;
     } else {
       content += `<p>Keine Strukturfehler bei <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code> oder <code>&lt;li&gt;</code> gefunden.</p>`;
     }
 
     if (fakeLists.length > 0) {
-      content += `<h4>Mögliche Fake-Listen</h4><ul>`;
+      content += `<h4>Mögliche Fake-Listen</h4><ol>`;
       fakeLists.forEach((entry) => {
         const examplesHtml = entry.examples.length
           ? `Listeneinträge: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
@@ -1797,10 +1812,14 @@ const tests = {
             <strong>${examplesHtml}</strong><br>
             ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}<br>
             Position: <code>${escapeHtml(entry.path)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</code></p></summary>
+              <div class="clonedElement">${cloneEl(entry.el)}</div>
+            </details>
           </li>
         `;
       });
-      content += `</ul>`;
+      content += `</ol>`;
     } else {
       content += `<p>Keine offensichtlichen Fake-Listen aus <code>&lt;p&gt;</code>-Elementen gefunden.</p>`;
     }
@@ -2312,7 +2331,7 @@ const tests = {
     }
 
     function renderList(items) {
-      return `<ul>${items
+      return `<ol>${items
         .map(
           (item) =>
           `<li><strong>${escapeHtml(item.message)}</strong><br>
@@ -2325,7 +2344,7 @@ const tests = {
             </details>
           </li>`
         )
-        .join("")}</ul>`;
+        .join("")}</ol>`;
     }
 
     let content = `
@@ -2878,8 +2897,8 @@ const tests = {
     `;
 
     const details = `
-      ${issues.length ? `<h4>Nicht korrekt zugeordnet</h4><ul>${issues.join('')}</ul>` : ''}
-      ${warnings.length ? `<h4>Manuell prüfen (visuelle Beschriftungen ohne Technik)</h4><ul>${warnings.join('')}</ul>` : ''}
+      ${issues.length ? `<h4>Nicht korrekt zugeordnet</h4><ol>${issues.join('')}</ol>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen (visuelle Beschriftungen ohne Technik)</h4><ol>${warnings.join('')}</ol>` : ''}
     `;
 
     return {
