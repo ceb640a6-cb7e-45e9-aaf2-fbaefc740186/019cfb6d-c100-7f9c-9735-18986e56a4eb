@@ -2620,19 +2620,6 @@ const tests = {
       );
     }
 
-    function getElementDescription(el) {
-      const tag = el.tagName.toLowerCase();
-      const type = (el.getAttribute('type') || '').toLowerCase();
-      const name = el.getAttribute('name') || '';
-      const id = el.id || '';
-
-      let desc = `<code>${escapeHtml(tag)}${type ? `[type="${escapeHtml(type)}"]` : ''}</code>`;
-      if (id) desc += `, id="<code>${escapeHtml(id)}</code>"`;
-      if (name) desc += `, name="<code>${escapeHtml(name)}</code>"`;
-
-      return desc;
-    }
-
     const relevantElements = elements.filter(isElementVisible);
     const issues = [];
     const warnings = [];
@@ -2641,14 +2628,17 @@ const tests = {
     relevantElements.forEach((el) => {
       const labelInfo = getVisibleLabelInfo(el);
       const domPath = getDomPath(el);
-      const elementDesc = getElementDescription(el);
 
       if (!labelInfo) {
         issues.push(`
           <li>
-            ${elementDesc}<br>
-            Pfad: <code>${escapeHtml(domPath)}</code><br>
-            Problem: Keine sichtbare Beschriftung gefunden.
+            <strong>Fehlende Beschriftung</strong>
+            Keine sichtbare Beschriftung gefunden.
+            Position: <code>${escapeHtml(domPath)}</code><br>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(label)}</div>
+            </details>
           </li>
         `);
         return;
@@ -2662,10 +2652,13 @@ const tests = {
       if (!hasProgrammaticAssociation) {
         warnings.push(`
           <li>
-            ${elementDesc}<br>
-            Pfad: <code>${escapeHtml(domPath)}</code><br>
+            Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.
+            Posision: <code>${escapeHtml(domPath)}</code><br>
             Gefundene sichtbare Beschriftung: "${escapeHtml(labelInfo.text)}"<br>
-            Hinweis: Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(el)}</div>
+            </details>
           </li>
         `);
         return;
@@ -2673,7 +2666,6 @@ const tests = {
 
       passes.push(`
         <li>
-          ${elementDesc}<br>
           Pfad: <code>${escapeHtml(domPath)}</code><br>
           Beschriftung: "${escapeHtml(labelInfo.text)}" (${escapeHtml(labelInfo.type)})
         </li>
@@ -2709,7 +2701,6 @@ const tests = {
     const details = `
       ${issues.length ? `<h4>Nicht bestanden</h4><ul>${issues.join('')}</ul>` : ''}
       ${warnings.length ? `<h4>Manuell prüfen</h4><ul>${warnings.join('')}</ul>` : ''}
-      ${passes.length ? `<h4>Bestanden</h4><ul>${passes.join('')}</ul>` : ''}
     `;
 
     return {
@@ -2804,12 +2795,6 @@ const tests = {
     const warnings = [];
     const passes = [];
 
-    function describe(el) {
-      const tag = el.tagName.toLowerCase();
-      const cls = el.className ? ` class="${escapeHtml(el.className)}"` : '';
-      return `<code>${tag}${cls}</code>`;
-    }
-
     // 🔍 echte <label>
     labels.forEach(label => {
       if (!isElementVisible(label)) return;
@@ -2823,10 +2808,13 @@ const tests = {
       if (!assoc.valid) {
         issues.push(`
           <li>
-            ${describe(label)}<br>
-            Pfad: <code>${escapeHtml(domPath)}</code><br>
-            Text: "${escapeHtml(text)}"<br>
-            Problem: Label ist keinem Formularfeld korrekt zugeordnet.
+            Text: <strong>"${escapeHtml(text)}"</strong><br>
+            Label ist keinem Formularfeld korrekt zugeordnet.
+            Position: <code>${escapeHtml(domPath)}</code><br>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(label)}</div>
+            </details>
           </li>
         `);
         return;
@@ -2834,14 +2822,12 @@ const tests = {
 
       passes.push(`
         <li>
-          ${describe(label)}<br>
           Pfad: <code>${escapeHtml(domPath)}</code><br>
           Beschriftet ein Formularfeld (${assoc.type})
         </li>
       `);
     });
 
-    // 🔍 pseudo Labels (z. B. dein Beispiel)
     pseudoLabels.forEach(el => {
       if (!isElementVisible(el)) return;
 
@@ -2866,10 +2852,13 @@ const tests = {
       if (!referenced && !nearbyInput) {
         warnings.push(`
           <li>
-            ${describe(el)}<br>
-            Pfad: <code>${escapeHtml(domPath)}</code><br>
-            Text: "${escapeHtml(text)}"<br>
+            Text: <strong>"${escapeHtml(text)}"</strong><br>
             Hinweis: Sieht aus wie eine Beschriftung, ist aber keinem Formularfeld technisch zugeordnet.
+            Position: <code>${escapeHtml(domPath)}</code><br>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(el)}</div>
+            </details>
           </li>
         `);
       }
@@ -2896,7 +2885,6 @@ const tests = {
     const details = `
       ${issues.length ? `<h4>Nicht korrekt zugeordnet</h4><ul>${issues.join('')}</ul>` : ''}
       ${warnings.length ? `<h4>Manuell prüfen (visuelle Beschriftungen ohne Technik)</h4><ul>${warnings.join('')}</ul>` : ''}
-      ${passes.length ? `<h4>Korrekte Labels</h4><ul>${passes.join('')}</ul>` : ''}
     `;
 
     return {
@@ -2927,7 +2915,6 @@ function highlightEl(el) {
 
 function cloneEl(el) {
   /*return el.parentElement.outerHTML;*/
-
   el.classList.add("highlight-temp");
   const html = el.parentElement.outerHTML;
   el.classList.remove("highlight-temp");
@@ -2947,6 +2934,11 @@ function getSelector(el) {
   }
 
   return (s || "(node)");
+}
+
+function getElTag(el) {
+  const openingTag = el.cloneNode(false).outerHTML;
+  return openingTag.slice(0, openingTag.indexOf('</'));
 }
 
 function getDomPath(el) {

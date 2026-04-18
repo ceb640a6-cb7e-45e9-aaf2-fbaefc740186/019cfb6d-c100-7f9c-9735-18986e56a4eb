@@ -65,7 +65,7 @@
           id: `Error`,
           reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
           title: `Missing test: ${name}`,
-          status: "fail",
+          status: "crash",
           content: "This test name was configured in loader.js but not found in main.js."
         });
         continue;
@@ -86,7 +86,7 @@
           id: `Error`,
           reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
           title: `Error in test: ${name}`,
-          status: "fail",
+          status: "crash",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
         });
       }
@@ -101,7 +101,7 @@
         acc[result.status] = (acc[result.status] || 0) + 1;
         return acc;
       },
-      { pass: 0, check: 0, fail: 0 }
+      { pass: 0, check: 0, fail: 0, crash: 0 }
     );
   }
 
@@ -109,6 +109,7 @@
     if (status === "pass") return "PASS";
     if (status === "check") return "CHECK";
     if (status === "fail") return "FAIL";
+    if (status === "crash") return "CRASH";
     return "CHECK";
   }
 
@@ -127,40 +128,6 @@
     if (totalRating <= 0.7) ratingColor = 'check';
     if (totalRating <= 0.4) ratingColor = 'fail';
     const ratingOutput = (totalRating*100).toFixed(0);
-
-    (async () => {
-      function load(src) {
-        return new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = src;
-          s.onload = res;
-          s.onerror = rej;
-          document.head.appendChild(s);
-        });
-      }
-
-      // Load html2canvas if needed
-      if (!window.html2canvas) {
-        await load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
-      }
-
-      // Render page
-      const canvas = await html2canvas(document.body, {
-        useCORS: true,
-        scale: 1
-      });
-
-      const src = canvas.toDataURL('image/jpeg', 0.8);
-      try {
-        await navigator.clipboard.writeText(src);
-        console.log("Copied src to clipboard!");
-      } catch (e) {
-        console.warn("Clipboard copy failed:", e);
-      }
-
-      // 3. Return it
-      return src;
-    })();
 
     const html = `
       <!doctype html>
@@ -196,6 +163,12 @@
             --fail: #f06595;
             --fail-dark: #d6336c;
             --fail-black: #a61e4d;
+            
+            --crash-white: #f3f0ff;
+            --crash-light: #b197fc;
+            --crash: #845ef7;
+            --crash-dark: #7048e8;
+            --crash-black: #5f3dc4;
           }
           
           body {
@@ -253,14 +226,19 @@
             border: 3px solid var(--pass-dark);
           }
 
+          .summary-check {
+            background: var(--check-white);
+            border: 3px solid var(--check-dark);
+          }
+
           .summary-fail {
             background: var(--fail-white);
             border: 3px solid var(--fail-dark);
           }
 
-          .summary-check {
-            background: var(--check-white);
-            border: 3px solid var(--check-dark);
+          .summary-crash {
+            background: var(--crash-white);
+            border: 3px solid var(--crash-dark);
           }
 
           .summary-box strong {
@@ -303,26 +281,35 @@
             color: var(--pass-white);
           }
 
+          .badge-check {
+            background: var(--check-dark);
+            color: var(--check-white);
+          }
+
           .badge-fail {
             background: var(--fail-dark);
             color: var(--fail-white);
           }
 
-          .badge-check {
-            background: var(--check-dark);
-            color: var(--check-white);
+          .badge-crash {
+            background: var(--crash-dark);
+            color: var(--crash-white);
           }
 
           .box-pass {
             border-left: 7px solid var(--pass-dark);
           }
 
+          .box-check {
+            border-left: 7px solid var(--check-dark);
+          }
+
           .box-fail {
             border-left: 7px solid var(--fail-dark);
           }
 
-          .box-check {
-            border-left: 7px solid var(--check-dark);
+          .box-crash {
+            border-left: 7px solid var(--crash-dark);
           }
 
           code, pre {
@@ -354,7 +341,6 @@
             box-shadow: 5px 5px 15px var(--lighter)
           }
 
-          /*https://symbolonly.com/arrow-symbols.html*/
           summary::marker,
           summary::-webkit-details-marker {
             list-style: none;
@@ -370,8 +356,9 @@
             position: relative;
           }
 
+          /*https://symbolonly.com/arrow-symbols.html*/
           details > summary .toggleText::before {
-            content: '⮞ '; /*⮞ᐅᐳ*/
+            content: 'ᐳ '; /*⮞ᐅᐳ*/
             position: absolute;
             left: 0;
             top: 0;
@@ -379,7 +366,7 @@
           }
 
           details[open] > summary .toggleText::before {
-            content: '⮟ '; /*⮟ᐁᐯ*/
+            content: 'ᐯ '; /*⮟ᐁᐯ*/
             position: absolute;
             left: 0;
             top: 0;
@@ -396,6 +383,10 @@
         </div>
         
         <div class="summary">
+          <div class="summary-box summary-crash">
+            Crash
+            <strong>${summary.crash}</strong>
+          </div>
           <div class="summary-box summary-fail">
             Fail
             <strong>${summary.fail}</strong>
@@ -512,7 +503,7 @@
       const results = runTests(selectedTests);
       if (RESULTS_SORT_FAILtoPASS) {
         results.sort((a, b) => {
-          const order = { fail: 0, check: 1, pass: 2 };
+          const order = { crash: 0, fail: 1, check: 2, pass: 3 };
           return order[a.status] - order[b.status];
         });
       }
