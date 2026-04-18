@@ -186,10 +186,11 @@
           }
 
           li {
-            padding: 5px 10px;
-            border: 2px solid var(--gray);
-            margin-top: 10px;
+            padding: 4px 10px;
+            border: 1px solid var(--gray);
+            margin-top: 5px;
             border-radius: 4px;
+            box-shadow: 0 0 8px var(--lighter);
           }
 
           img {
@@ -211,6 +212,7 @@
             gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 24px;
+            flex-direction: column;
           }
 
           .summary-box {
@@ -314,6 +316,7 @@
 
           code, pre {
             background: var(--white);
+            border: 1px solid var(--lighter);
             border-radius: 4px;
           }
 
@@ -330,6 +333,11 @@
             padding-left: 20px;
           }
           
+          td {
+            padding: 10px;
+            background: var(--white);
+          }
+          
           .clonedElement {
             user-select: none;
             display: inline-block;
@@ -338,7 +346,8 @@
             border-radius: 6px;
             border: 2px solid var(--lighter);
             padding: 5px 10px;
-            box-shadow: 5px 5px 15px var(--lighter)
+            box-shadow: 5px 5px 15px var(--lighter);
+            margin: 0 10px 10px 0;
           }
 
           summary::marker,
@@ -377,30 +386,40 @@
       <body>
         <h1>Page Analysis Report</h1>
         <div class="meta">
-        <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
-        <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
-        <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
+          <div class="metaUrl"><strong>URL:</strong> ${escapeHtml(location.href)}</div>
+          <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+          <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
         </div>
         
-        <div class="summary">
-        ${summary.crash > 0 ? `
-          <div class="summary-box summary-crash">
-            Crash
-            <strong>${summary.crash}</strong>
-          </div>` : ''}
-          <div class="summary-box summary-fail">
-            Fail
-            <strong>${summary.fail}</strong>
-          </div>
-          <div class="summary-box summary-check">
-            Check
-            <strong>${summary.check}</strong>
-          </div>
-          <div class="summary-box summary-pass">
-            Pass
-            <strong>${summary.pass}</strong>
-          </div>
-        </div>
+        <table>
+          <tr>
+            <td>
+              <div class="summary">
+                ${summary.crash > 0 ? `
+                <div class="summary-box summary-crash">
+                  Crash
+                  <strong>${summary.crash}</strong>
+                </div>` : ''}
+                <div class="summary-box summary-fail">
+                  Fail
+                  <strong>${summary.fail}</strong>
+                </div>
+                <div class="summary-box summary-check">
+                  Check
+                  <strong>${summary.check}</strong>
+                </div>
+                <div class="summary-box summary-pass">
+                  Pass
+                  <strong>${summary.pass}</strong>
+                </div>
+              </div>
+            </td>
+            <td>
+            
+            </td>
+          </tr>
+        </table>
+        
 
         <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
         <canvas id="summary-chart" width="350" height="350"></canvas>
@@ -421,9 +440,13 @@
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </summary>
             <div class="box-content">
-              ${r.content}
-              <small class="reqId">${escapeHtml(r.id)}</small><br>
-              <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
+              <div class="resultContent">
+                ${r.content}
+              </div>
+              <div class="reqInfo">
+                <p class="reqId">${escapeHtml(r.id)}</p><br>
+                <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
+              </div>
             </div>
           </details>
         `).join("")}

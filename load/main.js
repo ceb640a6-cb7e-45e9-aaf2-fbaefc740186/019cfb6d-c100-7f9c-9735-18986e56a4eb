@@ -464,7 +464,7 @@ const tests = {
           selector += `.${Array.from(el.classList).slice(0, 4).join(".")}`;
         }
 
-        results.push(`${selector || "(node)"}: ${matches.join(" | ")}<br>Position: <code>${getDomPath(el)}</code>`);
+        results.push(`<strong>${selector || "(node)"}</strong><br>${matches.join(" | ")}<br>Position: <code>${getDomPath(el)}</code>`);
       }
     });
 
@@ -1535,12 +1535,12 @@ const tests = {
     const renderItem = (x, i) => {
       return `
         <li>
-          <p><b>${escapeHtml(x.text)}</b><br>
+          <strong>${escapeHtml(x.text)}</strong><br>
           ${escapeHtml(x.reason)}<br>
           Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
           Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
           ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}<br>
-          Position: <code>${escapeHtml(x.path)}</code></p>
+          Position: <code>${escapeHtml(x.path)}</code>
           ${renderDiffs(x)}
 
           <details class="clone">
@@ -2632,8 +2632,8 @@ const tests = {
       if (!labelInfo) {
         issues.push(`
           <li>
-            <strong>Fehlende Beschriftung</strong>
-            Keine sichtbare Beschriftung gefunden.
+            <strong>Fehlende Beschriftung</strong><br>
+            Keine sichtbare Beschriftung gefunden.<br>
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -2652,9 +2652,9 @@ const tests = {
       if (!hasProgrammaticAssociation) {
         warnings.push(`
           <li>
+            Beschriftung: <strong>"${escapeHtml(labelInfo.text)}"</strong><br>
             Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.
-            Posision: <code>${escapeHtml(domPath)}</code><br>
-            Gefundene sichtbare Beschriftung: "${escapeHtml(labelInfo.text)}"<br>
+            Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="clonedElement">${cloneEl(el)}</div>
@@ -2664,12 +2664,7 @@ const tests = {
         return;
       }
 
-      passes.push(`
-        <li>
-          Pfad: <code>${escapeHtml(domPath)}</code><br>
-          Beschriftung: "${escapeHtml(labelInfo.text)}" (${escapeHtml(labelInfo.type)})
-        </li>
-      `);
+      passes.push(`<li><code>${escapeHtml(domPath)}</code></li>`);
     });
 
     if (!relevantElements.length) {
@@ -2677,7 +2672,7 @@ const tests = {
         id: 'R1332',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
         title: "Sichtbare Beschriftungen von Formularelementen",
-        status: "check",
+        status: "pass",
         content: "Es wurden keine sichtbaren relevanten Formularelemente gefunden."
       };
     }
@@ -2699,8 +2694,8 @@ const tests = {
     `;
 
     const details = `
-      ${issues.length ? `<h4>Nicht bestanden</h4><ul>${issues.join('')}</ul>` : ''}
-      ${warnings.length ? `<h4>Manuell prüfen</h4><ul>${warnings.join('')}</ul>` : ''}
+      ${issues.length ? `<h4>Nicht bestanden</h4><ol>${issues.join('')}</ol>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen</h4><ol>${warnings.join('')}</ol>` : ''}
     `;
 
     return {
@@ -2795,7 +2790,7 @@ const tests = {
     const warnings = [];
     const passes = [];
 
-    // 🔍 echte <label>
+    // echte <label>
     labels.forEach(label => {
       if (!isElementVisible(label)) return;
 
@@ -2808,8 +2803,8 @@ const tests = {
       if (!assoc.valid) {
         issues.push(`
           <li>
-            Text: <strong>"${escapeHtml(text)}"</strong><br>
-            Label ist keinem Formularfeld korrekt zugeordnet.
+            Beschriftung: <strong>"${escapeHtml(text)}"</strong><br>
+            Label ist keinem Formularfeld korrekt zugeordnet.<br>
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
