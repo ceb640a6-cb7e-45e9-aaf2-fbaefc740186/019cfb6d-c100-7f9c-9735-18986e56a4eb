@@ -87,7 +87,7 @@ const tests = {
         : ((heads.length <= 0) ? "<p>This page has no heading h1.</p>" : `<p>This page has <strong>${heads.length}</strong> <code>h1</code> headings.</p>
         <ol>
         ${heads.map(el => `
-          <li><strong>${el.textContent}<strong><br>
+          <li><strong>${el.textContent}</strong><br>
           Position: <code>${getDomPath(el)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -132,6 +132,7 @@ const tests = {
               const text = (el.textContent || "").trim() || "(no text)";
               const indent = (level - 1) * 16;
               const isJump = (level > (prevHLevel + 1));
+              prevHLevel = level;
 
               return `
                 <li style="margin-left:${indent}px" ${isJump ? 'class="highlight-temp"' : ''}>
@@ -649,7 +650,7 @@ const tests = {
       if (status === "check") msgOutHead = 'Anmerkungen';
       if (status === "fail") msgOutHead = 'Probleme';
       if (!noIssues) {
-        msgOutput = `<p><strong>${summaryList}</strong></p><ul>${messages.map((msg) => `<li>${msg}</li>`).join("")}</ul>`;
+        msgOutput = `<ul>${messages.map((msg) => `<li>${msg}</li>`).join("")}</ul>`;
       }
 
       return {
