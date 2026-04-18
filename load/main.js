@@ -1669,7 +1669,8 @@ const tests = {
       geseheneFakeLists.add(key);
 
       fakeLists.push({
-        el: container.firstElementChild,
+        /*el: container.firstElementChild,*/
+        el: items[0],
         path: getDomPath(container),
         count: items.length,
         examples,
