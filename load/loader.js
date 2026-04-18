@@ -383,10 +383,11 @@
         </div>
         
         <div class="summary">
+        ${summary.crash > 0 ? `
           <div class="summary-box summary-crash">
             Crash
             <strong>${summary.crash}</strong>
-          </div>
+          </div>` : ''}
           <div class="summary-box summary-fail">
             Fail
             <strong>${summary.fail}</strong>
@@ -439,16 +440,18 @@
 
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: ['Pass', 'Check', 'Fail'],
+            labels: [${summary.crash > 0 ? `'Crash',` : ''} 'Pass', 'Check', 'Fail'],
             datasets: [{
               label: 'Testfälle',
-              data: [${summary.pass}, ${summary.check}, ${summary.fail}],
+              data: [${summary.crash > 0 ? `${summary.crash},` : ''} ${summary.pass}, ${summary.check}, ${summary.fail}],
               backgroundColor: [
+                ${summary.crash > 0 ? `'#845ef7',` : ''}
                 '#20c997', // pass
                 '#fcc419', // check
                 '#f06595' // fail
               ],
               borderColor: [
+                ${summary.crash > 0 ? `'#ffffff00',` : ''}
                 '#ffffff00',
                 '#ffffff00',
                 '#ffffff00',
