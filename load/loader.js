@@ -404,7 +404,7 @@
         <div class="content">
           <h1>Page Analysis Report</h1>
           <div class="meta">
-            <div class="metaUrl"><strong>URL:</strong> <a href="${escapeHtml(location.href)}">${escapeHtml(location.href)}</a></div>
+            <div class="metaUrl"><strong>URL:</strong> <a href="${escapeHtml(location.href)}" target="_blank">${escapeHtml(location.href)}</a></div>
             <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
             <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
           </div>
