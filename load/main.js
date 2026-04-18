@@ -62,7 +62,7 @@ const tests = {
           <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
           <ol>
             ${badLinks.slice(0, 20).map(a => `
-              <li><a href="${escapeHtml(a.src)}" target="_blank">${escapeHtml(a.outerHTML.slice(0, 200))}</a><br>
+              <li><a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.outerHTML.slice(0, 200))}</a><br>
               Position: <code>${getDomPath(a)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
