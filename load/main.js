@@ -16,7 +16,7 @@ const tests = {
           <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
           <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Element: ${escapeHtml(img.outerHTML.slice(0, 200))}<br>
+              <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
               Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
@@ -63,8 +63,8 @@ const tests = {
           <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
           <ol>
             ${badLinks.slice(0, 20).map(a => `
-              <li>Link zu: <a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.href.slice(0, 200))}</a><br>
-              Element: ${escapeHtml(a.outerHTML.slice(0, 200))}<br>
+              <li>Element: <code>${escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
+              Link zu: <a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.href.slice(0, 200))}</a><br>
               Position: <code>${getDomPath(a)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -1669,7 +1669,7 @@ const tests = {
       geseheneFakeLists.add(key);
 
       fakeLists.push({
-        el: container,
+        el: container.firstElementChild,
         path: getDomPath(container),
         count: items.length,
         examples,
@@ -1701,7 +1701,7 @@ const tests = {
       }
     });
 
-    // 2) Strukturprüfung für <li>
+    // Strukturprüfung für <li>
     document.querySelectorAll("li").forEach((li) => {
       const parent = li.parentElement;
       if (!parent || !/^(UL|OL)$/.test(parent.tagName)) {
@@ -1712,7 +1712,7 @@ const tests = {
       }
     });
 
-    // 3) Erkennung möglicher Fake-Lists aus <p>-Elementen
+    // Erkennung möglicher Fake-Lists aus <p>-Elementen
     document.querySelectorAll("p").forEach((p) => {
       if (isHidden(p)) {
         return;
