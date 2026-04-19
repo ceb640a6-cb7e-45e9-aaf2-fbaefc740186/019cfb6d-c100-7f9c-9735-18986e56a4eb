@@ -2970,7 +2970,7 @@ const tests = {
           <li>
             <strong><label ohne Textstrong><br>
             Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.<br>
-            Element: ${labelDesc}<br>
+            Element: ${escapeHtml(labelDesc)}<br>
             Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -2987,7 +2987,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.<br>
-              Element: ${labelDesc}<br>
+              Element: ${escapeHtml(labelDesc)}<br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3003,7 +3003,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElTag(assoc.target)}, aber dieses Element ist nicht beschriftbar.<br>
-              Element: ${labelDesc}<br>
+              Element: ${escapeHtml(labelDesc)}<br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3019,7 +3019,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.<br>
-              Element: ${labelDesc}<br>
+              Element: ${escapeHtml(labelDesc)}<br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3046,7 +3046,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               Das umschlossene Element ist nicht beschriftbar.<br>
-              Element: ${labelDesc}<br>
+              Element: ${escapeHtml(labelDesc)}<br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3072,7 +3072,7 @@ const tests = {
           <li>
             Text: <strong>"${escapeHtml(text)}"</strong><br>
             Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.
-            Element: ${labelDesc}<br>
+            Element: ${escapeHtml(labelDesc)}<br>
             Position: <code>${escapeHtml(labelPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3087,7 +3087,7 @@ const tests = {
         <li>
           Text: <strong>"${escapeHtml(text)}"</strong><br>
           <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.
-          Element: ${labelDesc}<br>
+          Element: ${escapeHtml(labelDesc)}<br>
           Position: <code>${escapeHtml(labelPath)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3120,7 +3120,7 @@ const tests = {
           <li>
             <strong>Feld hat mehrere label-Elemente</strong>
             Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.<br>
-            Element: ${controlDesc}<br>
+            Element: ${escapeHtml(controlDesc)}<br>
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3147,7 +3147,7 @@ const tests = {
           <li>
             <strong>Mehrere mögliche Beschriftungen</strong><br>
             Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.<br>
-            Element: ${controlDesc}<br>
+            Element: ${escapeHtml(controlDesc)}<br>
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3176,7 +3176,7 @@ const tests = {
           <li>
             <strong>Fehlendes legend-Element</strong><br>
             <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.<br>
-            Element: ${fieldsetDesc}<br>
+            Element: ${escapeHtml(fieldsetDesc)}<br>
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3192,7 +3192,7 @@ const tests = {
           <li>
             <strong>Mehrere <code>legend</code>-Elemente</strong><br>
             Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.<br>
-            Element: ${fieldsetDesc}<br>
+            Element: ${escapeHtml(fieldsetDesc)}<br>
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3205,7 +3205,7 @@ const tests = {
 
       passes.push(`
         <li>
-          ${fieldsetDesc}<br>
+          ${escapeHtml(fieldsetDesc)}<br>
           Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
           Gruppenbeschriftung per <code>legend</code>: "${escapeHtml(visibleLegendsWithText[0].text)}"
         </li>
