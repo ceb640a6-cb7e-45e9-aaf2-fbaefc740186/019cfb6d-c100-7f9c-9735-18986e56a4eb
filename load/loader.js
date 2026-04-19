@@ -458,7 +458,7 @@
               <div class="resultContent">
                 ${r.content}
               </div>
-              <button onclick="openPopup(this)">Open in popup</button>
+              <button class="popupButton" onclick="openPopup(this)">Open in popup</button>
               <div class="reqInfo">
                 <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
@@ -473,7 +473,7 @@
         function openPopup(button) {
             const details = button.closest('details.box');
             const clone = details.cloneNode(true);
-
+            clone.querySelectorAll('.popupButton').forEach(btn => btn.remove()); /*remove cloned popup button*/
             clone.setAttribute("open", "true");
 
             let styles = "";
