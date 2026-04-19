@@ -26,8 +26,7 @@
     /* 2135 */ "pruefeAutocompleteAttribute",
     /* 1253 */ "pruefeLabelInName",
     /* 1332 */ "pruefeFormularBeschriftungen",
-    /* 1332 */ "pruefeUnzugeordneteBeschriftungen",
-    /* 1332 */ "pruefeBeschriftungenStrengWCAG"
+    /* 1038 */ "pruefeBeschriftungenStrengWCAG"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
