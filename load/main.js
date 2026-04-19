@@ -2825,26 +2825,6 @@ const tests = {
       return !!(el && el.matches && el.matches(formControlSelector));
     }
 
-    function getElementDescription(el) {
-      const tag = el.tagName.toLowerCase();
-      const type = el.getAttribute('type');
-      const id = el.id;
-      const name = el.getAttribute('name');
-      const cls = typeof el.className === 'string' && el.className.trim()
-        ? el.className.trim()
-        : '';
-
-      let desc = `<code>${escapeHtml(tag)}`;
-      if (type) desc += ` type="${escapeHtml(type)}"`;
-      desc += `</code>`;
-
-      if (id) desc += `, id="<code>${escapeHtml(id)}</code>"`;
-      if (name) desc += `, name="<code>${escapeHtml(name)}</code>"`;
-      if (cls) desc += `, class="<code>${escapeHtml(cls)}</code>"`;
-
-      return desc;
-    }
-
     function getAssociatedControlForLabel(label) {
       const forId = label.getAttribute('for');
       if (forId) {
@@ -2981,16 +2961,21 @@ const tests = {
     // 1) Labels selbst prüfen
     visibleLabels.forEach(label => {
       const text = getVisibleText(label);
-      const labelDesc = getElementDescription(label);
+      const labelDesc = getElTag(label);
       const labelPath = getDomPath(label);
       const assoc = getAssociatedControlForLabel(label);
 
       if (!text) {
         warnings.push(`
           <li>
-            ${labelDesc}<br>
-            Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Hinweis: Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.
+            <strong><label ohne Textstrong><br>
+            Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.<br>
+            Element: ${labelDesc}<br>
+            Position: <code>${escapeHtml(labelPath)}</code>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </details>
           </li>
         `);
         return;
@@ -3000,10 +2985,14 @@ const tests = {
         if (!assoc.target) {
           issues.push(`
             <li>
-              ${labelDesc}<br>
-              Pfad: <code>${escapeHtml(labelPath)}</code><br>
-              Text: "${escapeHtml(text)}"<br>
-              Problem: <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.
+              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.<br>
+              Element: ${labelDesc}<br>
+              Position: <code>${escapeHtml(labelPath)}</code>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </details>
             </li>
           `);
           return;
@@ -3012,10 +3001,14 @@ const tests = {
         if (!isLabelableElement(assoc.target)) {
           issues.push(`
             <li>
-              ${labelDesc}<br>
-              Pfad: <code>${escapeHtml(labelPath)}</code><br>
-              Text: "${escapeHtml(text)}"<br>
-              Problem: <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElementDescription(assoc.target)}, aber dieses Element ist nicht beschriftbar.
+              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElTag(assoc.target)}, aber dieses Element ist nicht beschriftbar.<br>
+              Element: ${labelDesc}<br>
+              Position: <code>${escapeHtml(labelPath)}</code>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </details>
             </li>
           `);
           return;
@@ -3024,10 +3017,14 @@ const tests = {
         if (!isElementVisible(assoc.target)) {
           warnings.push(`
             <li>
-              ${labelDesc}<br>
-              Pfad: <code>${escapeHtml(labelPath)}</code><br>
-              Text: "${escapeHtml(text)}"<br>
-              Hinweis: Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.
+              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.<br>
+              Element: ${labelDesc}<br>
+              Position: <code>${escapeHtml(labelPath)}</code>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </details>
             </li>
           `);
           return;
@@ -3037,7 +3034,7 @@ const tests = {
           <li>
             ${labelDesc}<br>
             Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Beschriftung "${escapeHtml(text)}" ist per <code>for</code> korrekt mit ${getElementDescription(assoc.target)} verknüpft.
+            Beschriftung "${escapeHtml(text)}" ist per <code>for</code> korrekt mit ${getElTag(assoc.target)} verknüpft.
           </li>
         `);
         return;
@@ -3047,10 +3044,14 @@ const tests = {
         if (!isLabelableElement(assoc.target)) {
           issues.push(`
             <li>
-              ${labelDesc}<br>
-              Pfad: <code>${escapeHtml(labelPath)}</code><br>
-              Text: "${escapeHtml(text)}"<br>
-              Problem: Das umschlossene Element ist nicht beschriftbar.
+              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              Das umschlossene Element ist nicht beschriftbar.<br>
+              Element: ${labelDesc}<br>
+              Position: <code>${escapeHtml(labelPath)}</code>
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </details>
             </li>
           `);
           return;
@@ -3060,7 +3061,7 @@ const tests = {
           <li>
             ${labelDesc}<br>
             Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Beschriftung "${escapeHtml(text)}" umschließt ${getElementDescription(assoc.target)} korrekt.
+            Beschriftung "${escapeHtml(text)}" umschließt ${getElTag(assoc.target)} korrekt.
           </li>
         `);
         return;
@@ -3069,10 +3070,14 @@ const tests = {
       if (assoc.mode === 'nested-multiple') {
         issues.push(`
           <li>
-            ${labelDesc}<br>
-            Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Text: "${escapeHtml(text)}"<br>
-            Problem: Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.
+            Text: <strong>"${escapeHtml(text)}"</strong><br>
+            Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.
+            Element: ${labelDesc}<br>
+            Position: <code>${escapeHtml(labelPath)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(label)}</div>
+            </details>
           </li>
         `);
         return;
@@ -3080,10 +3085,14 @@ const tests = {
 
       issues.push(`
         <li>
-          ${labelDesc}<br>
-          Pfad: <code>${escapeHtml(labelPath)}</code><br>
-          Text: "${escapeHtml(text)}"<br>
-          Problem: <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.
+          Text: <strong>"${escapeHtml(text)}"</strong><br>
+          <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.
+          Element: ${labelDesc}<br>
+          Position: <code>${escapeHtml(labelPath)}</code>
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</p></summary>
+            <div class="clonedElement">${cloneEl(label)}</div>
+          </details>
         </li>
       `);
     });
@@ -3103,15 +3112,20 @@ const tests = {
         }))
         .filter(item => item.text);
 
-      const controlDesc = getElementDescription(control);
+      const controlDesc = getElTag(control);
       const controlPath = getDomPath(control);
 
       if (labels.length > 1) {
         warnings.push(`
           <li>
-            ${controlDesc}<br>
-            Pfad: <code>${escapeHtml(controlPath)}</code><br>
-            Hinweis: Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.
+            <strong>Feld hat mehrere label-Elemente</strong>
+            Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.<br>
+            Element: ${controlDesc}<br>
+            Position: <code>${escapeHtml(controlPath)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(fieldset)}</div>
+            </details>
           </li>
         `);
       }
@@ -3131,9 +3145,14 @@ const tests = {
       ) {
         warnings.push(`
           <li>
-            ${controlDesc}<br>
-            Pfad: <code>${escapeHtml(controlPath)}</code><br>
-            Hinweis: Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.
+            <strong>Mehrere mögliche Beschriftungen</strong><br>
+            Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.<br>
+            Element: ${controlDesc}<br>
+            Position: <code>${escapeHtml(controlPath)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(fieldset)}</div>
+            </details>
           </li>
         `);
       }
@@ -3149,15 +3168,20 @@ const tests = {
         .map(legend => ({ legend, text: getVisibleText(legend) }))
         .filter(item => item.text);
 
-      const fieldsetDesc = getElementDescription(fieldset);
+      const fieldsetDesc = getElTag(fieldset);
       const fieldsetPath = getDomPath(fieldset);
 
       if (!visibleLegendsWithText.length) {
         warnings.push(`
           <li>
-            ${fieldsetDesc}<br>
-            Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
-            Hinweis: <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.
+            <strong>Fehlendes legend-Element</strong><br>
+            <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.<br>
+            Element: ${fieldsetDesc}<br>
+            Position: <code>${escapeHtml(fieldsetPath)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(fieldset)}</div>
+            </details>
           </li>
         `);
         return;
@@ -3166,9 +3190,14 @@ const tests = {
       if (visibleLegendsWithText.length > 1) {
         warnings.push(`
           <li>
-            ${fieldsetDesc}<br>
-            Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
-            Hinweis: Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.
+            <strong>Mehrere <code>legend</code>-Elemente</strong><br>
+            Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.<br>
+            Element: ${fieldsetDesc}<br>
+            Position: <code>${escapeHtml(fieldsetPath)}</code>
+            <details class="clone">
+              <summary><p class="toggleText">Element anzeigen</p></summary>
+              <div class="clonedElement">${cloneEl(fieldset)}</div>
+            </details>
           </li>
         `);
         return;
@@ -3200,7 +3229,7 @@ const tests = {
       seenPseudo.add(path);
 
       const text = getVisibleText(el);
-      const desc = getElementDescription(el);
+      const desc = getElTag(el);
 
       const hasOwnFor = el.hasAttribute('for');
       const isReferencedByAria = !!(
@@ -3223,10 +3252,14 @@ const tests = {
 
       warnings.push(`
         <li>
-          ${desc}<br>
-          Pfad: <code>${escapeHtml(path)}</code><br>
-          Text: "${escapeHtml(text)}"<br>
-          Hinweis: Dieses Element wirkt wie eine sichtbare Beschriftung für ein Formularfeld, ist aber nicht programmatisch als <code>label</code> oder per <code>aria-labelledby</code> mit einem Feld verknüpft.
+          Beschriftung: <strong>"${escapeHtml(text)}"</strong><br>
+          Dieses Element wirkt wie eine sichtbare Beschriftung für ein Formularfeld, ist aber nicht programmatisch als <code>label</code> oder per <code>aria-labelledby</code> mit einem Feld verknüpft.<br>
+          Element: <code>${escapeHtml(desc)}</code><br>
+          Position: <code>${escapeHtml(path)}</code>
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</p></summary>
+            <div class="clonedElement">${cloneEl(el)}</div>
+          </details>
         </li>
       `);
     });
@@ -3242,10 +3275,8 @@ const tests = {
 
     const summary = `
       <p>
-        Geprüfte Beschriftungs-/Gruppierungselemente: <strong>${checkedCount}</strong><br>
-        Korrekt bzw. unauffällig: <strong>${passes.length}</strong><br>
-        Manuell prüfen: <strong>${warnings.length}</strong><br>
-        Fehlerhafte Zuordnungen: <strong>${issues.length}</strong>
+        Fehlerhafte Zuordnungen: <strong>${issues.length}</strong><br>
+        Manuell prüfen: <strong>${warnings.length}</strong>
       </p>
       <p>
         Geprüft wurden sichtbare <code>label</code>-, <code>fieldset</code>/<code>legend</code>- und label-ähnliche Elemente. Die Auswertung ist streng und für WCAG-Prüfungen gedacht, ersetzt aber keine manuelle Fachprüfung.
@@ -3253,9 +3284,8 @@ const tests = {
     `;
 
     const details = `
-      ${issues.length ? `<h4>Nicht bestanden</h4><ul>${issues.join('')}</ul>` : ''}
-      ${warnings.length ? `<h4>Manuell prüfen</h4><ul>${warnings.join('')}</ul>` : ''}
-      ${passes.length ? `<h4>Unauffällige Befunde</h4><ul>${passes.join('')}</ul>` : ''}
+      ${issues.length ? `<h4>Nicht bestanden</h4><ol>${issues.join('')}</ol>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen</h4><ol>${warnings.join('')}</ol>` : ''}
     `;
 
     return {
