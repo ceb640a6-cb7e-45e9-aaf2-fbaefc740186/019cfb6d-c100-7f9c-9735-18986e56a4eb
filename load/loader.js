@@ -482,17 +482,17 @@
             });
 
             const popup = window.open("", "_blank", "width=600,height=400");
-            popup.document.write(${`
+            popup.document.write(\`
               <html>
                 <head>
                   <title>Popup</title>
-                  ${styles}
+                  \$\{styles\}
                 </head>
                 <body>
-                  ${clone.outerHTML}
+                  \$\{clone.outerHTML\}
                 </body>
               </html>
-            `});
+            \`);
 
             popup.document.close();
           }
