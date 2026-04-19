@@ -26,7 +26,8 @@
     /* 2135 */ "pruefeAutocompleteAttribute",
     /* 1253 */ "pruefeLabelInName",
     /* 1332 */ "pruefeFormularBeschriftungen",
-    /* 1332 */ "pruefeUnzugeordneteBeschriftungen"
+    /* 1332 */ "pruefeUnzugeordneteBeschriftungen",
+    /* 1332 */ "pruefeBeschriftungenStrengWCAG"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
@@ -459,7 +460,7 @@
                 ${r.content}
               </div>
               <div class="reqInfo">
-                <p><span class="reqId">${escapeHtml(r.id)}</span><br>
+                <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
                 </p>
               </div>

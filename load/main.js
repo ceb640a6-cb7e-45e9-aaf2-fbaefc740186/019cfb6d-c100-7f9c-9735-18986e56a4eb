@@ -2676,7 +2676,7 @@ const tests = {
         warnings.push(`
           <li>
             Beschriftung: <strong>"${escapeHtml(labelInfo.text)}"</strong><br>
-            Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.
+            Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.<br>
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -2909,6 +2909,543 @@ const tests = {
       id: 'R1332',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
       title: "Zuordnung von Beschriftungen zu Formularfeldern",
+      status,
+      content: summary + details
+    };
+  },
+
+  pruefeBeschriftungenStrengWCAG() {
+    const labelableSelector = [
+      'input:not([type="hidden"])',
+      'select',
+      'textarea',
+      'output',
+      'progress',
+      'meter'
+    ].join(',');
+
+    const formControlSelector = [
+      'input:not([type="hidden"])',
+      'select',
+      'textarea'
+    ].join(',');
+
+    function isElementVisible(el) {
+      if (!el || !(el instanceof Element)) return false;
+
+      if (el.hidden || el.getAttribute('aria-hidden') === 'true') {
+        return false;
+      }
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        style.visibility === 'collapse' ||
+        parseFloat(style.opacity) === 0
+      ) {
+        return false;
+      }
+
+      return el.getClientRects().length > 0;
+    }
+
+    function isTextNodeVisible(textNode) {
+      if (!textNode || !textNode.textContent || !textNode.textContent.trim()) {
+        return false;
+      }
+
+      const parent = textNode.parentElement;
+      if (!parent || !isElementVisible(parent)) return false;
+
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        return range.getClientRects().length > 0;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getVisibleText(el) {
+      if (!el || !isElementVisible(el)) return '';
+
+      const walker = document.createTreeWalker(
+        el,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            return node.textContent && node.textContent.trim()
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT;
+          }
+        }
+      );
+
+      const parts = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (isTextNodeVisible(node)) {
+          parts.push(node.textContent.trim());
+        }
+      }
+
+      return parts.join(' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function isLabelableElement(el) {
+      if (!el || !(el instanceof Element)) return false;
+      if (!el.matches(labelableSelector)) return false;
+
+      if (el.matches('input')) {
+        const type = (el.getAttribute('type') || 'text').toLowerCase();
+        return type !== 'hidden';
+      }
+
+      return true;
+    }
+
+    function isFormControl(el) {
+      return !!(el && el.matches && el.matches(formControlSelector));
+    }
+
+    function getElementDescription(el) {
+      const tag = el.tagName.toLowerCase();
+      const type = el.getAttribute('type');
+      const id = el.id;
+      const name = el.getAttribute('name');
+      const cls = typeof el.className === 'string' && el.className.trim()
+        ? el.className.trim()
+        : '';
+
+      let desc = `<code>${escapeHtml(tag)}`;
+      if (type) desc += ` type="${escapeHtml(type)}"`;
+      desc += `</code>`;
+
+      if (id) desc += `, id="<code>${escapeHtml(id)}</code>"`;
+      if (name) desc += `, name="<code>${escapeHtml(name)}</code>"`;
+      if (cls) desc += `, class="<code>${escapeHtml(cls)}</code>"`;
+
+      return desc;
+    }
+
+    function getAssociatedControlForLabel(label) {
+      const forId = label.getAttribute('for');
+      if (forId) {
+        const target = document.getElementById(forId);
+        return {
+          mode: 'for',
+          forId,
+          target: target || null
+        };
+      }
+
+      const nestedControls = Array.from(label.querySelectorAll(labelableSelector));
+      if (nestedControls.length === 1) {
+        return {
+          mode: 'nested',
+          target: nestedControls[0]
+        };
+      }
+
+      if (nestedControls.length > 1) {
+        return {
+          mode: 'nested-multiple',
+          target: null,
+          nestedControls
+        };
+      }
+
+      return {
+        mode: 'none',
+        target: null
+      };
+    }
+
+    function getExplicitLabelsForControl(control) {
+      if (!control.id) return [];
+      return Array.from(document.querySelectorAll(`label[for="${CSS.escape(control.id)}"]`));
+    }
+
+    function getImplicitLabelsForControl(control) {
+      return Array.from(document.querySelectorAll('label')).filter(label => {
+        if (label.hasAttribute('for')) return false;
+        return label.contains(control);
+      });
+    }
+
+    function getAllLabelsForControl(control) {
+      return [...getExplicitLabelsForControl(control), ...getImplicitLabelsForControl(control)];
+    }
+
+    function getAriaLabelledbyReferences(control) {
+      const ids = (control.getAttribute('aria-labelledby') || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      return ids.map(id => document.getElementById(id)).filter(Boolean);
+    }
+
+    function findNearestGroupContainer(el) {
+      return (
+        el.closest('.form-group, .field, .form-field, .mb-3, .row, .col, td, th, div, li') ||
+        el.parentElement
+      );
+    }
+
+    function findVisibleTextCandidatesNearControl(control) {
+      const results = [];
+      const seen = new Set();
+
+      const group = findNearestGroupContainer(control);
+      if (!group) return results;
+
+      const candidates = Array.from(
+        group.querySelectorAll([
+          'label',
+          'legend',
+          '[id]',
+          '.control-label',
+          '.form-label',
+          '.col-form-label',
+          '[class*="label"]'
+        ].join(','))
+      );
+
+      candidates.forEach(el => {
+        if (el === control) return;
+        if (!isElementVisible(el)) return;
+
+        const text = getVisibleText(el);
+        if (!text) return;
+
+        const key = getDomPath(el);
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        results.push({
+          el,
+          text,
+          domPath: key
+        });
+      });
+
+      return results;
+    }
+
+    function isPotentialLabelLikeElement(el) {
+      if (!el || !(el instanceof Element)) return false;
+      if (!isElementVisible(el)) return false;
+      if (el.tagName.toLowerCase() === 'label') return false;
+      if (el.tagName.toLowerCase() === 'legend') return false;
+
+      const text = getVisibleText(el);
+      if (!text) return false;
+      if (text.length > 120) return false;
+
+      if (
+        el.matches('.control-label, .form-label, .col-form-label, [class*="label"]')
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+
+    const issues = [];
+    const warnings = [];
+    const passes = [];
+
+    const allLabels = Array.from(document.querySelectorAll('label'));
+    const visibleLabels = allLabels.filter(isElementVisible);
+    const allControls = Array.from(document.querySelectorAll(formControlSelector)).filter(isElementVisible);
+    const allFieldsets = Array.from(document.querySelectorAll('fieldset')).filter(isElementVisible);
+
+    // 1) Labels selbst prüfen
+    visibleLabels.forEach(label => {
+      const text = getVisibleText(label);
+      const labelDesc = getElementDescription(label);
+      const labelPath = getDomPath(label);
+      const assoc = getAssociatedControlForLabel(label);
+
+      if (!text) {
+        warnings.push(`
+          <li>
+            ${labelDesc}<br>
+            Pfad: <code>${escapeHtml(labelPath)}</code><br>
+            Hinweis: Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.
+          </li>
+        `);
+        return;
+      }
+
+      if (assoc.mode === 'for') {
+        if (!assoc.target) {
+          issues.push(`
+            <li>
+              ${labelDesc}<br>
+              Pfad: <code>${escapeHtml(labelPath)}</code><br>
+              Text: "${escapeHtml(text)}"<br>
+              Problem: <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.
+            </li>
+          `);
+          return;
+        }
+
+        if (!isLabelableElement(assoc.target)) {
+          issues.push(`
+            <li>
+              ${labelDesc}<br>
+              Pfad: <code>${escapeHtml(labelPath)}</code><br>
+              Text: "${escapeHtml(text)}"<br>
+              Problem: <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElementDescription(assoc.target)}, aber dieses Element ist nicht beschriftbar.
+            </li>
+          `);
+          return;
+        }
+
+        if (!isElementVisible(assoc.target)) {
+          warnings.push(`
+            <li>
+              ${labelDesc}<br>
+              Pfad: <code>${escapeHtml(labelPath)}</code><br>
+              Text: "${escapeHtml(text)}"<br>
+              Hinweis: Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.
+            </li>
+          `);
+          return;
+        }
+
+        passes.push(`
+          <li>
+            ${labelDesc}<br>
+            Pfad: <code>${escapeHtml(labelPath)}</code><br>
+            Beschriftung "${escapeHtml(text)}" ist per <code>for</code> korrekt mit ${getElementDescription(assoc.target)} verknüpft.
+          </li>
+        `);
+        return;
+      }
+
+      if (assoc.mode === 'nested') {
+        if (!isLabelableElement(assoc.target)) {
+          issues.push(`
+            <li>
+              ${labelDesc}<br>
+              Pfad: <code>${escapeHtml(labelPath)}</code><br>
+              Text: "${escapeHtml(text)}"<br>
+              Problem: Das umschlossene Element ist nicht beschriftbar.
+            </li>
+          `);
+          return;
+        }
+
+        passes.push(`
+          <li>
+            ${labelDesc}<br>
+            Pfad: <code>${escapeHtml(labelPath)}</code><br>
+            Beschriftung "${escapeHtml(text)}" umschließt ${getElementDescription(assoc.target)} korrekt.
+          </li>
+        `);
+        return;
+      }
+
+      if (assoc.mode === 'nested-multiple') {
+        issues.push(`
+          <li>
+            ${labelDesc}<br>
+            Pfad: <code>${escapeHtml(labelPath)}</code><br>
+            Text: "${escapeHtml(text)}"<br>
+            Problem: Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.
+          </li>
+        `);
+        return;
+      }
+
+      issues.push(`
+        <li>
+          ${labelDesc}<br>
+          Pfad: <code>${escapeHtml(labelPath)}</code><br>
+          Text: "${escapeHtml(text)}"<br>
+          Problem: <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.
+        </li>
+      `);
+    });
+
+    // 2) Mehrfachbeschriftungen pro Feld
+    allControls.forEach(control => {
+      const labels = getAllLabelsForControl(control).filter(isElementVisible);
+      const visibleLabelTexts = labels
+        .map(getVisibleText)
+        .filter(Boolean);
+
+      const ariaRefs = getAriaLabelledbyReferences(control)
+        .filter(isElementVisible)
+        .map(ref => ({
+          el: ref,
+          text: getVisibleText(ref)
+        }))
+        .filter(item => item.text);
+
+      const controlDesc = getElementDescription(control);
+      const controlPath = getDomPath(control);
+
+      if (labels.length > 1) {
+        warnings.push(`
+          <li>
+            ${controlDesc}<br>
+            Pfad: <code>${escapeHtml(controlPath)}</code><br>
+            Hinweis: Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.
+          </li>
+        `);
+      }
+
+      const nearbyCandidates = findVisibleTextCandidatesNearControl(control)
+        .filter(item => item.el !== control);
+
+      const distinctNearbyTexts = Array.from(new Set(nearbyCandidates.map(item => item.text)));
+      const distinctProgrammaticTexts = Array.from(new Set([
+        ...visibleLabelTexts,
+        ...ariaRefs.map(x => x.text)
+      ]));
+
+      if (
+        distinctProgrammaticTexts.length === 1 &&
+        distinctNearbyTexts.length > 1
+      ) {
+        warnings.push(`
+          <li>
+            ${controlDesc}<br>
+            Pfad: <code>${escapeHtml(controlPath)}</code><br>
+            Hinweis: Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.
+          </li>
+        `);
+      }
+    });
+
+    // 3) fieldset / legend prüfen
+    allFieldsets.forEach(fieldset => {
+      const controlsInFieldset = Array.from(fieldset.querySelectorAll(formControlSelector)).filter(isElementVisible);
+      if (!controlsInFieldset.length) return;
+
+      const legends = Array.from(fieldset.querySelectorAll(':scope > legend')).filter(isElementVisible);
+      const visibleLegendsWithText = legends
+        .map(legend => ({ legend, text: getVisibleText(legend) }))
+        .filter(item => item.text);
+
+      const fieldsetDesc = getElementDescription(fieldset);
+      const fieldsetPath = getDomPath(fieldset);
+
+      if (!visibleLegendsWithText.length) {
+        warnings.push(`
+          <li>
+            ${fieldsetDesc}<br>
+            Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
+            Hinweis: <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.
+          </li>
+        `);
+        return;
+      }
+
+      if (visibleLegendsWithText.length > 1) {
+        warnings.push(`
+          <li>
+            ${fieldsetDesc}<br>
+            Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
+            Hinweis: Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.
+          </li>
+        `);
+        return;
+      }
+
+      passes.push(`
+        <li>
+          ${fieldsetDesc}<br>
+          Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
+          Gruppenbeschriftung per <code>legend</code>: "${escapeHtml(visibleLegendsWithText[0].text)}"
+        </li>
+      `);
+    });
+
+    // 4) label-ähnliche Elemente prüfen
+    const potentialLabelLikeElements = Array.from(document.querySelectorAll([
+      '.control-label',
+      '.form-label',
+      '.col-form-label',
+      '[class*="label"]'
+    ].join(',')))
+      .filter(isPotentialLabelLikeElement);
+
+    const seenPseudo = new Set();
+
+    potentialLabelLikeElements.forEach(el => {
+      const path = getDomPath(el);
+      if (seenPseudo.has(path)) return;
+      seenPseudo.add(path);
+
+      const text = getVisibleText(el);
+      const desc = getElementDescription(el);
+
+      const hasOwnFor = el.hasAttribute('for');
+      const isReferencedByAria = !!(
+        el.id &&
+        document.querySelector(`[aria-labelledby~="${CSS.escape(el.id)}"]`)
+      );
+      const parentLabel = el.closest('label');
+      const sameGroup = findNearestGroupContainer(el);
+      const nearbyControls = sameGroup
+        ? Array.from(sameGroup.querySelectorAll(formControlSelector)).filter(isElementVisible)
+        : [];
+
+      if (parentLabel) return;
+      if (hasOwnFor) return;
+      if (isReferencedByAria) return;
+      if (!nearbyControls.length) return;
+
+      const realLabelInGroup = sameGroup.querySelector('label, legend');
+      if (realLabelInGroup) return;
+
+      warnings.push(`
+        <li>
+          ${desc}<br>
+          Pfad: <code>${escapeHtml(path)}</code><br>
+          Text: "${escapeHtml(text)}"<br>
+          Hinweis: Dieses Element wirkt wie eine sichtbare Beschriftung für ein Formularfeld, ist aber nicht programmatisch als <code>label</code> oder per <code>aria-labelledby</code> mit einem Feld verknüpft.
+        </li>
+      `);
+    });
+
+    const checkedCount = visibleLabels.length + allFieldsets.length + potentialLabelLikeElements.length;
+
+    let status = 'pass';
+    if (issues.length) {
+      status = 'fail';
+    } else if (warnings.length) {
+      status = 'check';
+    }
+
+    const summary = `
+      <p>
+        Geprüfte Beschriftungs-/Gruppierungselemente: <strong>${checkedCount}</strong><br>
+        Korrekt bzw. unauffällig: <strong>${passes.length}</strong><br>
+        Manuell prüfen: <strong>${warnings.length}</strong><br>
+        Fehlerhafte Zuordnungen: <strong>${issues.length}</strong>
+      </p>
+      <p>
+        Geprüft wurden sichtbare <code>label</code>-, <code>fieldset</code>/<code>legend</code>- und label-ähnliche Elemente. Die Auswertung ist streng und für WCAG-Prüfungen gedacht, ersetzt aber keine manuelle Fachprüfung.
+      </p>
+    `;
+
+    const details = `
+      ${issues.length ? `<h4>Nicht bestanden</h4><ul>${issues.join('')}</ul>` : ''}
+      ${warnings.length ? `<h4>Manuell prüfen</h4><ul>${warnings.join('')}</ul>` : ''}
+      ${passes.length ? `<h4>Unauffällige Befunde</h4><ul>${passes.join('')}</ul>` : ''}
+    `;
+
+    return {
+      id: 'R1332+',
+      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      title: "Beschriftungen und Gruppierungsbeschriftungen von Formularfeldern",
       status,
       content: summary + details
     };
