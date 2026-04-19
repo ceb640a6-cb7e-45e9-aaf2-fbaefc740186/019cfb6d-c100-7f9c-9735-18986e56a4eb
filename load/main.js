@@ -2970,7 +2970,7 @@ const tests = {
           <li>
             <strong><label ohne Textstrong><br>
             Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.<br>
-            Element: ${escapeHtml(labelDesc)}<br>
+            Element: <code>${escapeHtml(labelDesc)}</code><br>
             Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -2987,7 +2987,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.<br>
-              Element: ${escapeHtml(labelDesc)}<br>
+              Element: <code>${escapeHtml(labelDesc)}</code><br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3003,7 +3003,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElTag(assoc.target)}, aber dieses Element ist nicht beschriftbar.<br>
-              Element: ${escapeHtml(labelDesc)}<br>
+              Element: <code>${escapeHtml(labelDesc)}</code><br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3019,7 +3019,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.<br>
-              Element: ${escapeHtml(labelDesc)}<br>
+              Element: <code>${escapeHtml(labelDesc)}</code><br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3046,7 +3046,7 @@ const tests = {
             <li>
               Text: <strong>"${escapeHtml(text)}"</strong><br>
               Das umschlossene Element ist nicht beschriftbar.<br>
-              Element: ${escapeHtml(labelDesc)}<br>
+              Element: <code>${escapeHtml(labelDesc)}</code><br>
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3071,8 +3071,8 @@ const tests = {
         issues.push(`
           <li>
             Text: <strong>"${escapeHtml(text)}"</strong><br>
-            Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.
-            Element: ${escapeHtml(labelDesc)}<br>
+            Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.<br>
+            Element: <code>${escapeHtml(labelDesc)}</code><br>
             Position: <code>${escapeHtml(labelPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3086,8 +3086,8 @@ const tests = {
       issues.push(`
         <li>
           Text: <strong>"${escapeHtml(text)}"</strong><br>
-          <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.
-          Element: ${escapeHtml(labelDesc)}<br>
+          <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.<br>
+          Element: <code>${escapeHtml(labelDesc)}</code><br>
           Position: <code>${escapeHtml(labelPath)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3120,7 +3120,7 @@ const tests = {
           <li>
             <strong>Feld hat mehrere label-Elemente</strong>
             Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.<br>
-            Element: ${escapeHtml(controlDesc)}<br>
+            Element: <code>${escapeHtml(controlDesc)}</code><br>
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3147,7 +3147,7 @@ const tests = {
           <li>
             <strong>Mehrere mögliche Beschriftungen</strong><br>
             Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.<br>
-            Element: ${escapeHtml(controlDesc)}<br>
+            Element: <code>${escapeHtml(controlDesc)}</code><br>
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3176,7 +3176,7 @@ const tests = {
           <li>
             <strong>Fehlendes legend-Element</strong><br>
             <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.<br>
-            Element: ${escapeHtml(fieldsetDesc)}<br>
+            Element: <code>${escapeHtml(fieldsetDesc)}</code><br>
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3192,7 +3192,7 @@ const tests = {
           <li>
             <strong>Mehrere <code>legend</code>-Elemente</strong><br>
             Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.<br>
-            Element: ${escapeHtml(fieldsetDesc)}<br>
+            Element: <code>${escapeHtml(fieldsetDesc)}</code><br>
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
