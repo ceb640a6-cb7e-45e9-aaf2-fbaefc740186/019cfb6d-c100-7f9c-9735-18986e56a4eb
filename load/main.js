@@ -3124,7 +3124,7 @@ const tests = {
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(fieldset)}</div>
+              <div class="clonedElement">${cloneEl(control)}</div>
             </details>
           </li>
         `);
@@ -3151,7 +3151,7 @@ const tests = {
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(fieldset)}</div>
+              <div class="clonedElement">${cloneEl(control)}</div>
             </details>
           </li>
         `);
