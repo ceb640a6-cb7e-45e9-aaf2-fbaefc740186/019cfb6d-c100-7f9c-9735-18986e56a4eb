@@ -458,6 +458,7 @@
               <div class="resultContent">
                 ${r.content}
               </div>
+              <button onclick="openPopup(this)">Open in popup</button>
               <div class="reqInfo">
                 <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
@@ -467,6 +468,35 @@
           </details>
         `).join("")}
         </div>
+
+        <script>
+        function openPopup(button) {
+            const details = button.closest('details.box');
+            const clone = details.cloneNode(true);
+
+            clone.setAttribute("open", "true");
+
+            let styles = "";
+            document.querySelectorAll("style").forEach(styleTag => {
+              styles += styleTag.outerHTML;
+            });
+
+            const popup = window.open("", "_blank", "width=600,height=400");
+            popup.document.write(`
+              <html>
+                <head>
+                  <title>Popup</title>
+                  ${styles}
+                </head>
+                <body>
+                  ${clone.outerHTML}
+                </body>
+              </html>
+            `);
+
+            popup.document.close();
+          }
+        </script>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
