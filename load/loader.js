@@ -198,6 +198,7 @@
           li {
             padding: 4px 10px;
             border: 1px solid var(--gray);
+            border-bottom-width: 5px;
             margin-top: 5px;
             border-radius: 4px;
             box-shadow: 0 0 8px var(--lighter);
@@ -361,7 +362,7 @@
             pointer-events: none;
             background: var(--white);
             border-radius: 6px;
-            border: 2px solid var(--lighter);
+            border: 3px solid var(--lighter);
             padding: 5px 10px;
             box-shadow: 5px 5px 15px var(--lighter);
             margin: 0 10px 10px 0;

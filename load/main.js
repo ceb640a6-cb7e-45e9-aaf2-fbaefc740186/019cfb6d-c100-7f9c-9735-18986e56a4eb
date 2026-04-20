@@ -17,7 +17,9 @@ const tests = {
           <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
               <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
-              Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
+              Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br>
+              <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
           ${missingAlt.length > 20 ? "<p>Nur die ersten 20 Bilder werden gezeigt.</p>" : ""}
@@ -40,7 +42,10 @@ const tests = {
           <p><strong>${emptyAltImages.length}</strong> Bilder haben einen leeren <code>alt</code>-Tag und müssen <strong>manuell geprüft</strong> werden.</p>
           <ol>
             ${emptyAltImages.slice(0, 30).map((img, i) => `
-              <li>${escapeHtml(img.outerHTML.slice(0, 200))}<br>Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br><img src="${img.src}" height="100">` : ''}</li>
+              <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
+              Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
+              Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br>
+              <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
           ${emptyAltImages.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
@@ -178,6 +183,16 @@ const tests = {
   pruefeDokumenttitel() {
     const rawTitle = document.title || "";
     const titleText = rawTitle.trim();
+
+    if (rawTitle == 'Ernst Klett Verlag') {
+      return {
+        id: 'R1242',
+        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        title: "Dokumenttitel prüfen",
+        status: "fail",
+        content: '<p>Dokumenttitel ist ausschließlich "Ernst Klett Verlag" und gibt daher keine Informationen über den Inhalt der Seite.</p>'
+      };
+    }
 
     let score = 100;
     const fehler = [];
@@ -1078,18 +1093,20 @@ const tests = {
     const langValue = hasLang ? String(htmlEl.getAttribute("lang") || "").trim() : "";
 
     let status = "pass";
-    let content = "<p>Das <code>&lt;html&gt;</code>-Element hat ein gesetztes und nicht-leeres <code>lang</code>-Attribut.</p>";
+    let content = "Das <code>&lt;html&gt;</code>-Element hat ein gesetztes und nicht-leeres <code>lang</code>-Attribut.";
 
     if (!htmlEl) {
       status = "fail";
-      content = "<p>Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.</p>";
+      content = "Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.";
     } else if (!hasLang) {
       status = "fail";
-      content = `<p>Attribut <code>lang</code> fehlt für das <code>&lt;html&gt;</code>-Element.<br>${getElTag(htmlEl)}</p>`;
+      content = `Attribut <code>lang</code> fehlt für das <code>&lt;html&gt;</code>-Element.<br>${getElTag(htmlEl)}`;
     } else if (!langValue) {
       status = "fail";
-      content = `<p>Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.<br>${getElTag(htmlEl)}</p>`;
+      content = `Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.<br>${getElTag(htmlEl)}`;
     }
+
+    content = `<p>${content}<br></br>Element: <code>${getElTag(htmlEl)}</code></p>`;
 
     return {
       id: 'R1311',
