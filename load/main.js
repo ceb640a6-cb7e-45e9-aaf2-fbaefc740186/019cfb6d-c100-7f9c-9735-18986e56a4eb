@@ -276,7 +276,7 @@ const tests = {
       status = "check";
     }
 
-    const parts = [`Gefundener Titel: "${titleText}".`, `Wertung: ${score}/100.`];
+    const parts = [`Gefundener Titel: <strong>"${titleText}"</strong>`, `Wertung: ${score}/100.`];
     if (fehler.length) { parts.push("Probleme: " + fehler.join(" ")); }
     if (hinweise.length) { parts.push("Hinweise: " + hinweise.join(" ")); }
     if (status === "pass") { parts.push("Der Titel wirkt sprechend, sinnvoll und sachlich formuliert."); }
@@ -490,7 +490,15 @@ const tests = {
           selector += `.${Array.from(el.classList).slice(0, 4).join(".")}`;
         }
 
-        results.push(`<strong>${selector || "(node)"}</strong><br>${matches.join(" | ")}<br>Position: <code>${getDomPath(el)}</code>`);
+        results.push(`
+        <strong>${selector || "(node)"}</strong><br>
+        ${matches.join("<br>")}<br>
+        Position: <code>${getDomPath(el)}</code>
+        <details class="clone">
+          <summary><p class="toggleText">Element anzeigen</code></p></summary>
+          <div class="clonedElement">${cloneEl(el)}</div>
+        </details>
+        `);
       }
     });
 
@@ -512,9 +520,7 @@ const tests = {
       content:
         `<p>Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:</p>
         <ol>
-          <li>
-          ${results.join("</li><li>")}
-          </li>
+          ${results.map(item => `<li>${item}</li>`).join('')}
         </ol>`
     };
   },
@@ -815,6 +821,7 @@ const tests = {
 
       if (uniqueErrors.length) {
         issues.push({
+          el: table,
           label: getSelector(table),
           path: getDomPath(table),
           errors: uniqueErrors
@@ -836,6 +843,7 @@ const tests = {
         if (tag === "td") msg = "<td> ist nicht innerhalb einer Tabelle verschachtelt";
 
         orphanIssuesRaw.push({
+          el: el,
           context: nearestContext(el),
           label: getSelector(el),
           path: getDomPath(el),
@@ -849,6 +857,7 @@ const tests = {
         const parent = el.parentElement;
         if (!parent || !/^(table|thead|tbody|tfoot)$/i.test(parent.tagName)) {
           orphanIssuesRaw.push({
+            el: el,
             context: table,
             label: getSelector(el),
             path: getDomPath(el),
@@ -861,6 +870,7 @@ const tests = {
         const parent = el.parentElement;
         if (!parent || parent.tagName.toLowerCase() !== "tr") {
           orphanIssuesRaw.push({
+            el: el,
             context: table,
             label: getSelector(el),
             path: getDomPath(el),
@@ -877,6 +887,7 @@ const tests = {
 
       if (!orphanMap.has(key)) {
         orphanMap.set(key, {
+          el: item,
           label: getSelector(item.context),
           path: getDomPath(item.context),
           errors: []
@@ -916,7 +927,11 @@ const tests = {
                   (err) => `${escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Pfad: <code>${escapeHtml(item.path)}</code>
+                Position: <code>${escapeHtml(item.path)}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                </details>
               </li>
             `
           )
@@ -1039,6 +1054,7 @@ const tests = {
 
       if (errors.length) {
         issues.push({
+          el: el,
           label: getSelector(table),
           path: getDomPath(table),
           errors: [...new Set(errors)]
@@ -1071,7 +1087,11 @@ const tests = {
                   (err) => `${escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Pfad: <code>${escapeHtml(item.path)}</code>
+                Position: <code>${escapeHtml(item.path)}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                </details>
               </li>
             `
           )
@@ -1106,7 +1126,7 @@ const tests = {
       content = `Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.`;
     }
 
-    content = `<p>${content}<br>Element: <code>${getElTag(document.documentElement)}</code></p>`;
+    content = `<p>${content}</p>`;
 
     return {
       id: 'R1311',
@@ -1166,22 +1186,23 @@ const tests = {
         const elemente = gruppiertNachTag[tag];
         const eintraege = elemente
           .map((el) => {
-            return `
-              <li>
+            `<li>
                 <strong>${getElTag(el)}</strong>
                 Element: <code>${escapeHtml(el.outerHTML)}</code><br>
                 Position: <code>${escapeHtml(getDomPath(el))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(el)}</div>
+                </details>
               </li>
-            `;
-          })
+            `
+          });
           .join("");
 
         return `
-          <div style="margin-bottom:12px;">
-            <ol style="margin-top:6px;">
+            <ol>
               ${eintraege}
             </ol>
-          </div>
         `;
       })
       .join("");
@@ -1193,13 +1214,9 @@ const tests = {
       status: "check",
       content: `
         <p>Es wurden <b>${leereElemente.length}</b> leere Tags ohne Attribute gefunden.</p>
-        <div class="sub" style="margin-top:8px;">
-          <p>Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.<br>
-          Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.</p>
-        </div>
-        <div style="margin-top:12px;">
-          ${detailsHtml}
-        </div>
+        <p>Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.<br>
+        Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.</p>
+        ${detailsHtml}
       `
     };
   },
@@ -2371,7 +2388,7 @@ const tests = {
     let content = `
     <p>
       Geprüft wurden <strong>${inspected.length}</strong> wahrscheinlich personenbezogene Eingabefelder<br>
-      Nicht einbezogen: <strong>${excluded.length}</strong> Felder ohne klaren Personenbezug oder mit erkanntem Sonderzweck.<br>
+      Nicht einbezogen: <strong>${excluded.length}</strong> Felder ohne klaren Personenbezug oder mit erkanntem Sonderzweck<br>
       Fehler: <strong>${failures.length}</strong><br>Hinweise: <strong>${warnings.length}</strong>
     </p>
     `;

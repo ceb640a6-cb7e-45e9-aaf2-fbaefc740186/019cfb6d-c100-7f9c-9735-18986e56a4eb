@@ -379,7 +379,7 @@
           }
 
           details > summary .toggleText {
-            padding-left: 20px;
+            padding-left: 30px;
             position: relative;
           }
 
@@ -390,6 +390,9 @@
             left: 0;
             top: 0;
             color: var(--dark);
+            background: var(--lighter);
+            padding: 0 5px;
+            border-radius: 8px;
           }
 
           details[open] > summary .toggleText::before {
