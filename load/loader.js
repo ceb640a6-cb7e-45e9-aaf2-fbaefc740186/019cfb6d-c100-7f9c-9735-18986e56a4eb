@@ -458,7 +458,7 @@
               <div class="resultContent">
                 ${r.content}
               </div>
-              <button class="popupButton removeInPopup" onclick="openPopup(this, ${escapeHtml(r.title)})">Open in popup</button>
+              <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
               <div class="reqInfo">
                 <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
