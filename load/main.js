@@ -1100,13 +1100,13 @@ const tests = {
       content = "Es konnte kein <code>&lt;html&gt;</code>-Element gefunden werden.";
     } else if (!hasLang) {
       status = "fail";
-      content = `Attribut <code>lang</code> fehlt für das <code>&lt;html&gt;</code>-Element.<br>${getElTag(htmlEl)}`;
+      content = `Attribut <code>lang</code> fehlt für das <code>&lt;html&gt;</code>-Element.`;
     } else if (!langValue) {
       status = "fail";
-      content = `Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.<br>${getElTag(htmlEl)}`;
+      content = `Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.`;
     }
 
-    content = `<p>${content}<br></br>Element: <code>${getElTag(htmlEl)}</code></p>`;
+    content = `<p>${content}<br>Element: <code>${getElTag(document.documentElement)}</code></p>`;
 
     return {
       id: 'R1311',
@@ -2713,7 +2713,7 @@ const tests = {
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
         title: "Sichtbare Beschriftungen von Formularelementen",
         status: "pass",
-        content: "Es wurden keine sichtbaren relevanten Formularelemente gefunden."
+        content: "<p>Es wurden keine sichtbaren relevanten Formularelemente gefunden.</p>"
       };
     }
 
