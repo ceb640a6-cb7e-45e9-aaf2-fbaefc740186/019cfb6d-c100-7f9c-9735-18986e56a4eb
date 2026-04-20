@@ -153,7 +153,7 @@ const tests = {
             ${jumps.slice(0, 20).map((jump, i) => `
               <li>
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
-                <strong>${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")}</strong> zu <strong>${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}</strong><br>
+                <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
                 In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
               </li>
             `).join("")}

@@ -449,7 +449,7 @@
           <button onclick="openBoxes('-pass')">Pass ausklappen</button>
           <button onclick="closeBoxes('-pass')">Pass zuklappen</button><br>
               
-          ${results.map(r => `<details class="box box-${r.status}" ${r.status == 'pass' ? '' : 'open'}>
+          ${results.map(r => `<details class="box box-${r.status}" id="${r.uuid}" ${r.status == 'pass' ? '' : 'open'}>
             <summary class="box-header">
               <h2 class="toggleText">${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
@@ -458,7 +458,7 @@
               <div class="resultContent">
                 ${r.content}
               </div>
-              <button class="popupButton" onclick="openPopup(this)">Open in popup</button>
+              <button class="popupButton removeInPopup" onclick="openPopup(this, ${escapeHtml(r.title)})">Open in popup</button>
               <div class="reqInfo">
                 <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
@@ -470,10 +470,10 @@
         </div>
 
         <script>
-        function openPopup(button) {
+        function openPopup(button, docTitle) {
             const details = button.closest('details.box');
             const clone = details.cloneNode(true);
-            clone.querySelectorAll('.popupButton').forEach(btn => btn.remove()); /*remove cloned popup button*/
+            clone.querySelectorAll('.removeInPopup').forEach(el => el.remove()); /*remove cloned popup button*/
             clone.setAttribute("open", "true");
 
             let styles = "";
@@ -481,11 +481,11 @@
               styles += styleTag.outerHTML;
             });
 
-            const popup = window.open("", "_blank", "width=600,height=400");
+            const popup = window.open("", "_blank", "width=700,height=400");
             popup.document.write(\`
               <html>
                 <head>
-                  <title>Popup</title>
+                  <title>\$\{docTitle\} – Popup</title>
                   \$\{styles\}
                 </head>
                 <body>
@@ -580,6 +580,7 @@
           return order[a.status] - order[b.status];
         });
       }
+      results.forEach(obj => obj.uuid = crypto.randomUUID());
       openReport(results);
     } catch (err) {
       console.error("Page analyzer failed:", err);
