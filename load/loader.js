@@ -64,6 +64,7 @@
         results.push({
           id: `Error`,
           reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+          reqInfo: ['test', '123'],
           title: `Missing test: ${name}`,
           status: "crash",
           content: "This test name was configured in loader.js but not found in main.js."
@@ -77,6 +78,7 @@
         results.push({
           id: result?.id || name,
           reqLink: result?.reqLink || ['https://www.geogebra.org/calculator', 'Link-Text'],
+          reqInfo: result?.reqInfo || ['test', '123'],
           title: result?.title || name,
           status: normalizeStatus(result?.status),
           content: result?.content || ""
@@ -85,6 +87,7 @@
         results.push({
           id: `Error`,
           reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+          reqInfo: ['test', '123'],
           title: `Error in test: ${name}`,
           status: "crash",
           content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
@@ -462,6 +465,7 @@
               <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
               <div class="reqInfo">
                 <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
+                Infos: ${escapeHtml(r.reqInfo[0])}//${escapeHtml(r.reqInfo[1])}<br>
                   <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
                 </p>
               </div>

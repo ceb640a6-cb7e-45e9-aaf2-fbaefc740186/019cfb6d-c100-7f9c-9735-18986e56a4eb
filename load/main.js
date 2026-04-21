@@ -8,6 +8,7 @@ const tests = {
     return {
       id: 'R1012',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Bilder ohne Alt-Tag",
       status: missingAlt.length === 0 ? "pass" : "fail",
       content: missingAlt.length === 0
@@ -34,6 +35,7 @@ const tests = {
     return {
       id: 'R1013',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Bilder mit leerem Alt-Tag",
       status: emptyAltImages.length === 0 ? "pass" : "check",
       content: emptyAltImages.length === 0
@@ -60,6 +62,7 @@ const tests = {
     return {
       id: 'R1244',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Links without text",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
@@ -87,6 +90,7 @@ const tests = {
     return {
       id: 'R1031',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Only one H1",
       status: (heads.length === 1) ? "pass" : "fail",
       content: (heads.length === 1)
@@ -169,6 +173,7 @@ const tests = {
     return {
       id: 'R1031',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Heading hierarchy jumps",
       status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
       content: `${headingJumps_content}
@@ -188,6 +193,7 @@ const tests = {
       return {
         id: 'R1242',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Dokumenttitel prüfen",
         status: "fail",
         content: '<p>Dokumenttitel ist ausschließlich "Ernst Klett Verlag" und gibt daher keine Informationen über den Inhalt der Seite.</p>'
@@ -211,6 +217,7 @@ const tests = {
       return {
         id: 'R1242',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Dokumenttitel prüfen",
         status: "fail",
         content: "<p>Kein Dokumenttitel vorhanden.</p>"
@@ -284,6 +291,7 @@ const tests = {
     return {
       id: 'R1242',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Dokumenttitel prüfen",
       status,
       content: `<p>${parts.join("<br>")}</p>`
@@ -372,6 +380,7 @@ const tests = {
     return {
       id: 'R1411',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Prüfe IDs",
       status,
       content
@@ -427,6 +436,7 @@ const tests = {
     return {
       id: 'R1411',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Doppelte Attribute",
       status,
       content
@@ -498,6 +508,7 @@ const tests = {
       return {
         id: 'R1034',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "CSS-Text in Pseudo-Elementen",
         status: "pass",
         content: '<p>Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.</p>'
@@ -507,6 +518,7 @@ const tests = {
     return {
       id: 'R1034',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
@@ -673,6 +685,7 @@ const tests = {
       return {
       id: 'R1241',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Landmarken",
       status,
       content: `
@@ -895,6 +908,7 @@ const tests = {
       return {
         id: 'R1035',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Struktur sichtbarer Tabellen prüfen",
         status: "pass",
         content: visibleTables.length
@@ -926,6 +940,7 @@ const tests = {
     return {
       id: 'R1035',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Struktur sichtbarer Tabellen prüfen",
       status: "fail",
       content: html
@@ -1050,6 +1065,7 @@ const tests = {
       return {
         id: 'R1037',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Visuell transparente Tabellen prüfen",
         status: "pass",
         content: transparentTables.length
@@ -1081,6 +1097,7 @@ const tests = {
     return {
       id: 'R1037',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Visuell transparente Tabellen prüfen",
       status: "fail",
       content: html
@@ -1111,6 +1128,7 @@ const tests = {
     return {
       id: 'R1311',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "lang-Attribut prüfen",
       status,
       content
@@ -1144,6 +1162,7 @@ const tests = {
       return {
         id: 'R8010',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Leere Tags ohne Attribute",
         status: "pass",
         content: `<p>Es wurden keine leeren Tags ohne Attribute gefunden.</p>`
@@ -1189,6 +1208,7 @@ const tests = {
     return {
       id: 'R8010',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Leere Tags ohne Attribute",
       status: "check",
       content: `
@@ -1609,6 +1629,7 @@ const tests = {
     return {
       id: 'R8020',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Links sollen sich durch mehr als nur die Textfarbe von anderem Text abheben",
       status: overallStatus,
       content: `
@@ -1848,6 +1869,7 @@ const tests = {
     return {
       id: 'R1032',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Listenstruktur prüfen",
       status,
       content
@@ -2395,6 +2417,7 @@ const tests = {
     return {
       id: 'R2135',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Autocomplete-Attribute prüfen",
       status: status,
       content: content
@@ -2450,6 +2473,7 @@ const tests = {
       return {
         id: 'R1253',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Sichtbare Beschriftung im Namen",
         status: "pass",
         content: "Es wurden keine Probleme mit zugänglichen Namen in Bedienelementen erkannt oder gefunden."
@@ -2474,6 +2498,7 @@ const tests = {
     return {
       id: 'R1253',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Sichtbare Beschriftung im Namen",
       status: "fail",
       content: `
@@ -2711,6 +2736,7 @@ const tests = {
       return {
         id: 'R1332',
         reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+        reqInfo: ['test', '123'],
         title: "Sichtbare Beschriftungen von Formularelementen",
         status: "pass",
         content: "<p>Es wurden keine sichtbaren relevanten Formularelemente gefunden.</p>"
@@ -2741,6 +2767,7 @@ const tests = {
     return {
       id: 'R1332',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Sichtbare Beschriftungen von Formularelementen",
       status,
       content: summary + details
@@ -3308,6 +3335,7 @@ const tests = {
     return {
       id: 'R1038',
       reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
+      reqInfo: ['test', '123'],
       title: "Beschriftungen und Gruppierungsbeschriftungen von Formularfeldern",
       status,
       content: summary + details
