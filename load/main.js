@@ -157,13 +157,19 @@ const tests = {
     let headingJumps_content = (jumps.length === 0)
         ? "<p>No heading hierarchy jumps found.</p>"
         : `
-          <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
+          <p><strong>${jumps.length}</strong> jump${jumps.length == 1 ? '' : 's'} in heading hierarchy found.</p>
           <ol>
             ${jumps.slice(0, 20).map((jump, i) => `
               <li>
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
                 <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
-                In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                Element: <code>${escapeHtml(getElTag(jump.to))}</code><br>
+                Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Elemente anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(jump.from)}</div>
+                  <div class="clonedElement">${cloneEl(jump.to)}</div>
+                </details>
               </li>
             `).join("")}
           </ol>
@@ -355,8 +361,8 @@ const tests = {
       if (duplicateIds.length > 0) {
         content += duplicateIds.map(([key, elements]) => {
           return `
-            <h4>Doppelte IDs: <code>#${key}</code></h4>
-            <p>Es wurden ${elements.length} Elemente mit der gesetzten ID <code>#${key}</code> gefunden.</p>
+            <p><strong>Doppelte IDs:</strong> <code>#${key}</code><br>
+            Es wurden ${elements.length} Elemente mit der gesetzten ID <code>#${key}</code> gefunden.</p>
             <details class="clone">
               <summary><p class="toggleText">Elemente anzeigen mit </p></summary>
               ${elements.map(el => `
