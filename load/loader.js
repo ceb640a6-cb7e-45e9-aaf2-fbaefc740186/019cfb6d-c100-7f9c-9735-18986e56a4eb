@@ -64,8 +64,8 @@
         results.push({
           id: `Error`,
           reqLink: ['#', 'Error'],
-          reqInfo: ['Error im Test', ''],
-          title: `Missing test: ${name}`,
+          reqInfo: [`Test ${name} nicht gefunden`, `Betroffen: ${name}`],
+          title: `Unbekannter Test: ${name}`,
           status: "crash",
           content: "This test name was configured in loader.js but not found in main.js."
         });
@@ -85,12 +85,12 @@
         });
       } catch (err) {
         results.push({
-          id: `Error`,
-          reqLink: ['#', 'Error'],
-          reqInfo: ['Error im Test', ''],
-          title: `Error in test: ${name}`,
+          id: `Error`,  
+          reqLink: ['', 'Error'],
+          reqInfo: [`${err.name} im Test`, `${name}: <code>${escapeHtml(err.stack || err)}</code>`],
+          title: `${err.name} in test: ${name}`,
           status: "crash",
-          content: `<pre>${escapeHtml(err.message || String(err))}</pre>`
+          content: `<pre>${escapeHtml(err.toString() || String(err))}</pre><br><pre>${escapeHtml(err.stack || err)}</pre>`
         });
       }
     }
