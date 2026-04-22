@@ -2409,7 +2409,7 @@ const tests = {
           `<li><strong>${escapeHtml(item.message)}</strong><br>
             Position: <code>${escapeHtml(item.path)}</code><br>
             <details class="clone">
-              <summary><p class="toggleText">Element-Vorschau anzeigen</p></summary>
+              <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="clonedElement">
                 ${item.cloned}
               </div>
@@ -2512,9 +2512,10 @@ const tests = {
     const listItems = issues
       .map((issue) => `
         <li>
-          <strong>Element:</strong> <code>${getElTag(issue.el)}</code><br>
+          <strong>Element:</strong> &lt;${issue.tagName}&gt;<br>
           <strong>Sichtbare Beschriftung:</strong> ${escapeHtml(issue.visibleText)}<br>
           <strong>Zugänglicher Name:</strong> ${escapeHtml(issue.accessibleName)}
+
           <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="clonedElement">${cloneEl(issue.el)}</div>
@@ -2530,7 +2531,7 @@ const tests = {
       title: "Sichtbare Beschriftung im Namen",
       status: "fail",
       content: `
-        <p>Es wurde${issues.length == 1 ? '' : 'n'} ${issues.length} Problem${issues.length == 1 ? '' : 'e'} gefunden:</p>
+        <p>Es wurden ${issues.length} Probleme gefunden:</p>
         <ol>
           ${listItems}
         </ol>
