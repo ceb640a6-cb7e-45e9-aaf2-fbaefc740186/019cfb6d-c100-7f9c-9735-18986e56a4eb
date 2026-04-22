@@ -41,11 +41,11 @@ const tests = {
       content: emptyAltImages.length === 0
         ? "<p>Alle Alt-Texte in Bildern sind befüllt.</p>"
         : `
-          <p><strong>${emptyAltImages.length}</strong> Bilder haben einen leeren <code>alt</code>-Tag und müssen <strong>manuell geprüft</strong> werden.</p>
+          <p><strong>${emptyAltImages.length}</strong> ${emptyAltImages.length == 1 ? 'Bild hat' : 'Bilder haben'} einen leeren <code>alt</code>-Tag. ${emptyAltImages.length == 1 ? 'Dieses Bild darf' : 'Diese Bilder dürfen'} daher <strong>keinen wichtigen Informationsgehalt</strong> besitzen, da diese${emptyAltImages.length == 1 ? 's' : ''} als Schmuckbild${emptyAltImages.length == 1 ? '' : 'er'} interpretiert ${emptyAltImages.length == 1 ? 'wird' : 'werden'}.<br>Bitte kontrolliere, ob das so korrekt ist.</p>
           <ol>
             ${emptyAltImages.slice(0, 30).map((img, i) => `
-              <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
-              Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
+              <li>Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
+              Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
               Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br>
               <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
@@ -68,7 +68,7 @@ const tests = {
       content: badLinks.length === 0
         ? "<p>No empty links found.</p>"
         : `
-          <p><strong>${badLinks.length}</strong> link(s) appear to have no visible text and no <code>aria-label</code>.</p>
+          <p><strong>${badLinks.length}</strong> link${badLinks.length == 1 ? '' : 's'} appear to have no visible text and no <code>aria-label</code>.</p>
           <ol>
             ${badLinks.slice(0, 20).map(a => `
               <li>Element: <code>${escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
@@ -355,8 +355,10 @@ const tests = {
       if (duplicateIds.length > 0) {
         content += duplicateIds.map(([key, elements]) => {
           return `
+            <h4>Doppelte IDs: <code>#${key}</code></h4>
+            <p>Es wurden ${elements.length} Elemente mit der gesetzten ID <code>#${key}</code> gefunden.</p>
             <details class="clone">
-              <summary><p class="toggleText">Elemente anzeigen mit <code>#${key}</code></p></summary>
+              <summary><p class="toggleText">Elemente anzeigen mit </p></summary>
               ${elements.map(el => `
                 <div class="clonedElement">${cloneEl(el)}</div>
               `).join("")}
@@ -367,8 +369,9 @@ const tests = {
 
       if (emptyElements.length > 0) {
         content += `
+          <h4>Leere IDs</h4>
           <details class="clone">
-            <summary><p class="toggleText">Elemente anzeigen mit leerer ID</p></summary>
+            <summary><p class="toggleText">Elemente anzeigen</p></summary>
             ${emptyElements.map(el => `
               <div class="clonedElement">${cloneEl(el)}</div>
             `).join("")}
@@ -500,7 +503,16 @@ const tests = {
           selector += `.${Array.from(el.classList).slice(0, 4).join(".")}`;
         }
 
-        results.push(`<strong>${selector || "(node)"}</strong><br>${matches.join(" | ")}<br>Position: <code>${getDomPath(el)}</code>`);
+        results.push(
+          `<strong>${selector || "(node)"}</strong><br>
+          ${matches.join(" | ")}<br>
+          Element: <code>${escapeHtml(getElTag(el))}</code>
+          Position: <code>${escapeHtml(getDomPath(el))}</code>
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</code></p></summary>
+            <div class="clonedElement">${cloneEl(el)}</div>
+          </details>
+          `);
       }
     });
 
@@ -522,7 +534,7 @@ const tests = {
         title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
-        `<p>Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:</p>
+        `<p>Es wurde${results.length == 1 ? '' : 'n'} ${results.length} Element${results.length == 1 ? '' : 'e'} mit per CSS eingebundenem Text gefunden:</p>
         <ol>
           <li>
           ${results.join("</li><li>")}
@@ -890,6 +902,7 @@ const tests = {
 
       if (!orphanMap.has(key)) {
         orphanMap.set(key, {
+          el: item.context,
           label: getSelector(item.context),
           path: getDomPath(item.context),
           errors: []
@@ -930,7 +943,12 @@ const tests = {
                   (err) => `${escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Pfad: <code>${escapeHtml(item.path)}</code>
+                Element: <code>${escapeHtml(getElTag(item.el))}</code>
+                Position: <code>${escapeHtml(item.path)}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                </details>
               </li>
             `
           )
@@ -1054,6 +1072,7 @@ const tests = {
 
       if (errors.length) {
         issues.push({
+          el: table,
           label: getSelector(table),
           path: getDomPath(table),
           errors: [...new Set(errors)]
@@ -1087,7 +1106,12 @@ const tests = {
                   (err) => `${escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Pfad: <code>${escapeHtml(item.path)}</code>
+                Element: <code>${escapeHtml(getElTag(item.el))}</code><br>
+                Position: <code>${escapeHtml(item.path)}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                </details>
               </li>
             `
           )
@@ -1123,7 +1147,7 @@ const tests = {
       content = `Das <code>&lt;html&gt;</code>-Element hat ein leeres <code>lang</code>-Attribut.`;
     }
 
-    content = `<p>${content}<br>Element: <code>${getElTag(document.documentElement)}</code></p>`;
+    content = `<p>${content}</p>`;
 
     return {
       id: 'R1311',
@@ -1190,17 +1214,19 @@ const tests = {
                 <strong>${getElTag(el)}</strong>
                 Element: <code>${escapeHtml(el.outerHTML)}</code><br>
                 Position: <code>${escapeHtml(getDomPath(el))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</code></p></summary>
+                  <div class="clonedElement">${cloneEl(el)}</div>
+                </details>
               </li>
             `;
           })
           .join("");
 
         return `
-          <div style="margin-bottom:12px;">
-            <ol style="margin-top:6px;">
-              ${eintraege}
-            </ol>
-          </div>
+          <ol>
+            ${eintraege}
+          </ol>
         `;
       })
       .join("");
@@ -1217,9 +1243,7 @@ const tests = {
           <p>Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.<br>
           Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.</p>
         </div>
-        <div style="margin-top:12px;">
-          ${detailsHtml}
-        </div>
+        ${detailsHtml}
       `
     };
   },
@@ -1589,9 +1613,9 @@ const tests = {
           Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
           Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
           ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}<br>
+          Element: <code>${escapeHtml(getElTag(x.el))}</code><br>
           Position: <code>${escapeHtml(x.path)}</code>
           ${renderDiffs(x)}
-
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</code></p></summary>
             <div class="clonedElement">${cloneEl(x.el)}</div>
@@ -1825,6 +1849,7 @@ const tests = {
         content += `
           <li>
             <strong>${escapeHtml(entry.message)}</strong><br>
+            Element: <code>${escapeHtml(getElTag(entry.el))}</code><br>
             Position: <code>${escapeHtml(entry.path)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
@@ -2483,7 +2508,7 @@ const tests = {
     const listItems = issues
       .map((issue) => `
         <li>
-          <strong>Element:</strong> &lt;${issue.tagName}&gt;<br>
+          <strong>Element:</strong> <code>${getElTag(issue.el)}</code><br>
           <strong>Sichtbare Beschriftung:</strong> ${escapeHtml(issue.visibleText)}<br>
           <strong>Zugänglicher Name:</strong> ${escapeHtml(issue.accessibleName)}
 
@@ -2502,7 +2527,7 @@ const tests = {
       title: "Sichtbare Beschriftung im Namen",
       status: "fail",
       content: `
-        <p>Es wurden ${issues.length} Problem(e) gefunden:</p>
+        <p>Es wurde${issues.length == 1 ? '' : 'n'} ${issues.length} Problem${issues.length == 1 ? '' : 'e'} gefunden:</p>
         <ol>
           ${listItems}
         </ol>
