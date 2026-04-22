@@ -7,8 +7,8 @@ const tests = {
 
     return {
       id: 'R1012',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-1-1b-alternativtexte-fuer-grafiken-und-objekte', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.1.1b', 'Alternativtexte für Grafiken und Objekte'],
       title: "Bilder ohne Alt-Tag",
       status: missingAlt.length === 0 ? "pass" : "fail",
       content: missingAlt.length === 0
@@ -34,8 +34,8 @@ const tests = {
 
     return {
       id: 'R1013',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-1-1c-leere-alt-attribute-fuer-layoutgrafiken', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.1.1c', 'Leere alt-Attribute für Layoutgrafiken'],
       title: "Bilder mit leerem Alt-Tag",
       status: emptyAltImages.length === 0 ? "pass" : "check",
       content: emptyAltImages.length === 0
@@ -61,8 +61,8 @@ const tests = {
 
     return {
       id: 'R1244',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-4-aussagekraeftige-linktexte', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.2.4.4', 'Aussagekräftige Linktexte'],
       title: "Links without text",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
@@ -89,8 +89,8 @@ const tests = {
     const heads = [...document.querySelectorAll('h1')];
     return {
       id: 'R1031',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
       title: "Only one H1",
       status: (heads.length === 1) ? "pass" : "fail",
       content: (heads.length === 1)
@@ -172,8 +172,8 @@ const tests = {
 
     return {
       id: 'R1031',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
       title: "Heading hierarchy jumps",
       status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
       content: `${headingJumps_content}
@@ -192,8 +192,8 @@ const tests = {
     if (rawTitle == 'Ernst Klett Verlag') {
       return {
         id: 'R1242',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
         title: "Dokumenttitel prüfen",
         status: "fail",
         content: '<p>Dokumenttitel ist ausschließlich "Ernst Klett Verlag" und gibt daher keine Informationen über den Inhalt der Seite.</p>'
@@ -216,8 +216,8 @@ const tests = {
     if (isEmpty) {
       return {
         id: 'R1242',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
         title: "Dokumenttitel prüfen",
         status: "fail",
         content: "<p>Kein Dokumenttitel vorhanden.</p>"
@@ -290,9 +290,9 @@ const tests = {
 
     return {
       id: 'R1242',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
-      title: "Dokumenttitel prüfen",
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
+        title: "Dokumenttitel prüfen",
       status,
       content: `<p>${parts.join("<br>")}</p>`
     };
@@ -379,8 +379,8 @@ const tests = {
 
     return {
       id: 'R1411',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-4-1-1-korrekte-syntax', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.4.1.1', 'Korrekte Syntax'],
       title: "Prüfe IDs",
       status,
       content
@@ -435,8 +435,8 @@ const tests = {
 
     return {
       id: 'R1411',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-4-1-1-korrekte-syntax', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.4.1.1', 'Korrekte Syntax'],
       title: "Doppelte Attribute",
       status,
       content
@@ -507,8 +507,8 @@ const tests = {
     if (results.length === 0) {
       return {
         id: 'R1034',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1d-inhalt-gegliedert', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1d', 'Inhalt gegliedert'],
         title: "CSS-Text in Pseudo-Elementen",
         status: "pass",
         content: '<p>Kein per CSS eingebundener Text über "::before" oder "::after" mit mehr als 2 Zeichen gefunden.</p>'
@@ -517,9 +517,9 @@ const tests = {
 
     return {
       id: 'R1034',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
-      title: "CSS-Text in Pseudo-Elementen",
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1d-inhalt-gegliedert', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1d', 'Inhalt gegliedert'],
+        title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
         `<p>Es wurden ${results.length} Element(e) mit per CSS eingebundenem Text gefunden:</p>
@@ -684,8 +684,8 @@ const tests = {
 
       return {
       id: 'R1241',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-1-bereiche-ueberspringbar', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.2.4.1', 'Bereiche überspringbar'],
       title: "Landmarken",
       status,
       content: `
@@ -907,8 +907,8 @@ const tests = {
     if (!issues.length) {
       return {
         id: 'R1035',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1e-datentabellen-richtig-aufgebaut', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1e', 'Datentabellen richtig aufgebaut'],
         title: "Struktur sichtbarer Tabellen prüfen",
         status: "pass",
         content: visibleTables.length
@@ -939,8 +939,8 @@ const tests = {
 
     return {
       id: 'R1035',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1e-datentabellen-richtig-aufgebaut', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1e', 'Datentabellen richtig aufgebaut'],
       title: "Struktur sichtbarer Tabellen prüfen",
       status: "fail",
       content: html
@@ -1064,8 +1064,8 @@ const tests = {
     if (!issues.length) {
       return {
         id: 'R1037',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1g-kein-strukturmarkup-fuer-layouttabellen', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1g', 'Kein Strukturmarkup für Layouttabellen'],
         title: "Visuell transparente Tabellen prüfen",
         status: "pass",
         content: transparentTables.length
@@ -1096,8 +1096,8 @@ const tests = {
 
     return {
       id: 'R1037',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1g-kein-strukturmarkup-fuer-layouttabellen', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1g', 'Kein Strukturmarkup für Layouttabellen'],
       title: "Visuell transparente Tabellen prüfen",
       status: "fail",
       content: html
@@ -1127,8 +1127,8 @@ const tests = {
 
     return {
       id: 'R1311',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-3-1-1-hauptsprache-angegeben', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.3.1.1', 'Hauptsprache angegeben'],
       title: "lang-Attribut prüfen",
       status,
       content
@@ -1161,8 +1161,8 @@ const tests = {
     if (leereElemente.length === 0) {
       return {
         id: 'R8010',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['#', 'Nicht zugeordnet'],
+        reqInfo: ['R8010', 'Nicht zugeordnet'],
         title: "Leere Tags ohne Attribute",
         status: "pass",
         content: `<p>Es wurden keine leeren Tags ohne Attribute gefunden.</p>`
@@ -1207,8 +1207,8 @@ const tests = {
 
     return {
       id: 'R8010',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['#', 'Nicht zugeordnet'],
+      reqInfo: ['R8010', 'Nicht zugeordnet'],
       title: "Leere Tags ohne Attribute",
       status: "check",
       content: `
@@ -1628,8 +1628,8 @@ const tests = {
 
     return {
       id: 'R8020',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['#', 'Nicht zugeordnet'],
+      reqInfo: ['R8020', 'Nicht zugeordnet'],
       title: "Links sollen sich durch mehr als nur die Textfarbe von anderem Text abheben",
       status: overallStatus,
       content: `
@@ -1868,8 +1868,8 @@ const tests = {
 
     return {
       id: 'R1032',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1b-html-strukturelemente-fuer-listen', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1b', 'HTML-Strukturelemente für Listen'],
       title: "Listenstruktur prüfen",
       status,
       content
@@ -2416,8 +2416,8 @@ const tests = {
 
     return {
       id: 'R2135',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-5-eingabefelder-zu-nutzerdaten-vermitteln-den-zweck', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.5', 'Eingabefelder zu Nutzerdaten vermitteln den Zweck'],
       title: "Autocomplete-Attribute prüfen",
       status: status,
       content: content
@@ -2472,8 +2472,8 @@ const tests = {
     if (issues.length === 0) {
       return {
         id: 'R1253',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-5-3-sichtbare-beschriftung-teil-des-zugaenglichen-namens', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.2.5.3', 'Sichtbare Beschriftung Teil des zugänglichen Namens'],
         title: "Sichtbare Beschriftung im Namen",
         status: "pass",
         content: "Es wurden keine Probleme mit zugänglichen Namen in Bedienelementen erkannt oder gefunden."
@@ -2497,8 +2497,8 @@ const tests = {
 
     return {
       id: 'R1253',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-5-3-sichtbare-beschriftung-teil-des-zugaenglichen-namens', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.2.5.3', 'Sichtbare Beschriftung Teil des zugänglichen Namens'],
       title: "Sichtbare Beschriftung im Namen",
       status: "fail",
       content: `
@@ -2735,8 +2735,8 @@ const tests = {
     if (!relevantElements.length) {
       return {
         id: 'R1332',
-        reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-        reqInfo: ['test', '123'],
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-3-3-2-beschriftungen-von-formularelementen-vorhanden', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.3.3.2', 'Beschriftungen von Formularelementen vorhanden'],
         title: "Sichtbare Beschriftungen von Formularelementen",
         status: "pass",
         content: "<p>Es wurden keine sichtbaren relevanten Formularelemente gefunden.</p>"
@@ -2766,8 +2766,8 @@ const tests = {
 
     return {
       id: 'R1332',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-3-3-2-beschriftungen-von-formularelementen-vorhanden', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.3.3.2', 'Beschriftungen von Formularelementen vorhanden'],
       title: "Sichtbare Beschriftungen von Formularelementen",
       status,
       content: summary + details
@@ -3334,8 +3334,8 @@ const tests = {
 
     return {
       id: 'R1038',
-      reqLink: ['https://www.geogebra.org/calculator', 'Link-Text'],
-      reqInfo: ['test', '123'],
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1h-beschriftung-von-formularelementen-programmatisch-ermittelbar', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1h', 'Beschriftung von Formularelementen programmatisch ermittelbar'],
       title: "Beschriftungen und Gruppierungsbeschriftungen von Formularfeldern",
       status,
       content: summary + details
