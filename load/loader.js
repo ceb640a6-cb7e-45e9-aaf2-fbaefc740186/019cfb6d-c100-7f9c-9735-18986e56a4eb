@@ -326,22 +326,18 @@
 
           .box-pass {
             border-left: 7px solid var(--pass-dark);
-            linear-gradient(90deg,var(--pass-white) 0%, var(--white) 3%);
           }
 
           .box-check {
             border-left: 7px solid var(--check-dark);
-            linear-gradient(90deg,var(--check-white) 0%, var(--white) 3%);
           }
 
           .box-fail {
             border-left: 7px solid var(--fail-dark);
-            linear-gradient(90deg,var(--fail-white) 0%, var(--white) 3%);
           }
 
           .box-crash {
             border-left: 7px solid var(--crash-dark);
-            linear-gradient(90deg,var(--check-white) 0%, var(--white) 3%);
           }
 
           code, pre {
@@ -471,7 +467,7 @@
                 ${r.content}
               </div>
               <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
-                <details style="padding: 0 10px; margin-top: 10px; border: 2px solid var(--${r.status}-black); border-radius: 4px">
+                <details>
                   <summary>
                     <p class="toggleText">Weitere Infos zur Anforderung</p>
                   </summary>
