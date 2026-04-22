@@ -840,6 +840,7 @@ const tests = {
 
       if (uniqueErrors.length) {
         issues.push({
+          el: table,
           label: getSelector(table),
           path: getDomPath(table),
           errors: uniqueErrors
@@ -861,6 +862,7 @@ const tests = {
         if (tag === "td") msg = "<td> ist nicht innerhalb einer Tabelle verschachtelt";
 
         orphanIssuesRaw.push({
+          el: el,
           context: nearestContext(el),
           label: getSelector(el),
           path: getDomPath(el),
@@ -874,6 +876,7 @@ const tests = {
         const parent = el.parentElement;
         if (!parent || !/^(table|thead|tbody|tfoot)$/i.test(parent.tagName)) {
           orphanIssuesRaw.push({
+            el: el,
             context: table,
             label: getSelector(el),
             path: getDomPath(el),
@@ -886,6 +889,7 @@ const tests = {
         const parent = el.parentElement;
         if (!parent || parent.tagName.toLowerCase() !== "tr") {
           orphanIssuesRaw.push({
+            el: el,
             context: table,
             label: getSelector(el),
             path: getDomPath(el),

@@ -87,10 +87,10 @@
         results.push({
           id: `Error`,  
           reqLink: ['', 'Error'],
-          reqInfo: [`${err.name} im Test`, `${name}: <code>${escapeHtml(err.stack || err)}</code>`],
+          reqInfo: [`${err.name} im Test`, `${name}: <code>${err.name || 'Unbekannter Fehler'}</code>`],
           title: `${err.name} in test: ${name}`,
           status: "crash",
-          content: `<pre>${escapeHtml(err.toString() || String(err))}</pre><br><pre>${escapeHtml(err.stack || err)}</pre>`
+          content: `<pre>${escapeHtml(err.toString() || String(err))}</pre><pre>${escapeHtml(err.stack || err)}</pre>`
         });
       }
     }
