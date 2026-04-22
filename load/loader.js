@@ -198,6 +198,10 @@
             color: var(--link-dark);
           }
 
+          ol, ul {
+            padding-left: 30px;
+          }
+
           li {
             padding: 4px 10px;
             border: 1px solid var(--gray);
@@ -463,13 +467,18 @@
                 ${r.content}
               </div>
               <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
-              <div class="reqInfo">
-                <p><span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span><br>
-                  <strong>${escapeHtml(r.reqInfo[0])}</strong><br>
-                  ${escapeHtml(r.reqInfo[1])}<br>
-                  <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a>
-                </p>
-              </div>
+                <details>
+                  <summary>
+                    <p class="toggleText">Weitere Infos zur Anforderung</p>
+                  </summary>
+                  <div class="reqInfo">
+                    <p><strong>${escapeHtml(r.reqInfo[0])}</strong><br>
+                      ${escapeHtml(r.reqInfo[1])}<br>
+                      <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a><br>
+                      <span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span>
+                    </p>
+                </div>
+              </details>
             </div>
           </details>
         `).join("")}
