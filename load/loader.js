@@ -462,7 +462,7 @@
               <h2 class="toggleText">${escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </summary>
-            <div class="box-content">
+            <div class="box-content details-content">
               <div class="resultContent">
                 ${r.content}
               </div>

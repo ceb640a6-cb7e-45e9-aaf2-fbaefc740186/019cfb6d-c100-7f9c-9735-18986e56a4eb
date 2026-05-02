@@ -76,7 +76,9 @@ const tests = {
               Position: <code>${getDomPath(a)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(a)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(a)}</div>
+                </div>
               </details>
               </li>
             `).join("")}
@@ -102,7 +104,9 @@ const tests = {
           Position: <code>${getDomPath(el)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
-            <div class="clonedElement">${cloneEl(el)}</div>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(el)}</div>
+            </div>
           </details>
           </li>
         `).join("")}
@@ -168,18 +172,45 @@ const tests = {
             `).join("")}
           </ol>
           ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
-        `
+        `;
+
+    const invalidHeadings = [...document.querySelectorAll('*')]
+      .filter(el => /^h\d+$/i.test(el.tagName))
+      .filter(el => {
+        const level = Number(el.tagName.slice(1));
+        return level < 1 || level > 6;
+      });
+
+    let invalidHeadings_content = (invalidHeadings.length === 0)
+        ? ''
+        : `
+          <p><strong>${invalidHeadings.length}</strong> invalide Überschriften gefunden.</p>
+          <ol>
+            ${invalidHeadings.slice(0, 20).map((el, i) => `
+              <li>
+                <strong>&lt;${el.tagName.toLowerCase()}&gt;</strong><br>
+                <strong>"${el.textContent}"</strong><br>
+                In Position: <code>${escapeHtml(getDomPath(el))}</code>
+              </li>
+            `).join("")}
+          </ol>
+          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+        `;
+
+    let statusRes = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail";
 
     return {
       id: 'R1031',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
       title: "Heading hierarchy jumps",
-      status: jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail",
+      status: statusRes,
       content: `${headingJumps_content}
         <details>
           <summary><p class="toggleText">Alle ${headings.length} Überschriften anzeigen</code></p></summary>
-          ${headingList_content}
+          <div class="inline-content details-content">
+            ${headingList_content}
+          </div>
         </details>
       `
     };
@@ -359,9 +390,11 @@ const tests = {
             <p>Es wurden ${elements.length} Elemente mit der gesetzten ID <code>#${key}</code> gefunden.</p>
             <details class="clone">
               <summary><p class="toggleText">Elemente anzeigen mit </p></summary>
-              ${elements.map(el => `
-                <div class="clonedElement">${cloneEl(el)}</div>
-              `).join("")}
+              <div class="inline-content details-content">
+                ${elements.map(el => `
+                  <div class="clonedElement">${cloneEl(el)}</div>
+                `).join("")}
+              </div>
             </details>
           `;
         }).join("");
@@ -372,9 +405,11 @@ const tests = {
           <h4>Leere IDs</h4>
           <details class="clone">
             <summary><p class="toggleText">Elemente anzeigen</p></summary>
-            ${emptyElements.map(el => `
-              <div class="clonedElement">${cloneEl(el)}</div>
-            `).join("")}
+            <div class="inline-content details-content">
+              ${emptyElements.map(el => `
+                <div class="clonedElement">${cloneEl(el)}</div>
+              `).join("")}
+            </div>
           </details>
         `;
       }
@@ -510,7 +545,9 @@ const tests = {
           Position: <code>${escapeHtml(getDomPath(el))}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</code></p></summary>
-            <div class="clonedElement">${cloneEl(el)}</div>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(el)}</div>
+            </div>
           </details>
           `);
       }
@@ -677,9 +714,9 @@ const tests = {
     const summaryList = details
       .map((item) => {
         const label = `<code>${escapeHtml(item.tag)}</code>`;
-        const base = `${label}: gefunden <b>${item.count}</b>, sichtbar <b>${item.visibleCount}</b>`;
+        const base = `${label}: gefunden <strong>${item.count}</strong>, sichtbar <strong>${item.visibleCount}</strong>`;
         if (item.namedCount !== null && item.visibleCount > 1) {
-          return `${base}, benannt <b>${item.namedCount}</b>`;
+          return `${base}, benannt <strong>${item.namedCount}</strong>`;
         }
         return base;
       })
@@ -935,13 +972,13 @@ const tests = {
     }
 
     const html = `
-      <p>Geprüfte visuell gestaltete Tabellen: <b>${visibleTables.length}</b><br>
-      Gefundene Probleme: <b>${issues.length}</b></p><ol>
+      <p>Geprüfte visuell gestaltete Tabellen: <strong>${visibleTables.length}</strong><br>
+      Gefundene Probleme: <strong>${issues.length}</strong></p><ol>
         ${issues
           .map(
             (item, index) => `
               <li>
-                <b>${escapeHtml(item.label)}</b><br>
+                <strong>${escapeHtml(item.label)}</strong><br>
                 ${item.errors
                 .map(
                   (err) => `${escapeHtml(err)}`
@@ -951,7 +988,9 @@ const tests = {
                 Position: <code>${escapeHtml(item.path)}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
-                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(item.el)}</div>
+                  </div>
                 </details>
               </li>
             `
@@ -1098,13 +1137,13 @@ const tests = {
     }
 
     const html = `
-      <p>Geprüfte visuell transparente Tabellen: <b>${transparentTables.length}</b><br>
-      Gefundene Probleme: <b>${issues.length}</b></p><ol>
+      <p>Geprüfte visuell transparente Tabellen: <strong>${transparentTables.length}</strong><br>
+      Gefundene Probleme: <strong>${issues.length}</strong></p><ol>
         ${issues
           .map(
             (item, index) => `
               <li>
-                <b>${escapeHtml(item.label)}</b><br>
+                <strong>${escapeHtml(item.label)}</strong><br>
                 ${item.errors
                 .map(
                   (err) => `${escapeHtml(err)}`
@@ -1114,7 +1153,9 @@ const tests = {
                 Position: <code>${escapeHtml(item.path)}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
-                  <div class="clonedElement">${cloneEl(item.el)}</div>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(item.el)}</div>
+                  </div>
                 </details>
               </li>
             `
@@ -1220,7 +1261,9 @@ const tests = {
                 Position: <code>${escapeHtml(getDomPath(el))}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
-                  <div class="clonedElement">${cloneEl(el)}</div>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(el)}</div>
+                  </div>
                 </details>
               </li>
             `;
@@ -1242,7 +1285,7 @@ const tests = {
       title: "Leere Tags ohne Attribute",
       status: "check",
       content: `
-        <p>Es wurden <b>${leereElemente.length}</b> leere Tags ohne Attribute gefunden.</p>
+        <p>Es wurden <strong>${leereElemente.length}</strong> leere Tags ohne Attribute gefunden.</p>
         <div class="sub" style="margin-top:8px;">
           <p>Geprüft wurden nur Elemente ohne Attribute, ohne Textinhalt und ohne Kindelemente.<br>
           Void-Elemente wie <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code> oder <code>&lt;meta&gt;</code> wurden ignoriert.</p>
@@ -1597,7 +1640,7 @@ const tests = {
       let rows = Object.entries(x.diff)
       .filter(([, v]) => v && String(v.link) !== String(v.context))
       .map(([key, v]) => `
-          <b>${escapeHtml(labels[key] || key)}:</b>
+          <strong>${escapeHtml(labels[key] || key)}:</strong>
           Text = <code>${escapeHtml(v.context || "(leer)")}</code>
           → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
       `)
@@ -1616,13 +1659,15 @@ const tests = {
           ${escapeHtml(x.reason)}<br>
           Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
           Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-          ${x.contrast != null ? ` → Kontrast Link/Text: <b>${escapeHtml(x.contrast.toFixed(2))}:1</b>` : ""}<br>
+          ${x.contrast != null ? ` → Kontrast Link/Text: <strong>${escapeHtml(x.contrast.toFixed(2))}:1</strong>` : ""}<br>
           Element: <code>${escapeHtml(getElTag(x.el))}</code><br>
           Position: <code>${escapeHtml(x.path)}</code>
           ${renderDiffs(x)}
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</code></p></summary>
-            <div class="clonedElement">${cloneEl(x.el)}</div>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(x.el)}</div>
+            </div>
           </details>
         </li>
       `;
@@ -1638,10 +1683,10 @@ const tests = {
     if (fails.length) overallStatus = "fail";
 
     const summaryHtml = `
-      <p>Geprüft wurden als Inline-Link erkannte <b>&lt;a href&gt;</b>-Elemente im Fließtext.</p>
-      <p>Alle gefundenen Links gesamt: <b>${allLinks.length}</b><br>
-      Textlinks im Fließtext: <b>${inlineLinks.length}</b><br>
-      Problematische Links: <b>${fails.length}</b></p>
+      <p>Geprüft wurden als Inline-Link erkannte <strong>&lt;a href&gt;</strong>-Elemente im Fließtext.</p>
+      <p>Alle gefundenen Links gesamt: <strong>${allLinks.length}</strong><br>
+      Textlinks im Fließtext: <strong>${inlineLinks.length}</strong><br>
+      Problematische Links: <strong>${fails.length}</strong></p>
     `;
 
     const failHtml = fails.length
@@ -1857,7 +1902,9 @@ const tests = {
             Position: <code>${escapeHtml(entry.path)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
-              <div class="clonedElement">${cloneEl(entry.el)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(entry.el)}</div>
+              </div>
             </details>
           </li>
         `;
@@ -1885,7 +1932,9 @@ const tests = {
             Position: <code>${escapeHtml(entry.path)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
-              <div class="clonedElement">${cloneEl(entry.el)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(entry.el)}</div>
+              </div>
             </details>
           </li>
         `;
@@ -2410,8 +2459,8 @@ const tests = {
             Position: <code>${escapeHtml(item.path)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">
-                ${item.cloned}
+              <div class="inline-content details-content">
+                <div class="clonedElement">${item.cloned}</div>
               </div>
             </details>
           </li>`
@@ -2518,7 +2567,9 @@ const tests = {
 
           <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(issue.el)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(issue.el)}</div>
+              </div>
             </details>
         </li>
       `)
@@ -2731,7 +2782,9 @@ const tests = {
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(el)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(el)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -2751,7 +2804,9 @@ const tests = {
             Position: <code>${escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(el)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(el)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3047,7 +3102,9 @@ const tests = {
             Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(label)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(label)}</div>
+                </div>
               </details>
           </li>
         `);
@@ -3064,7 +3121,9 @@ const tests = {
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(label)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(label)}</div>
+                </div>
               </details>
             </li>
           `);
@@ -3080,7 +3139,9 @@ const tests = {
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(label)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(label)}</div>
+                </div>
               </details>
             </li>
           `);
@@ -3096,7 +3157,9 @@ const tests = {
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(label)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(label)}</div>
+                </div>
               </details>
             </li>
           `);
@@ -3123,7 +3186,9 @@ const tests = {
               Position: <code>${escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="clonedElement">${cloneEl(label)}</div>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(label)}</div>
+                </div>
               </details>
             </li>
           `);
@@ -3149,7 +3214,9 @@ const tests = {
             Position: <code>${escapeHtml(labelPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(label)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(label)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3164,7 +3231,9 @@ const tests = {
           Position: <code>${escapeHtml(labelPath)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
-            <div class="clonedElement">${cloneEl(label)}</div>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(label)}</div>
+            </div>
           </details>
         </li>
       `);
@@ -3197,7 +3266,9 @@ const tests = {
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(control)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(control)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3224,7 +3295,9 @@ const tests = {
             Position: <code>${escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(control)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(control)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3253,7 +3326,9 @@ const tests = {
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(fieldset)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(fieldset)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3269,7 +3344,9 @@ const tests = {
             Position: <code>${escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
-              <div class="clonedElement">${cloneEl(fieldset)}</div>
+              <div class="inline-content details-content">
+                <div class="clonedElement">${cloneEl(fieldset)}</div>
+              </div>
             </details>
           </li>
         `);
@@ -3331,7 +3408,9 @@ const tests = {
           Position: <code>${escapeHtml(path)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
-            <div class="clonedElement">${cloneEl(el)}</div>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(el)}</div>
+            </div>
           </details>
         </li>
       `);
