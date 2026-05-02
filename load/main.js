@@ -194,7 +194,7 @@ const tests = {
               </li>
             `).join("")}
           </ol>
-          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+          ${invalidHeadings.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
         `;
 
     let statusRes = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail";
@@ -205,7 +205,8 @@ const tests = {
       reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
       title: "Heading hierarchy jumps",
       status: statusRes,
-      content: `${headingJumps_content}
+      content: `${invalidHeadings_content}
+      ${headingJumps_content}
         <details>
           <summary><p class="toggleText">Alle ${headings.length} Überschriften anzeigen</code></p></summary>
           <div class="inline-content details-content">
@@ -389,7 +390,7 @@ const tests = {
             <h4>Doppelte IDs: <code>#${key}</code></h4>
             <p>Es wurden ${elements.length} Elemente mit der gesetzten ID <code>#${key}</code> gefunden.</p>
             <details class="clone">
-              <summary><p class="toggleText">Elemente anzeigen mit </p></summary>
+              <summary><p class="toggleText">Elemente anzeigen</p></summary>
               <div class="inline-content details-content">
                 ${elements.map(el => `
                   <div class="clonedElement">${cloneEl(el)}</div>
