@@ -168,6 +168,12 @@ const tests = {
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
                 <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
                 In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</p></summary>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(jump.to)}</div>
+                  </div>
+                </details>
               </li>
             `).join("")}
           </ol>
@@ -188,9 +194,15 @@ const tests = {
           <ol>
             ${invalidHeadings.slice(0, 20).map((el, i) => `
               <li>
-                <strong>&lt;${el.tagName.toLowerCase()}&gt;</strong><br>
+                <strong>Ungültiges Element: &lt;${el.tagName.toLowerCase()}&gt;</strong><br>
                 <strong>"${el.textContent}"</strong><br>
                 In Position: <code>${escapeHtml(getDomPath(el))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</p></summary>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(el)}</div>
+                  </div>
+                </details>
               </li>
             `).join("")}
           </ol>
