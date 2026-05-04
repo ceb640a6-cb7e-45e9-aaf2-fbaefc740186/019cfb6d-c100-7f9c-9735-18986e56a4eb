@@ -3499,6 +3499,8 @@ const tests = {
           valid: false,
           message: `Invalid scope value: "${scope}"`
         }); fail += 1;
+      } else {
+        pass += 1;
       }
     });
 
@@ -3512,7 +3514,7 @@ const tests = {
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
-              <div class="clonedElement">${cloneEl(issue.el)}</div>
+              <div class="clonedElement">${cloneEl(issue.el.closest('table'))}</div>
             </div>
           </details>
         </li>
