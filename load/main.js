@@ -3471,13 +3471,13 @@ const tests = {
 
     if (thElements.length <= 0) {
       return {
-        id: 'test',
-        reqLink: ['https://bitvtest.de/', 'Prüfschritt aufrufen'],
-        reqInfo: ['Prüfschritt 9.', 'Sichtbare'],
-        title: "Sichtbare",
-        status: "crash",
+        id: 'R1036',
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1f-zuordnung-von-tabellenzellen', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1f', 'Zuordnung von Tabellenzellen'],
+        title: "Prüfe th scopes",
+        status: "pass",
         content: `
-          <p>No th found</p>
+          <p>Es wurden keine &lt;th&gt;-Elemente auf der Seite gefunden.</p>
         `
       };
     }
@@ -3499,26 +3499,19 @@ const tests = {
           valid: false,
           message: `Invalid scope value: "${scope}"`
         }); fail += 1;
-      } else {
-        results.push({
-          el: th,
-          index,
-          valid: true,
-          message: "Valid scope"
-        }); pass += 1;
-      }
-    });
+      });
 
-    const thItems = results
-      .map((thEl) => `
+    const issues = results
+      .map((issue) => `
         <li>
-          <strong>${thEl.message}</strong><br>
-          <strong>Element:</strong> &lt;${getElTag(thEl.el)}&gt;
+          <strong>${issue.message}</strong><br>
+          <strong>Element:</strong> <code>${escapeHtml(getElTag(issue.el))}</code><br>
+          <strong>Position:</strong> <code>${escapeHtml(getDomPath(issue.el))}</code>
 
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
-              <div class="clonedElement">${cloneEl(thEl.el)}</div>
+              <div class="clonedElement">${cloneEl(issue.el)}</div>
             </div>
           </details>
         </li>
@@ -3526,15 +3519,18 @@ const tests = {
     .join("");
 
     return {
-      id: 'test',
-      reqLink: ['https://bitvtest.de/', 'Prüfschritt aufrufen'],
-      reqInfo: ['Prüfschritt 9.', 'Sichtbare'],
-      title: "Sichtbare",
-      status: "crash",
+      id: 'R1036',
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1f-zuordnung-von-tabellenzellen', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1f', 'Zuordnung von Tabellenzellen'],
+      title: "Prüfe th scopes",
+      status: fail > 0 ? "fail" : "pass",
       content: `
-        <p>Checks: ${pass} / ${check} / ${fail}</p>
+        <p>Gefundene &lt;th&gt;-Elemente: <strong>${thElements.length}</strong><br>
+          Korrekt verwendet: <strong>${pass}</strong><br>
+          Nicht eindeutig: <strong>${check}</strong><br>
+          Problematisch: <strong>${fail}</strong></p>
         <ol>
-          ${thItems}
+          ${issues}
         </ol>
       `
     };
