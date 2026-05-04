@@ -3514,7 +3514,7 @@ const tests = {
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
-              <div class="clonedElement">${cloneEl(issue.el.closest('table'))}</div>
+              <div class="clonedElement">${cloneEl(issue.el, issue.el.closest('table'))}</div>
             </div>
           </details>
         </li>
@@ -3584,10 +3584,11 @@ function getElTag(el) {
   return openingTag.slice(0, openingTag.indexOf('</'));
 }
 
-function getDomPath(el) {
+function getDomPath(el, container = null) {
   const parts = [];
   let current = el;
   let depth = 0;
+  
 
   while (current && current.nodeType === 1 && depth < 6) {
     let part = current.tagName.toLowerCase();
@@ -3602,7 +3603,9 @@ function getDomPath(el) {
       part += "." + [...current.classList].slice(0, 3).join(".");
     }
 
-    const parent = current.parentElement;
+    let parent = current.parentElement;
+    if (container) parent = container;
+    
     if (parent) {
       const sameTagSiblings = [...parent.children].filter(
         sibling => sibling.tagName === current.tagName
