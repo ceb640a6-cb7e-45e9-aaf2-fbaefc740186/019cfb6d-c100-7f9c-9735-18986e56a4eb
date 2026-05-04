@@ -3550,16 +3550,12 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-function highlightEl(el) {
-  el.style.border = "5px solid #f0f";
-  el.style.background = "#f0f8";
-  el.style.boxShadow = "0 0 10px #f0f8";
-}
-
-function cloneEl(el) {
+function cloneEl(el, container = null) {
   /*return el.parentElement.outerHTML;*/
   el.classList.add("highlight-temp");
-  const html = el.parentElement.outerHTML;
+  let parent = el.parentElement;
+  if (container) parent = container;
+  const html = parent.outerHTML;
   el.classList.remove("highlight-temp");
   return html;
 }
