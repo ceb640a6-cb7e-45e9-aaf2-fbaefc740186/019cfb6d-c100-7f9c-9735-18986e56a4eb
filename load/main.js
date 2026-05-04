@@ -3461,6 +3461,83 @@ const tests = {
       status,
       content: summary + details
     };
+  },
+
+  checkThScope() {
+    const validScopes = ["row", "col", "rowgroup", "colgroup"];
+    const thElements = document.querySelectorAll("th");
+    const results = [];
+    let pass = 0, check = 0, fail = 0;
+
+    if (thElements.length <= 0) {
+      return {
+        id: 'test',
+        reqLink: ['https://bitvtest.de/', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.', 'Sichtbare'],
+        title: "Sichtbare",
+        status: "crash",
+        content: `
+          <p>No th found</p>
+        `
+      };
+    }
+
+    thElements.forEach((th, index) => {
+      const scope = th.getAttribute("scope");
+      
+      if (!scope) {
+        results.push({
+          el: th,
+          index,
+          valid: false,
+          message: "Missing scope attribute"
+        }); fail += 1;
+      } else if (!validScopes.includes(scope.toLowerCase())) {
+        results.push({
+          el: th,
+          index,
+          valid: false,
+          message: `Invalid scope value: "${scope}"`
+        }); fail += 1;
+      } else {
+        results.push({
+          el: th,
+          index,
+          valid: true,
+          message: "Valid scope"
+        }); pass += 1;
+      }
+    });
+
+    const thItems = results
+      .map((thEl) => `
+        <li>
+          <strong>${thEl.message}</strong><br>
+          <strong>Element:</strong> &lt;${getElTag(thEl.el)}&gt;
+
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</p></summary>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(thEl.el)}</div>
+            </div>
+          </details>
+        </li>
+      `)
+    .join("");
+
+    return {
+      id: 'test',
+      reqLink: ['https://bitvtest.de/', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.', 'Sichtbare'],
+      title: "Sichtbare",
+      status: "crash",
+      content: `
+        <p>Checks: ${pass} / ${check} / ${fail}</p>
+        <ol>
+          ${thItems}
+        </ol>
+      `
+    };
   }
 
 };
