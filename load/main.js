@@ -3499,7 +3499,8 @@ const tests = {
           valid: false,
           message: `Invalid scope value: "${scope}"`
         }); fail += 1;
-      });
+      }
+    });
 
     const issues = results
       .map((issue) => `
