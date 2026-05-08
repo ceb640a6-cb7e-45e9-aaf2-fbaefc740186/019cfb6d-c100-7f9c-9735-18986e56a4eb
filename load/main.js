@@ -3491,14 +3491,14 @@ const tests = {
           index,
           valid: false,
           message: "Missing scope attribute"
-        }); fail += 1;
+        }); check += 1;
       } else if (!validScopes.includes(scope.toLowerCase())) {
         results.push({
           el: th,
           index,
           valid: false,
           message: `Invalid scope value: "${scope}"`
-        }); fail += 1;
+        }); check += 1;
       } else {
         pass += 1;
       }
@@ -3526,7 +3526,7 @@ const tests = {
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1f-zuordnung-von-tabellenzellen', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.1.3.1f', 'Zuordnung von Tabellenzellen'],
       title: "Prüfe th scopes",
-      status: fail > 0 ? "fail" : "pass",
+      status: fail > 0 ? "fail" : (check > 0 ? "check" : "pass"),
       content: `
         <p>Gefundene &lt;th&gt;-Elemente: <strong>${thElements.length}</strong><br>
           Korrekt verwendet: <strong>${pass}</strong><br>
