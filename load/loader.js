@@ -28,7 +28,8 @@
     /* 1332 */ "pruefeFormularBeschriftungen",
     /* 1038 */ "pruefeBeschriftungenStrengWCAG",
     /* 1036 */ "checkThScope",
-    /* 2146 */ "checkHorizontalScroll320"
+    /* 2146 */ "checkHorizontalScroll320",
+    /* 2143 */ "pruefeTextKontrast"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();

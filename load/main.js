@@ -3635,6 +3635,259 @@ const tests = {
 
       p.addEventListener("load", () => setTimeout(done, 400));
     });
+  },
+
+  pruefeTextKontrast() {
+    const MIN_NORMAL_TEXT = 4.5;
+    const MIN_LARGE_TEXT = 3.0;
+
+    function parseRgb(color) {
+      if (!color || color === "transparent") return null;
+      const match = color.match(/rgba?\(([^)]+)\)/i);
+      if (!match) return null;
+
+      const parts = match[1].split(",").map(v => parseFloat(v.trim()));
+      return {
+        r: parts[0],
+        g: parts[1],
+        b: parts[2],
+        a: parts.length >= 4 ? parts[3] : 1
+      };
+    }
+
+    function blendOver(fg, bg) {
+      const alpha = fg.a == null ? 1 : fg.a;
+      return {
+        r: fg.r * alpha + bg.r * (1 - alpha),
+        g: fg.g * alpha + bg.g * (1 - alpha),
+        b: fg.b * alpha + bg.b * (1 - alpha),
+        a: 1
+      };
+    }
+
+    function relativeLuminance(rgb) {
+      function channel(v) {
+        v = v / 255;
+        return v <= 0.03928
+          ? v / 12.92
+          : Math.pow((v + 0.055) / 1.055, 2.4);
+      }
+
+      return (
+        0.2126 * channel(rgb.r) +
+        0.7152 * channel(rgb.g) +
+        0.0722 * channel(rgb.b)
+      );
+    }
+
+    function contrastRatio(color1, color2) {
+      const l1 = relativeLuminance(color1);
+      const l2 = relativeLuminance(color2);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function getEffectiveBackgroundColor(el) {
+      let current = el;
+
+      while (current && current !== document.documentElement) {
+        const bg = parseRgb(getComputedStyle(current).backgroundColor);
+
+        if (bg && bg.a > 0) {
+          if (bg.a < 1) {
+            return blendOver(bg, { r: 255, g: 255, b: 255, a: 1 });
+          }
+          return bg;
+        }
+
+        current = current.parentElement;
+      }
+
+      return { r: 255, g: 255, b: 255, a: 1 };
+    }
+
+    function isVisible(el) {
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        parseFloat(style.opacity) > 0 &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+    }
+
+    function hasOwnVisibleText(el) {
+      return Array.from(el.childNodes)
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .some(node => node.textContent.trim().length > 0);
+    }
+
+    function isLargeText(style) {
+      const fontSize = parseFloat(style.fontSize);
+      const fontWeight = parseInt(style.fontWeight, 10) || 400;
+      return fontSize >= 24 || (fontSize >= 18.66 && fontWeight >= 700);
+    }
+
+    function rgbToHex(rgb) {
+      const toHex = value =>
+        Math.round(value).toString(16).padStart(2, "0").toUpperCase();
+
+      return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+    }
+
+    function simulateColorVisionDeficiency(rgb, type) {
+      const matrices = {
+        protanopia: [
+          [0.567, 0.433, 0.000],
+          [0.558, 0.442, 0.000],
+          [0.000, 0.242, 0.758]
+        ],
+        deuteranopia: [
+          [0.625, 0.375, 0.000],
+          [0.700, 0.300, 0.000],
+          [0.000, 0.300, 0.700]
+        ],
+        tritanopia: [
+          [0.950, 0.050, 0.000],
+          [0.000, 0.433, 0.567],
+          [0.000, 0.475, 0.525]
+        ]
+      };
+
+      const m = matrices[type];
+
+      return {
+        r: Math.min(255, Math.max(0, rgb.r * m[0][0] + rgb.g * m[0][1] + rgb.b * m[0][2])),
+        g: Math.min(255, Math.max(0, rgb.r * m[1][0] + rgb.g * m[1][1] + rgb.b * m[1][2])),
+        b: Math.min(255, Math.max(0, rgb.r * m[2][0] + rgb.g * m[2][1] + rgb.b * m[2][2])),
+        a: 1
+      };
+    }
+
+    function getColorDeficiencyResults(foreground, background) {
+      return ["protanopia", "deuteranopia", "tritanopia"].map(type => {
+        const simulatedFg = simulateColorVisionDeficiency(foreground, type);
+        const simulatedBg = simulateColorVisionDeficiency(background, type);
+
+        return {
+          type,
+          ratio: Number(contrastRatio(simulatedFg, simulatedBg).toFixed(2))
+        };
+      });
+    }
+
+    const candidates = Array.from(document.body.querySelectorAll("*"))
+      .filter(isVisible)
+      .filter(hasOwnVisibleText);
+
+    const failures = [];
+    const warnings = [];
+    let checked = 0;
+
+    candidates.forEach(el => {
+      const style = getComputedStyle(el);
+      const textColor = parseRgb(style.color);
+      const bgColor = getEffectiveBackgroundColor(el);
+
+      if (!textColor || !bgColor) return;
+
+      const foreground = textColor.a < 1 ? blendOver(textColor, bgColor) : textColor;
+      const ratio = Number(contrastRatio(foreground, bgColor).toFixed(2));
+      const requiredRatio = isLargeText(style) ? MIN_LARGE_TEXT : MIN_NORMAL_TEXT;
+      const cvdResults = getColorDeficiencyResults(foreground, bgColor);
+
+      const passesWcag = ratio >= requiredRatio;
+      const passesCvd = cvdResults.every(r => r.ratio >= requiredRatio);
+
+      checked++;
+
+      const item = {
+        element: el,
+        path: getDomPath(el),
+        text: el.innerText.trim().replace(/\s+/g, " ").slice(0, 120),
+        contrast: ratio,
+        required: requiredRatio,
+        textColor: rgbToHex(foreground),
+        backgroundColor: rgbToHex(bgColor),
+        cvdResults
+      };
+
+      if (!passesWcag) {
+        failures.push(item);
+        el.style.outline = "3px solid red";
+        el.style.outlineOffset = "2px";
+      } else if (!passesCvd) {
+        warnings.push(item);
+        el.style.outline = "3px solid orange";
+        el.style.outlineOffset = "2px";
+      }
+    });
+
+    const failureHtml = failures.map(item => `
+      <li>
+        <strong>${escapeHtml(item.path)}</strong><br>
+        Text: "${escapeHtml(item.text)}"<br>
+        Kontrast: <strong>${item.contrast}:1</strong>,
+        erforderlich: <strong>${item.required}:1</strong><br>
+        Textfarbe: ${escapeHtml(item.textColor)},
+        Hintergrund: ${escapeHtml(item.backgroundColor)}
+      </li>
+    `).join("");
+
+    const warningHtml = warnings.map(item => {
+      const simulatedText = item.cvdResults
+        .map(r => `${r.type}: ${r.ratio}:1`)
+        .join(", ");
+
+      return `
+        <li>
+          <strong>${escapeHtml(item.path)}</strong><br>
+          Text: "${escapeHtml(item.text)}"<br>
+          Normaler Kontrast: <strong>${item.contrast}:1</strong>,
+          erforderlich: <strong>${item.required}:1</strong><br>
+          Simulierte Kontraste: ${escapeHtml(simulatedText)}<br>
+          Hinweis: Der WCAG-Kontrast ist ausreichend, aber eine vereinfachte Farbfehlsichtigkeits-Simulation ist potenziell auffällig.
+        </li>
+      `;
+    }).join("");
+
+    let status = "pass";
+    let content = `
+      <p>Geprüfte Textelemente: <strong>${checked}</strong></p>
+      <p>Keine Kontrastprobleme gefunden.</p>
+    `;
+
+    if (warnings.length > 0) {
+      status = "neutral";
+      content = `
+        <p>Geprüfte Textelemente: <strong>${checked}</strong></p>
+        <p>Keine WCAG-Kontrastfehler gefunden, aber <strong>${warnings.length}</strong> potenziell problematische Farbkombinationen.</p>
+        <ul>${warningHtml}</ul>
+      `;
+    }
+
+    if (failures.length > 0) {
+      status = "fail";
+      content = `
+        <p>Geprüfte Textelemente: <strong>${checked}</strong></p>
+        <p><strong>${failures.length}</strong> Textelemente unterschreiten den erforderlichen Helligkeitskontrast.<br>
+        Hinweis: Das Script prüft Kontrast rechnerisch. Ob Inhalte wirklich für alle Farbfehlsichtigkeiten verständlich sind, kann automatisiert nur angenähert werden.</p>
+        ${warnings.length > 0 ? `<p>Zusätzlich: <strong>${warnings.length}</strong> potenziell problematische Farbkombinationen.</p>` : ""}
+        <h4>Kontrastfehler</h4>
+        <ul>${failureHtml}</ul>
+        ${warnings.length > 0 ? `<h4>Hinweise Farbfehlsichtigkeit</h4><ul>${warningHtml}</ul>` : ""}
+      `;
+    }
+
+    return {
+      title: "Text-Kontrast und Farbfehlsichtigkeit",
+      status: status,
+      content: content
+    };
   }
 
 };
