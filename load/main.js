@@ -3818,12 +3818,8 @@ const tests = {
 
       if (!passesWcag) {
         failures.push(item);
-        el.style.outline = "3px solid red";
-        el.style.outlineOffset = "2px";
       } else if (!passesCvd) {
         warnings.push(item);
-        el.style.outline = "3px solid orange";
-        el.style.outlineOffset = "2px";
       }
     });
 
@@ -3906,9 +3902,38 @@ function cloneEl(el, container = null) {
   el.classList.add("highlight-temp");
   let parent = el.parentElement;
   if (container) parent = container;
-  const html = parent.outerHTML;
+  const html = /*parent.outerHTML*/elementToStyledHTML(parent);
   el.classList.remove("highlight-temp");
   return html;
+}
+
+function elementToStyledHTML(element) {
+  const clone = element.cloneNode(true);
+
+  copyStylesRecursive(element, clone);
+
+  return clone.outerHTML;
+}
+
+function copyStylesRecursive(source, target) {
+  const computedStyle = window.getComputedStyle(source);
+
+  // Build inline style string
+  const styleString = Array.from(computedStyle)
+    .map((prop) => {
+      const value = computedStyle.getPropertyValue(prop);
+      const priority = computedStyle.getPropertyPriority(prop);
+
+      return `${prop}: ${value}${priority ? " !important" : ""};`;
+    })
+    .join(" ");
+
+  target.setAttribute("style", styleString);
+
+  // Recursively process children
+  for (let i = 0; i < source.children.length; i++) {
+    copyStylesRecursive(source.children[i], target.children[i]);
+  }
 }
 
 function getSelector(el) {
