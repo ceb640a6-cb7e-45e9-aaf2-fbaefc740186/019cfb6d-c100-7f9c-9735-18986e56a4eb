@@ -3831,12 +3831,12 @@ const tests = {
         erforderlich: <strong>${item.required}:1</strong><br>
         Textfarbe: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.textColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.textColor)},
         Hintergrund: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.backgroundColor)}<br>
-        Element: <code>${escapeHtml(getElTag(item))}</code><br>
+        Element: <code>${escapeHtml(getElTag(item.el))}</code><br>
         Position: <code>${escapeHtml(item.path)}</code>
         <details class="clone">
           <summary><p class="toggleText">Element anzeigen</p></summary>
           <div class="inline-content details-content">
-            <div class="clonedElement">${cloneEl(item)}</div>
+            <div class="clonedElement">${cloneEl(item.el)}</div>
           </div>
         </details>
       </li>
@@ -3853,12 +3853,12 @@ const tests = {
           Erforderlicher Kontrast: <strong>${item.required}:1</strong><br>
           Simulierte Kontraste: ${escapeHtml(simulatedText)}<br>
           Hinweis: Der WCAG-Kontrast ist ausreichend, aber eine vereinfachte Farbfehlsichtigkeits-Simulation ist potenziell auffällig.<br>
-          Element: ${escapeHtml(getElTag(item))}<br>
+          Element: ${escapeHtml(getElTag(item.el))}<br>
           Position: ${escapeHtml(item.path)}
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
-              <div class="clonedElement">${cloneEl(item)}</div>
+              <div class="clonedElement">${cloneEl(item.el)}</div>
             </div>
           </details>
         </li>
