@@ -725,10 +725,10 @@
               label: 'Testfälle',
               data: [${summary.crash > 0 ? `${summary.crash},` : ''} ${summary.pass}, ${summary.check}, ${summary.fail}],
               backgroundColor: [
-                ${summary.crash > 0 ? `'#845ef7',` : ''}
-                '#20c997', // pass
-                '#fcc419', // check
-                '#f06595' // fail
+                ${summary.crash > 0 ? `'#6941d0',` : ''}
+                '#41d0a7', // pass
+                '#e8b129', // check
+                '#d93872' // fail
               ],
               borderColor: [
                 ${summary.crash > 0 ? `'#ffffff00',` : ''}

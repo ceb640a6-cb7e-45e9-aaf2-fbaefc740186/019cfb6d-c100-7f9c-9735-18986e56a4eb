@@ -3540,15 +3540,38 @@ const tests = {
   },
 
   checkHorizontalScroll320() {
+    let localFile = (location.protocol === "file:");
+    let noOrigin = (window.location.origin === "null");
+    
+    if (localFile || noOrigin) {
+      resolve({
+        id: "R2146",
+        reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+        reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
+        title: "Horizontal scroll at 320px",
+        status: "check",
+        content: localFile ? `
+<p>This test cannot run on local HTML files (<code>file://</code>).<br>
+Browsers block access to popup window dimensions/content for local files because the origin is <code>null</code>.<br>
+Please run the test from a web server instead.</p>
+` : `
+<p>Der Ursprung der Datei ist <code>null</code>.<br>
+Browsers block access to popup window dimensions/content pages where the origin is <code>null</code>.<br>
+This test couldn't be executed/was skipped.</p>
+` 
+      });
+      return;
+    }
+
     return new Promise((resolve) => {
       const url = location.href;
       const p = window.open(url, "mobile320probe", "width=320,height=700,resizable=yes,scrollbars=yes");
 
       if (!p) {
         resolve({
-          id: "R9999",
-          reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
-          reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+          id: "R2146",
+          reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+          reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
           title: "Horizontal scroll at 320px",
           status: "check",
           content: "Popup could not be opened. Please allow popups and run the test again."
@@ -3574,9 +3597,9 @@ const tests = {
           } catch (_) {}
 
           resolve({
-            id: "R9999",
-            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
-            reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+            id: "R2146",
+            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+            reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
             title: "Horizontal scroll at 320px",
             status: overflow ? "fail" : "pass",
             content: overflow ? `
@@ -3600,9 +3623,9 @@ const tests = {
           } catch (_) {}
 
           resolve({
-            id: "R9999",
-            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
-            reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+            id: "R2146",
+            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+            reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
             title: "Horizontal scroll at 320px",
             status: "crash",
             content: `Check failed: ${escapeHtml(e && e.message ? e.message : e)}`
