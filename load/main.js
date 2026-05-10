@@ -3831,7 +3831,7 @@ const tests = {
         erforderlich: <strong>${item.required}:1</strong><br>
         Textfarbe: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.textColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.textColor)},
         Hintergrund: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.backgroundColor)}<br>
-        Element: <code>${escapeHtml(getElTag(item.path))}</code><br>
+        Element: <code>${escapeHtml(getElTag(item))}</code><br>
         Position: <code>${escapeHtml(item.path)}</code>
         <details class="clone">
           <summary><p class="toggleText">Element anzeigen</p></summary>
