@@ -3825,28 +3825,42 @@ const tests = {
 
     const failureHtml = failures.map(item => `
       <li>
-        <strong>${escapeHtml(item.path)}</strong><br>
-        Text: "${escapeHtml(item.text)}"<br>
-        Kontrast: <strong>${item.contrast}:1</strong>,
+        <br>
+        Text: <strong>${escapeHtml(item.text)}</strong><br>
+        Kontrast: <div style="width: 1rem; height: 1rem; position:relative; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"><span style="color:${escapeHtml(item.textColor)};position:absolute;transform:translate(-50%,-50%);top:50%;left:50%">A</span></div><strong>${item.contrast}:1</strong>,
         erforderlich: <strong>${item.required}:1</strong><br>
-        Textfarbe: ${escapeHtml(item.textColor)},
-        Hintergrund: ${escapeHtml(item.backgroundColor)}
+        Textfarbe: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.textColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.textColor)},
+        Hintergrund: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.backgroundColor)}<br>
+        Element: <code>${escapeHtml(getElTag(item.path))}</code><br>
+        Position: <code>${escapeHtml(item.path)}</code>
+        <details class="clone">
+          <summary><p class="toggleText">Element anzeigen</p></summary>
+          <div class="inline-content details-content">
+            <div class="clonedElement">${cloneEl(item)}</div>
+          </div>
+        </details>
       </li>
     `).join("");
 
     const warningHtml = warnings.map(item => {
       const simulatedText = item.cvdResults
-        .map(r => `${r.type}: ${r.ratio}:1`)
+        .map(r => `${r.type}: <strong>${r.ratio}:1</strong>`)
         .join(", ");
 
       return `
         <li>
-          <strong>${escapeHtml(item.path)}</strong><br>
-          Text: "${escapeHtml(item.text)}"<br>
-          Normaler Kontrast: <strong>${item.contrast}:1</strong>,
-          erforderlich: <strong>${item.required}:1</strong><br>
+          Text: <strong>${escapeHtml(item.text)}</strong><br>
+          Erforderlicher Kontrast: <strong>${item.required}:1</strong><br>
           Simulierte Kontraste: ${escapeHtml(simulatedText)}<br>
-          Hinweis: Der WCAG-Kontrast ist ausreichend, aber eine vereinfachte Farbfehlsichtigkeits-Simulation ist potenziell auffällig.
+          Hinweis: Der WCAG-Kontrast ist ausreichend, aber eine vereinfachte Farbfehlsichtigkeits-Simulation ist potenziell auffällig.<br>
+          Element: ${escapeHtml(getElTag(item))}<br>
+          Position: ${escapeHtml(item.path)}
+          <details class="clone">
+            <summary><p class="toggleText">Element anzeigen</p></summary>
+            <div class="inline-content details-content">
+              <div class="clonedElement">${cloneEl(item)}</div>
+            </div>
+          </details>
         </li>
       `;
     }).join("");
@@ -3869,9 +3883,9 @@ const tests = {
     if (failures.length > 0) {
       status = "fail";
       content = `
-        <p>Geprüfte Textelemente: <strong>${checked}</strong></p>
-        <p><strong>${failures.length}</strong> Textelemente unterschreiten den erforderlichen Helligkeitskontrast.<br>
-        Hinweis: Das Script prüft Kontrast rechnerisch. Ob Inhalte wirklich für alle Farbfehlsichtigkeiten verständlich sind, kann automatisiert nur angenähert werden.</p>
+        <p>Geprüfte Textelemente: <strong>${checked}</strong><br>
+        Das Script prüft Kontrast rechnerisch. Ob Inhalte wirklich für alle Farbfehlsichtigkeiten verständlich sind, kann automatisiert nur angenähert werden.</p>
+        <p><strong>${failures.length}</strong> Textelemente unterschreiten den erforderlichen Helligkeitskontrast.</p>
         ${warnings.length > 0 ? `<p>Zusätzlich: <strong>${warnings.length}</strong> potenziell problematische Farbkombinationen.</p>` : ""}
         <h4>Kontrastfehler</h4>
         <ul>${failureHtml}</ul>
@@ -3880,6 +3894,9 @@ const tests = {
     }
 
     return {
+      id: 'R2143',
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-3-kontraste-von-texten-ausreichend', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.4.3', 'Kontraste von Texten ausreichend'],
       title: "Text-Kontrast und Farbfehlsichtigkeit",
       status: status,
       content: content
@@ -3902,38 +3919,9 @@ function cloneEl(el, container = null) {
   el.classList.add("highlight-temp");
   let parent = el.parentElement;
   if (container) parent = container;
-  const html = /*parent.outerHTML*/elementToStyledHTML(parent);
+  const html = parent.outerHTML;
   el.classList.remove("highlight-temp");
   return html;
-}
-
-function elementToStyledHTML(element) {
-  const clone = element.cloneNode(true);
-
-  copyStylesRecursive(element, clone);
-
-  return clone.outerHTML;
-}
-
-function copyStylesRecursive(source, target) {
-  const computedStyle = window.getComputedStyle(source);
-
-  // Build inline style string
-  const styleString = Array.from(computedStyle)
-    .map((prop) => {
-      const value = computedStyle.getPropertyValue(prop);
-      const priority = computedStyle.getPropertyPriority(prop);
-
-      return `${prop}: ${value}${priority ? " !important" : ""};`;
-    })
-    .join(" ");
-
-  target.setAttribute("style", styleString);
-
-  // Recursively process children
-  for (let i = 0; i < source.children.length; i++) {
-    copyStylesRecursive(source.children[i], target.children[i]);
-  }
 }
 
 function getSelector(el) {
