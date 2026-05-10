@@ -3537,6 +3537,81 @@ const tests = {
         </ol>
       `
     };
+  },
+
+  checkHorizontalScroll320() {
+    return new Promise((resolve) => {
+      const url = location.href;
+      const p = window.open(url, "mobile320probe", "width=320,height=700,resizable=yes,scrollbars=yes");
+
+      if (!p) {
+        resolve({
+          id: "R9999",
+          reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
+          reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+          title: "Horizontal scroll at 320px",
+          status: "check",
+          content: "Popup could not be opened. Please allow popups and run the test again."
+        });
+        return;
+      }
+
+      const done = () => {
+        try {
+          const de = p.document.documentElement;
+          const body = p.document.body;
+
+          const clientWidth = de.clientWidth;
+          const scrollWidth = Math.max(
+            de.scrollWidth,
+            body ? body.scrollWidth : 0
+          );
+
+          const overflow = scrollWidth > clientWidth;
+
+          try {
+            p.close();
+          } catch (_) {}
+
+          resolve({
+            id: "R9999",
+            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
+            reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+            title: "Horizontal scroll at 320px",
+            status: overflow ? "fail" : "pass",
+            content: overflow ? `
+              Die Seite läuft bei 320px Breite horizontal über.
+
+              Viewport width tested: \`${clientWidth}px\`  
+              Document scroll width: \`${scrollWidth}px\`  
+              Horizontally scrollable: **YES**
+
+              A horizontal scrollbar is needed because \`scrollWidth > clientWidth\`.
+              ` : `
+              No horizontal overflow detected at 320px width.
+
+              Viewport width tested: \`${clientWidth}px\`  
+              Document scroll width: \`${scrollWidth}px\`
+              `
+          });
+        } catch (e) {
+          try {
+            p.close();
+          } catch (_) {}
+
+          resolve({
+            id: "R9999",
+            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Weitere Prüfschritte anzeigen"],
+            reqInfo: ["Ansicht bei 320px Breite", "Horizontales Scrollen prüfen"],
+            title: "Horizontal scroll at 320px",
+            status: "crash",
+            content: `Check failed: ${escapeHtml(e && e.message ? e.message : e)}`
+          });
+        }
+      };
+
+      p.addEventListener("load", () => setTimeout(done, 400));
+    });
   }
 
 };
