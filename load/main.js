@@ -3540,37 +3540,37 @@ const tests = {
   },
 
   checkHorizontalScroll320() {
-    let localFile = (location.protocol === "file:");
-    let noOrigin = (window.location.origin === "null");
-    
-    if (localFile || noOrigin) {
-      resolve({
-        id: "R2146",
-        reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
-        reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
-        title: "Horizontal scroll at 320px",
-        status: "check",
-        content: localFile ? `
-<p>This test cannot run on local HTML files (<code>file://</code>).<br>
-Browsers block access to popup window dimensions/content for local files because the origin is <code>null</code>.<br>
-Please run the test from a web server instead.</p>
-` : `
-<p>Der Ursprung der Datei ist <code>null</code>.<br>
-Browsers block access to popup window dimensions/content pages where the origin is <code>null</code>.<br>
-This test couldn't be executed/was skipped.</p>
-` 
-      });
-      return;
-    }
-
     return new Promise((resolve) => {
+      let localFile = (location.protocol === "file:");
+      let noOrigin = (window.location.origin === "null");
+      
+      if (localFile || noOrigin) {
+        resolve({
+          id: "R2146",
+          reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
+          reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
+          title: "Horizontal scroll at 320px",
+          status: "check",
+          content: localFile ? `
+            <p>This test cannot run on local HTML files (<code>file://</code>).<br>
+            Browsers block access to popup window dimensions/content for local files because the origin is <code>null</code>.<br>
+            Please run the test from a web server instead.</p>
+            ` : `
+            <p>Der Ursprung der Datei ist <code>null</code>.<br>
+            Browsers block access to popup window dimensions/content pages where the origin is <code>null</code>.<br>
+            This test couldn't be executed/was skipped.</p>
+            ` 
+        });
+        return;
+      }
+
       const url = location.href;
       const p = window.open(url, "mobile320probe", "width=320,height=700,resizable=yes,scrollbars=yes");
 
       if (!p) {
         resolve({
           id: "R2146",
-          reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+          reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
           reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
           title: "Horizontal scroll at 320px",
           status: "check",
@@ -3598,7 +3598,7 @@ This test couldn't be executed/was skipped.</p>
 
           resolve({
             id: "R2146",
-            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+            reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
             reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
             title: "Horizontal scroll at 320px",
             status: overflow ? "fail" : "pass",
@@ -3624,7 +3624,7 @@ This test couldn't be executed/was skipped.</p>
 
           resolve({
             id: "R2146",
-            reqLink: ["https://bitvtest.de/pruefverfahren/bitv-20-web", "Prüfschritt aufrufen"],
+            reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
             reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
             title: "Horizontal scroll at 320px",
             status: "crash",
