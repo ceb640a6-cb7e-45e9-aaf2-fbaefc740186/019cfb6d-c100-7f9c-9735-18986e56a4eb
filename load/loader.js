@@ -1,5 +1,3 @@
-// loader.js
-
 (function () {
   const MAIN_JS_URL = "https://ceb640a6-cb7e-45e9-aaf2-fbaefc740186.github.io/019cfb6d-c100-7f9c-9735-18986e56a4eb/load/main.js?t="+Date.now();
 
@@ -10,8 +8,7 @@
     /* 1012 */ "imagesMissingAlt",
     /* 1013 */ "imagesEmptyAlt",
     /* 1244 */ "linksWithoutText",
-      /* 1031 */ "oneH1",
-      /* 1031 */ "checkHeadings",
+    /* 1031 */ "checkHeadings",
     /* 1242 */ "pruefeDokumenttitel",
       /* 1411 */ "checkIds",
       /* 1411 */ "checkDuplicateAttributes",

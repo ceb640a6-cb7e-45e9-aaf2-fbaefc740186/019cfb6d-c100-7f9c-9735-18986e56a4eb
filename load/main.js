@@ -1,8 +1,8 @@
-// main.js
+const COMPANY_NAME = 'Ernst Klett Verlag';
 
 const tests = {
   imagesMissingAlt() {
-    const images = [...document.querySelectorAll("img")];
+    const images = [...all("img")];
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
 
     return {
@@ -29,7 +29,7 @@ const tests = {
   },
 
   imagesEmptyAlt() {
-    const images = [...document.querySelectorAll("img")];
+    const images = [...all("img")];
     const emptyAltImages = images.filter(img => img.hasAttribute("alt") && img.getAttribute("alt").trim() === "");
 
     return {
@@ -56,7 +56,7 @@ const tests = {
   },
 
   linksWithoutText() {
-    const links = [...document.querySelectorAll("a")];
+    const links = [...all("a")];
     const badLinks = links.filter(a => !a.textContent.trim() && !a.getAttribute("aria-label"));
 
     return {
@@ -88,7 +88,7 @@ const tests = {
   },
 
   oneH1() {
-    const heads = [...document.querySelectorAll('h1')];
+    const heads = [...all('h1')];
     return {
       id: 'R1031',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
@@ -116,8 +116,22 @@ const tests = {
   },
 
   checkHeadings() {
-    const headings = [...document.querySelectorAll("h1, h2, h3, h4, h5, h6")];
+    const headings = [...all("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
+
+    if (headings.length <= 0) {
+      return {
+        id: 'R1031',
+        title: "Heading hierarchy jumps",
+        status: "check",
+        content: `<p>Es wurden keine Überschriften oder ähnliche Elemente auf der Seite gefunden. Sollte es sich um eine inhaltsreiche Seite handeln, sollte dies vermieden werden.</p>`
+      };
+    }
+
+    const head1s = [...all('h1')];
+    let h1res = ['check', 'Es wurden keine H1 Überschriften auf der Seite gefunden. Dies verstößt nicht gegen die WCAG Richtlinien, ist aber auch nicht ideal oder empfohlen; vor allem, da andere Überschriften auf der Seite existieren.'];
+    if (head1s.length == 1) h1res = ['pass', `Es wurde eine H1 Überschrift auf der Seite gefunden: <strong>${head1s[0]}</strong>. Dies bildet das übliche Verhalten von Webseiten ab.`];
+    if (head1s.length > 1) h1res = ['check', 'Es wurde mehr als eine H1 Überschrift auf der Seite gefunden. Dies verstößt nicht gegen die WCAG Richtlinien, doch ist eine Seite mit nur einer H1 Überschrift häufig einfacher zu verstehen.'];
 
     for (let i = 1; i < headings.length; i++) {
       const previous = headings[i - 1];
@@ -136,94 +150,53 @@ const tests = {
       }
     }
 
-    let prevHLevel = +headings[0].tagName.substring(1);
     let headingList_content = (headings.length === 0)
-        ? "<p>No headings found on the page.</p>"
-        : `
-          <p><strong>${headings.length}</strong> heading(s) found.</p>
-          <ol>
-            ${headings.map((el, i) => {
-              const level = parseInt(el.tagName.substring(1), 10);
-              const text = (el.textContent || "").trim() || "(no text)";
-              const indent = (level - 1) * 16;
-              const isJump = (level > (prevHLevel + 1));
-              prevHLevel = level;
+      ? "<p>No headings found on the page.</p>"
+      : `
+        <p><strong>${headings.length}</strong> heading(s) found.</p>
+        <ul>
+          ${headings.map((el, i) => {
+            const level = parseInt(el.tagName.substring(1), 10);
+            const text = (el.textContent || "").trim() || "(no text)";
+            const indent = (level - 1) * 16;
 
-              return `
-                <li style="margin-left:${indent}px" ${isJump ? 'class="highlight-temp"' : ''}>
-                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
-                </li>
-              `;
-            }).join("")}
-          </ol>
-        `;
+            return `
+              <li style="margin-left:${indent}px">
+                <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+              </li>
+            `;
+          }).join("")}
+        </ul>
+      `;
 
     let headingJumps_content = (jumps.length === 0)
-        ? "<p>No heading hierarchy jumps found.</p>"
-        : `
-          <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
-          <ol>
-            ${jumps.slice(0, 20).map((jump, i) => `
-              <li>
-                <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
-                <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
-                In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
-                <details class="clone">
-                  <summary><p class="toggleText">Element anzeigen</p></summary>
-                  <div class="inline-content details-content">
-                    <div class="clonedElement">${cloneEl(jump.to)}</div>
-                  </div>
-                </details>
-              </li>
-            `).join("")}
-          </ol>
-          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
-        `;
+      ? "<p>No heading hierarchy jumps found.</p>"
+      : `
+        <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
+        <ol>
+          ${jumps.slice(0, 20).map((jump, i) => `
+            <li>
+              <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
+              <strong>${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")}</strong> zu <strong>${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}</strong><br>
+              In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+            </li>
+          `).join("")}
+        </ol>
+        ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+      `;
 
-    const invalidHeadings = [...document.querySelectorAll('*')]
-      .filter(el => /^h\d+$/i.test(el.tagName))
-      .filter(el => {
-        const level = Number(el.tagName.slice(1));
-        return level < 1 || level > 6;
-      });
-
-    let invalidHeadings_content = (invalidHeadings.length === 0)
-        ? ''
-        : `
-          <p><strong>${invalidHeadings.length}</strong> invalide Überschriften gefunden.</p>
-          <ol>
-            ${invalidHeadings.slice(0, 20).map((el, i) => `
-              <li>
-                <strong>Ungültiges Element: &lt;${el.tagName.toLowerCase()}&gt;</strong><br>
-                <strong>"${el.textContent}"</strong><br>
-                In Position: <code>${escapeHtml(getDomPath(el))}</code>
-                <details class="clone">
-                  <summary><p class="toggleText">Element anzeigen</p></summary>
-                  <div class="inline-content details-content">
-                    <div class="clonedElement">${cloneEl(el)}</div>
-                  </div>
-                </details>
-              </li>
-            `).join("")}
-          </ol>
-          ${invalidHeadings.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
-        `;
-
-    let statusRes = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail";
+    let resStatus = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail"; //maybe the headings.length fork is obsolete but oh well
+    if (resStatus == 'pass') resStatus = h1res[0]; //set status to "h1 check status" if "heading jumps check" passed
 
     return {
       id: 'R1031',
-      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
-      reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
       title: "Heading hierarchy jumps",
-      status: statusRes,
-      content: `${invalidHeadings_content}
+      status: resStatus,
+      content: `<p>${h1res[1]}</p>
       ${headingJumps_content}
         <details>
           <summary><p class="toggleText">Alle ${headings.length} Überschriften anzeigen</code></p></summary>
-          <div class="inline-content details-content">
-            ${headingList_content}
-          </div>
+          ${headingList_content}
         </details>
       `
     };
@@ -233,14 +206,14 @@ const tests = {
     const rawTitle = document.title || "";
     const titleText = rawTitle.trim();
 
-    if (rawTitle == 'Ernst Klett Verlag') {
+    if (rawTitle == COMPANY_NAME) {
       return {
         id: 'R1242',
         reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
         reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
         title: "Dokumenttitel prüfen",
         status: "fail",
-        content: '<p>Dokumenttitel ist ausschließlich "Ernst Klett Verlag" und gibt daher keine Informationen über den Inhalt der Seite.</p>'
+        content: `<p>Dokumenttitel ist ausschließlich "${COMPANY_NAME}" und gibt daher keine Informationen über den Inhalt der Seite.</p>`
       };
     }
 
@@ -361,7 +334,7 @@ const tests = {
       return true;
     };
 
-    const elementsWithId = Array.from(document.querySelectorAll("[id]")).filter(visible);
+    const elementsWithId = Array.from(all("[id]")).filter(visible);
 
     const idMap = new Map();
     const emptyElements = [];
@@ -457,7 +430,7 @@ const tests = {
       return true;
     };
 
-    const allVisibleElements = Array.from(document.querySelectorAll("*")).filter(visible);
+    const allVisibleElements = Array.from(all("*")).filter(visible);
     const affectedElements = [];
 
     allVisibleElements.forEach((el) => {
@@ -518,7 +491,7 @@ const tests = {
 
     const results = [];
 
-    document.querySelectorAll("*").forEach((el) => {
+    all("*").forEach((el) => {
       let before = "";
       let after = "";
 
@@ -594,18 +567,36 @@ const tests = {
   },
 
   checkLandmarks() {
-    const LANDMARKS = ["header", "nav", "main", "aside", "footer"];
+    const LANDMARK_SELECTORS = {
+      header: 'header:not([role]), [role="banner"]',
+      nav: 'nav:not([role]), [role="navigation"]',
+      main: 'main:not([role]), [role="main"]',
+      aside: 'aside:not([role]), [role="complementary"]',
+      footer: 'footer:not([role]), [role="contentinfo"]'
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function isHiddenFromAT(el) {
+      return el.hidden || el.getAttribute("aria-hidden") === "true";
+    }
 
     function isVisible(el) {
-      if (!el) return false;
+      if (!el || isHiddenFromAT(el)) return false;
 
       const style = window.getComputedStyle(el);
+
       if (
         style.display === "none" ||
         style.visibility === "hidden" ||
-        style.visibility === "collapse" ||
-        el.hidden ||
-        el.getAttribute("aria-hidden") === "true"
+        style.visibility === "collapse"
       ) {
         return false;
       }
@@ -615,143 +606,242 @@ const tests = {
     }
 
     function isPageLevelHeaderOrFooter(el) {
-      if (!el || !el.parentElement) return true;
+      if (!el) return false;
+
+      // header/footer innerhalb article/section/nav/aside/main sind keine seitenweiten
+      // banner/contentinfo-landmarks.
       return !el.closest("article, aside, main, nav, section");
-    }
-
-    function getRelevantElements(tagName) {
-      const elements = Array.from(document.querySelectorAll(tagName));
-
-      if (tagName === "header" || tagName === "footer") {
-        return elements.filter(isPageLevelHeaderOrFooter);
-      }
-
-      return elements;
     }
 
     function getAccessibleName(el) {
       const ariaLabel = el.getAttribute("aria-label");
-      if (ariaLabel && ariaLabel.trim()) {
-        return ariaLabel.trim();
-      }
+      if (ariaLabel && ariaLabel.trim()) return ariaLabel.trim();
 
       const labelledBy = el.getAttribute("aria-labelledby");
       if (labelledBy) {
         const text = labelledBy
           .split(/\s+/)
-          .map((id) => document.getElementById(id))
+          .map((id) => g(id))
           .filter(Boolean)
           .map((node) => (node.textContent || "").trim())
           .filter(Boolean)
           .join(" ");
+
         if (text) return text;
       }
 
       return "";
     }
 
-    const details = LANDMARKS.map((tag) => {
-      const elements = getRelevantElements(tag);
+    function getLandmarkElements(type) {
+      const elements = Array.from(all(LANDMARK_SELECTORS[type]));
+
+      if (type === "header" || type === "footer") {
+        return elements.filter((el) => {
+          const explicitRole = el.getAttribute("role");
+          if (explicitRole === "banner" || explicitRole === "contentinfo") {
+            return true;
+          }
+
+          return isPageLevelHeaderOrFooter(el);
+        });
+      }
+
+      return elements;
+    }
+
+    function hasFocusableTarget(el) {
+      if (!el) return false;
+
+      const tag = el.tagName.toLowerCase();
+      const tabindex = el.getAttribute("tabindex");
+
+      return (
+        ["a", "button", "input", "select", "textarea"].includes(tag) ||
+        tabindex !== null
+      );
+    }
+
+    function getSkipLinks() {
+      const links = Array.from(all('a[href^="#"]'));
+
+      return links
+        .map((link) => {
+          const href = link.getAttribute("href");
+          const id = href && href.length > 1 ? decodeURIComponent(href.slice(1)) : "";
+          const target = id ? g(id) : null;
+          const text = (link.textContent || "").trim();
+
+          const looksLikeSkipLink =
+            /skip|spring|springen|direkt|inhalt|content|hauptinhalt|main/i.test(text) ||
+            /content|main|hauptinhalt|inhalt/i.test(id);
+
+          return {
+            link,
+            text,
+            href,
+            target,
+            targetVisible: target ? isVisible(target) : false,
+            targetFocusable: target ? hasFocusableTarget(target) : false,
+            looksLikeSkipLink
+          };
+        })
+        .filter((item) => item.looksLikeSkipLink);
+    }
+
+    function getFramesWithoutTitle() {
+      return Array.from(all("frame, iframe"))
+        .filter(isVisible)
+        .filter((frame) => {
+          const title = frame.getAttribute("title");
+          return !title || !title.trim();
+        });
+    }
+
+    const details = Object.keys(LANDMARK_SELECTORS).map((type) => {
+      const elements = getLandmarkElements(type);
       const visibleElements = elements.filter(isVisible);
 
       return {
-        tag,
+        type,
         count: elements.length,
         visibleCount: visibleElements.length,
         namedCount:
-          tag === "nav" || tag === "aside"
+          type === "nav" || type === "aside"
             ? visibleElements.filter((el) => getAccessibleName(el)).length
-            : null
+            : null,
+        elements,
+        visibleElements
       };
     });
 
-    let status = "pass";
+    const byType = Object.fromEntries(details.map((item) => [item.type, item]));
+
+    const skipLinks = getSkipLinks();
+    const workingSkipLinks = skipLinks.filter((item) => item.target && item.targetVisible);
+    const framesWithoutTitle = getFramesWithoutTitle();
+
     const messages = [];
+    const notes = [];
 
-    const main = details.find((item) => item.tag === "main");
-    const nav = details.find((item) => item.tag === "nav");
-    const header = details.find((item) => item.tag === "header");
-    const footer = details.find((item) => item.tag === "footer");
+    let status = "pass";
 
-    if (!main || main.count === 0) {
+    const mainCount = byType.main.visibleCount;
+    const navCount = byType.nav.visibleCount;
+    const hasWorkingSkipLink = workingSkipLinks.length > 0;
+    const hasMainLandmark = mainCount === 1;
+    const hasAnyBypassMechanism = hasWorkingSkipLink || hasMainLandmark;
+
+    // Harte Probleme
+    if (mainCount > 1) {
       status = "fail";
-      messages.push("Kein <code>main</code> gefunden.");
-    } else if (main.count > 1) {
-      status = "fail";
-      messages.push(`Mehrere <code>main</code>-Elemente gefunden (${main.count}).`);
-    } else if (main.visibleCount === 0) {
-      status = "fail";
-      messages.push("<code>main</code> ist vorhanden, aber nicht sichtbar.");
+      messages.push(`Mehrere sichtbare Hauptbereiche gefunden (${mainCount}). Es sollte in der Regel genau einen <code>main</code> bzw. <code>role="main"</code> geben.`);
     }
 
-    if (!nav || nav.count === 0) {
+    if (byType.main.count > 0 && mainCount === 0) {
       status = "fail";
-      messages.push("Kein <code>nav</code> gefunden.");
-    } else if (nav.visibleCount === 0) {
-      status = "fail";
-      messages.push("<code>nav</code> ist vorhanden, aber nicht sichtbar.");
+      messages.push(`<code>main</code> bzw. <code>role="main"</code> ist vorhanden, aber nicht sichtbar oder für assistive Technologien verborgen.`);
     }
 
+    if (!hasAnyBypassMechanism) {
+      status = "fail";
+      messages.push(
+        `Kein verlässlicher Mechanismus zum Umgehen wiederholter Blöcke gefunden: weder funktionierender Sprunglink noch sichtbarer <code>main</code>/<code>role="main"</code>.`
+      );
+    }
+
+    // Wahrscheinliche Prüfpunkte / manuelle Prüfung
     if (status !== "fail") {
-      const presentCount = details.filter((item) => item.count > 0).length;
-
-      if (presentCount < 3) {
+      if (!hasWorkingSkipLink) {
         status = "check";
-        messages.push(
-          `Nur ${presentCount} von 5 geprüften Landmarken wurden gefunden.`
+        notes.push(
+          `Kein funktionierender Sprunglink zum Hauptinhalt erkannt. Mit Landmarken kann 9.2.4.1 zwar erfüllt sein, ein sichtbarer/fokussierbarer Skiplink sollte aber manuell geprüft werden.`
         );
       }
 
-      if (header && header.count === 0) {
-        if (status === "pass") status = "check";
-        messages.push("Kein seitenweiter <code>header</code> gefunden.");
-      }
-
-      if (footer && footer.count === 0) {
-        if (status === "pass") status = "check";
-        messages.push("Kein seitenweiter <code>footer</code> gefunden.");
-      }
-
-      if (nav && nav.visibleCount > 1 && nav.namedCount < nav.visibleCount) {
-        if (status === "pass") status = "check";
-        messages.push(
-          "Mehrere sichtbare <code>nav</code>-Bereiche sind nicht eindeutig benannt."
+      if (navCount === 0) {
+        status = "check";
+        notes.push(
+          `Keine sichtbare Navigation-Landmarke gefunden. Das ist nicht automatisch ein Fehler, wenn die Seite keine wiederkehrende Navigation hat oder ein anderer Bypass-Mechanismus vorhanden ist.`
         );
+      }
+
+      if (navCount > 1 && byType.nav.namedCount < navCount) {
+        status = "check";
+        notes.push(
+          `Mehrere sichtbare Navigationsbereiche gefunden, aber nicht alle sind eindeutig benannt. Mehrere <code>nav</code>/<code>role="navigation"</code>-Bereiche sollten unterscheidbare Namen haben.`
+        );
+      }
+
+      if (byType.aside.visibleCount > 1 && byType.aside.namedCount < byType.aside.visibleCount) {
+        status = "check";
+        notes.push(
+          `Mehrere sichtbare ergänzende Bereiche gefunden, aber nicht alle sind eindeutig benannt.`
+        );
+      }
+
+      if (byType.header.visibleCount === 0) {
+        notes.push(`Kein seitenweiter <code>header</code>/<code>role="banner"</code> gefunden. Nicht automatisch ein Fehler.`);
+        if (status === "pass") status = "check";
+      }
+
+      if (byType.footer.visibleCount === 0) {
+        notes.push(`Kein seitenweiter <code>footer</code>/<code>role="contentinfo"</code> gefunden. Nicht automatisch ein Fehler.`);
+        if (status === "pass") status = "check";
       }
     }
 
-    /*if (messages.length === 0) {
-      messages.push("Die geprüften Landmarken wurden in sinnvoller Form gefunden.");
-    }*/
+    // Frames / iframes: eher eigener Teilaspekt
+    if (framesWithoutTitle.length > 0) {
+      if (status === "pass") status = "check";
+      notes.push(
+        `${framesWithoutTitle.length} sichtbare(s) <code>iframe</code>/<code>frame</code>-Element(e) ohne <code>title</code>-Attribut gefunden.`
+      );
+    }
+
+    if (skipLinks.length > 0 && workingSkipLinks.length === 0) {
+      status = "fail";
+      messages.push(
+        `Sprunglink-Kandidat(en) gefunden, aber kein Ziel ist vorhanden und sichtbar.`
+      );
+    }
 
     const summaryList = details
       .map((item) => {
-        const label = `<code>${escapeHtml(item.tag)}</code>`;
-        const base = `${label}: gefunden <strong>${item.count}</strong>, sichtbar <strong>${item.visibleCount}</strong>`;
+        const label = `<code>${escapeHtml(item.type)}</code>`;
+        let base = `${label}: gefunden <b>${item.count}</b>, sichtbar <b>${item.visibleCount}</b>`;
+
         if (item.namedCount !== null && item.visibleCount > 1) {
-          return `${base}, benannt <strong>${item.namedCount}</strong>`;
+          base += `, benannt <b>${item.namedCount}</b>`;
         }
+
         return base;
       })
       .join("<br>");
 
-      const noIssues = (messages.length === 0);
-      let msgOutput = "<p>Die geprüften Landmarken wurden in sinnvoller Form gefunden.</p>";
-      let msgOutHead = 'Keine Probleme';
-      if (status === "check") msgOutHead = 'Anmerkungen';
-      if (status === "fail") msgOutHead = 'Probleme';
-      if (!noIssues) {
-        msgOutput = `<ul>${messages.map((msg) => `<li>${msg}</li>`).join("")}</ul>`;
-      }
+    const skipLinkSummary =
+      `Sprunglink-Kandidaten: <b>${skipLinks.length}</b>, funktionierend: <b>${workingSkipLinks.length}</b>`;
 
-      return {
-      id: 'R1241',
-      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-1-bereiche-ueberspringbar', 'Prüfschritt aufrufen'],
-      reqInfo: ['Prüfschritt 9.2.4.1', 'Bereiche überspringbar'],
-      title: "Landmarken",
+    const frameSummary =
+      `Sichtbare Frames/iFrames ohne Titel: <b>${framesWithoutTitle.length}</b>`;
+
+    const allMessages = [...messages, ...notes];
+
+    let msgOutHead = "Keine Probleme";
+    if (status === "check") msgOutHead = "Manuell prüfen / Anmerkungen";
+    if (status === "fail") msgOutHead = "Probleme";
+
+    const msgOutput = allMessages.length
+      ? `<h4>${msgOutHead}</h4><ul>${allMessages.map((msg) => `<li>${msg}</li>`).join("")}</ul>`
+      : `<p>Es wurde ein plausibler Mechanismus zum Umgehen wiederholter Blöcke gefunden.</p>`;
+
+    return {
+      id: "R1241",
+      title: "Landmarken / Blöcke umgehen",
       status,
       content: `
-        <p>${summaryList}</p>${msgOutput}
+        <p>${summaryList}<br>${skipLinkSummary}<br>${frameSummary}</p>
+        ${msgOutput}
       `
     };
   },
@@ -826,7 +916,7 @@ const tests = {
     }
 
     const issues = [];
-    const tables = Array.from(document.querySelectorAll("table"));
+    const tables = Array.from(all("table"));
     const visibleTables = tables.filter(hasVisibleTableStyling);
 
     visibleTables.forEach((table) => {
@@ -900,7 +990,7 @@ const tests = {
 
     const orphanIssuesRaw = [];
 
-    Array.from(document.querySelectorAll("tr,th,td")).forEach((el) => {
+    Array.from(all("tr,th,td")).forEach((el) => {
       const tag = el.tagName.toLowerCase();
       const table = el.closest("table");
 
@@ -1086,7 +1176,7 @@ const tests = {
       return relevantElements.some((el) => hasVisibleBackground(el) || hasVisibleBorder(el));
     }
 
-    const tables = Array.from(document.querySelectorAll("table"));
+    const tables = Array.from(all("table"));
     const transparentTables = tables.filter((table) => !hasVisibleTableStyling(table));
     const issues = [];
 
@@ -1223,7 +1313,7 @@ const tests = {
       "LINK", "META", "PARAM", "SOURCE", "TRACK", "WBR"
     ]);
 
-    const alleElemente = Array.from(document.querySelectorAll("*"));
+    const alleElemente = Array.from(all("*"));
 
     function hatSichtbarenText(el) {
       return Array.from(el.childNodes).some(
@@ -1686,7 +1776,7 @@ const tests = {
       `;
     };
 
-    const allLinks = Array.from(document.querySelectorAll("a[href]"));
+    const allLinks = Array.from(all("a[href]"));
     const inlineLinks = allLinks.filter(looksLikeInlineTextLink);
     const results = inlineLinks.map(analyzeLink);
 
@@ -1803,7 +1893,7 @@ const tests = {
     }
 
     // Strukturprüfung für <ul> und <ol>
-    document.querySelectorAll("ul, ol").forEach((list) => {
+    all("ul, ol").forEach((list) => {
       const allowedChildTags = new Set(["LI", "SCRIPT", "TEMPLATE", "STYLE"]);
       const children = Array.from(list.children);
 
@@ -1827,7 +1917,7 @@ const tests = {
     });
 
     // Strukturprüfung für <li>
-    document.querySelectorAll("li").forEach((li) => {
+    all("li").forEach((li) => {
       const parent = li.parentElement;
       if (!parent || !/^(UL|OL)$/.test(parent.tagName)) {
         pushStrukturFehler(
@@ -1838,7 +1928,7 @@ const tests = {
     });
 
     // Erkennung möglicher Fake-Lists aus <p>-Elementen
-    document.querySelectorAll("p").forEach((p) => {
+    all("p").forEach((p) => {
       if (isHidden(p)) {
         return;
       }
@@ -1969,7 +2059,7 @@ const tests = {
 
   pruefeAutocompleteAttribute() {
     const selector = "input, textarea, select";
-    const allElements = Array.from(document.querySelectorAll(selector));
+    const allElements = Array.from(all(selector));
 
     const ignoredInputTypes = new Set([
       "hidden",
@@ -2275,7 +2365,7 @@ const tests = {
       const ariaLabelledBy = el.getAttribute("aria-labelledby");
       if (ariaLabelledBy) {
         ariaLabelledBy.split(/\s+/).forEach(function (refId) {
-          const ref = document.getElementById(refId);
+          const ref = g(refId);
           if (ref && ref.textContent) parts.push(ref.textContent);
         });
       }
@@ -2516,7 +2606,7 @@ const tests = {
   },
 
   pruefeLabelInName() {
-    const elements = document.querySelectorAll(`
+    const elements = all(`
       button,
       a[href],
       input[type="button"],
@@ -2536,7 +2626,7 @@ const tests = {
       } else if (el.hasAttribute("aria-labelledby")) {
         const ids = el.getAttribute("aria-labelledby").split(/\s+/);
         accessibleName = ids
-          .map((id) => document.getElementById(id)?.innerText || "")
+          .map((id) => g(id)?.innerText || "")
           .join(" ")
           .trim();
       } else if (el.alt) {
@@ -2610,7 +2700,7 @@ const tests = {
       'textarea'
     ].join(',');
 
-    const elements = Array.from(document.querySelectorAll(selector));
+    const elements = Array.from(all(selector));
 
     function isElementVisible(el) {
       if (!el || !(el instanceof Element)) return false;
@@ -2716,7 +2806,7 @@ const tests = {
       const sources = [];
 
       ids.forEach((id) => {
-        const ref = document.getElementById(id);
+        const ref = g(id);
         if (!ref) return;
 
         const text = getVisibleTextFromElement(ref);
@@ -2969,7 +3059,7 @@ const tests = {
     function getAssociatedControlForLabel(label) {
       const forId = label.getAttribute('for');
       if (forId) {
-        const target = document.getElementById(forId);
+        const target = g(forId);
         return {
           mode: 'for',
           forId,
@@ -3001,11 +3091,11 @@ const tests = {
 
     function getExplicitLabelsForControl(control) {
       if (!control.id) return [];
-      return Array.from(document.querySelectorAll(`label[for="${CSS.escape(control.id)}"]`));
+      return Array.from(all(`label[for="${CSS.escape(control.id)}"]`));
     }
 
     function getImplicitLabelsForControl(control) {
-      return Array.from(document.querySelectorAll('label')).filter(label => {
+      return Array.from(all('label')).filter(label => {
         if (label.hasAttribute('for')) return false;
         return label.contains(control);
       });
@@ -3021,7 +3111,7 @@ const tests = {
         .split(/\s+/)
         .filter(Boolean);
 
-      return ids.map(id => document.getElementById(id)).filter(Boolean);
+      return ids.map(id => g(id)).filter(Boolean);
     }
 
     function findNearestGroupContainer(el) {
@@ -3094,10 +3184,10 @@ const tests = {
     const warnings = [];
     const passes = [];
 
-    const allLabels = Array.from(document.querySelectorAll('label'));
+    const allLabels = Array.from(all('label'));
     const visibleLabels = allLabels.filter(isElementVisible);
-    const allControls = Array.from(document.querySelectorAll(formControlSelector)).filter(isElementVisible);
-    const allFieldsets = Array.from(document.querySelectorAll('fieldset')).filter(isElementVisible);
+    const allControls = Array.from(all(formControlSelector)).filter(isElementVisible);
+    const allFieldsets = Array.from(all('fieldset')).filter(isElementVisible);
 
     // 1) Labels selbst prüfen
     visibleLabels.forEach(label => {
@@ -3376,7 +3466,7 @@ const tests = {
     });
 
     // 4) label-ähnliche Elemente prüfen
-    const potentialLabelLikeElements = Array.from(document.querySelectorAll([
+    const potentialLabelLikeElements = Array.from(all([
       '.control-label',
       '.form-label',
       '.col-form-label',
@@ -3465,7 +3555,7 @@ const tests = {
 
   checkThScope() {
     const validScopes = ["row", "col", "rowgroup", "colgroup"];
-    const thElements = document.querySelectorAll("th");
+    const thElements = all("th");
     const results = [];
     let pass = 0, check = 0, fail = 0;
 
@@ -3904,6 +3994,9 @@ const tests = {
   }
 
 };
+
+const g = elId => document.getElementById(elId);
+const all = cssSel => document.querySelectorAll(cssSel);
 
 function escapeHtml(str) {
   return String(str)
