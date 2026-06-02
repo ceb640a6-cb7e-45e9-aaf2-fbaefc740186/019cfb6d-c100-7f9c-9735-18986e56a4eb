@@ -57,29 +57,135 @@ const tests = {
 
   linksWithoutText() {
     const links = [...all("a")];
-    const badLinks = links.filter(a => !a.textContent.trim() && !a.getAttribute("aria-label"));
+
+    const isHidden = (el) => {
+      if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+
+      const style = window.getComputedStyle(el);
+
+      return (
+        el.hidden ||
+        el.getAttribute("aria-hidden") === "true" ||
+        style.display === "none" ||
+        style.visibility === "hidden"
+      );
+    };
+
+    const getVisibleText = (el) => {
+      if (!el) return "";
+
+      let text = "";
+
+      const walk = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+          return;
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+        if (isHidden(node)) return;
+
+        for (const child of node.childNodes) {
+          walk(child);
+        }
+      };
+
+      walk(el);
+
+      return text.trim();
+    };
+
+    const getAriaLabelledByText = (el) => {
+      const labelledBy = el.getAttribute("aria-labelledby");
+      if (!labelledBy) return "";
+
+      return labelledBy
+        .split(/\s+/)
+        .map(id => document.getElementById(id))
+        .filter(Boolean)
+        .map(labelEl => getVisibleText(labelEl) || labelEl.textContent.trim())
+        .join(" ")
+        .trim();
+    };
+
+    const getImageAltText = (el) => {
+      return [...el.querySelectorAll("img, input[type='image']")]
+        .filter(img => !isHidden(img))
+        .map(img => img.getAttribute("alt"))
+        .filter(alt => alt && alt.trim())
+        .join(" ")
+        .trim();
+    };
+
+    const getSvgTitleText = (el) => {
+      return [...el.querySelectorAll("svg title")]
+        .filter(title => !isHidden(title.closest("svg")))
+        .map(title => title.textContent.trim())
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+    };
+
+    const getTitleAttributeText = (el) => {
+      return (el.getAttribute("title") || "").trim();
+    };
+
+    const getAccessibleName = (a) => {
+      // 1. aria-labelledby has high priority
+      const labelledByText = getAriaLabelledByText(a);
+      if (labelledByText) return labelledByText;
+
+      // 2. aria-label
+      const ariaLabel = (a.getAttribute("aria-label") || "").trim();
+      if (ariaLabel) return ariaLabel;
+
+      // 3. Visible text content
+      const visibleText = getVisibleText(a);
+      if (visibleText) return visibleText;
+
+      // 4. Image alt text inside link
+      const imageAltText = getImageAltText(a);
+      if (imageAltText) return imageAltText;
+
+      // 5. SVG title inside link
+      const svgTitleText = getSvgTitleText(a);
+      if (svgTitleText) return svgTitleText;
+
+      // 6. title attribute fallback
+      // Technically can contribute to accessible name,
+      // but it is not ideal as the only label.
+      const titleText = getTitleAttributeText(a);
+      if (titleText) return titleText;
+
+      return "";
+    };
+
+    const badLinks = links.filter(a => !getAccessibleName(a));
 
     return {
       id: 'R1244',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-4-aussagekraeftige-linktexte', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.2.4.4', 'Aussagekräftige Linktexte'],
-      title: "Links without text",
+      title: "Links without accessible names",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
-        ? "<p>No empty links found.</p>"
+        ? "<p>No links without accessible names found.</p>"
         : `
-          <p><strong>${badLinks.length}</strong> link${badLinks.length == 1 ? '' : 's'} appear to have no visible text and no <code>aria-label</code>.</p>
+          <p><strong>${badLinks.length}</strong> link${badLinks.length == 1 ? '' : 's'} appear to have no accessible name.</p>
+          <p>A link should usually have visible text, or otherwise be labelled with text alternatives such as <code>aria-label</code>, <code>aria-labelledby</code>, image <code>alt</code> text, or an SVG <code>title</code>.</p>
           <ol>
             ${badLinks.slice(0, 20).map(a => `
-              <li>Element: <code>${escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
-              Link zu: <a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.href.slice(0, 200))}</a><br>
-              Position: <code>${getDomPath(a)}</code>
-              <details class="clone">
-                <summary><p class="toggleText">Element anzeigen</p></summary>
-                <div class="inline-content details-content">
-                  <div class="clonedElement">${cloneEl(a)}</div>
-                </div>
-              </details>
+              <li>
+                Element: <code>${escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
+                Link zu: <a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.href.slice(0, 200))}</a><br>
+                Position: <code>${getDomPath(a)}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</p></summary>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(a)}</div>
+                  </div>
+                </details>
               </li>
             `).join("")}
           </ol>
@@ -150,40 +256,78 @@ const tests = {
       }
     }
 
+    let prevHLevel = +headings[0].tagName.substring(1);
     let headingList_content = (headings.length === 0)
-      ? "<p>No headings found on the page.</p>"
-      : `
-        <p><strong>${headings.length}</strong> heading(s) found.</p>
-        <ul>
-          ${headings.map((el, i) => {
-            const level = parseInt(el.tagName.substring(1), 10);
-            const text = (el.textContent || "").trim() || "(no text)";
-            const indent = (level - 1) * 16;
+        ? "<p>No headings found on the page.</p>"
+        : `
+          <p><strong>${headings.length}</strong> heading(s) found.</p>
+          <ol>
+            ${headings.map((el, i) => {
+              const level = parseInt(el.tagName.substring(1), 10);
+              const text = (el.textContent || "").trim() || "(no text)";
+              const indent = (level - 1) * 16;
+              const isJump = (level > (prevHLevel + 1));
+              prevHLevel = level;
 
-            return `
-              <li style="margin-left:${indent}px">
-                <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
-              </li>
-            `;
-          }).join("")}
-        </ul>
-      `;
+              return `
+                <li style="margin-left:${indent}px" ${isJump ? 'class="highlight-temp"' : ''}>
+                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+                </li>
+              `;
+            }).join("")}
+          </ol>
+        `;
 
     let headingJumps_content = (jumps.length === 0)
-      ? "<p>No heading hierarchy jumps found.</p>"
-      : `
-        <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
-        <ol>
-          ${jumps.slice(0, 20).map((jump, i) => `
-            <li>
-              <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
-              <strong>${escapeHtml((jump.from.textContent || "").trim() || "(ohne Text)")}</strong> zu <strong>${escapeHtml((jump.to.textContent || "").trim() || "(ohne Text)")}</strong><br>
-              In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
-            </li>
-          `).join("")}
-        </ol>
-        ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
-      `;
+        ? "<p>No heading hierarchy jumps found.</p>"
+        : `
+          <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
+          <ol>
+            ${jumps.slice(0, 20).map((jump, i) => `
+              <li>
+                <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
+                <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
+                In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</p></summary>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(jump.to)}</div>
+                  </div>
+                </details>
+              </li>
+            `).join("")}
+          </ol>
+          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+        `;
+
+    const invalidHeadings = [...document.querySelectorAll('*')]
+      .filter(el => /^h\d+$/i.test(el.tagName))
+      .filter(el => {
+        const level = Number(el.tagName.slice(1));
+        return level < 1 || level > 6;
+      });
+
+    let invalidHeadings_content = (invalidHeadings.length === 0)
+        ? ''
+        : `
+          <p><strong>${invalidHeadings.length}</strong> invalide Überschriften gefunden.</p>
+          <ol>
+            ${invalidHeadings.slice(0, 20).map((el, i) => `
+              <li>
+                <strong>Ungültiges Element: &lt;${el.tagName.toLowerCase()}&gt;</strong><br>
+                <strong>"${el.textContent}"</strong><br>
+                In Position: <code>${escapeHtml(getDomPath(el))}</code>
+                <details class="clone">
+                  <summary><p class="toggleText">Element anzeigen</p></summary>
+                  <div class="inline-content details-content">
+                    <div class="clonedElement">${cloneEl(el)}</div>
+                  </div>
+                </details>
+              </li>
+            `).join("")}
+          </ol>
+          ${invalidHeadings.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+        `;
 
     let resStatus = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail"; //maybe the headings.length fork is obsolete but oh well
     if (resStatus == 'pass') resStatus = h1res[0]; //set status to "h1 check status" if "heading jumps check" passed
@@ -193,6 +337,7 @@ const tests = {
       title: "Heading hierarchy jumps",
       status: resStatus,
       content: `<p>${h1res[1]}</p>
+      ${invalidHeadings_content}
       ${headingJumps_content}
         <details>
           <summary><p class="toggleText">Alle ${headings.length} Überschriften anzeigen</code></p></summary>
