@@ -4409,6 +4409,409 @@ const tests = {
       document.documentElement.style.fontSize = originalHtmlFontSize;
       document.body.style.fontSize = originalBodyFontSize;
     }
+  },
+
+  pruefeTextabstaendeAnpassbar() {
+    const TEST_CLASS = "wcag-text-spacing-test";
+    const STYLE_ID = "wcag-text-spacing-test-style";
+
+    const results = [];
+    const warnings = [];
+    const maxReportedItems = 30;
+
+    function isVisible(el) {
+      if (!el || !(el instanceof Element)) return false;
+
+      const style = window.getComputedStyle(el);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.opacity === "0"
+      ) {
+        return false;
+      }
+
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    }
+
+    function hasRelevantText(el) {
+      if (!el || !el.innerText) return false;
+
+      const text = el.innerText.replace(/\s+/g, " ").trim();
+      if (text.length < 2) return false;
+
+      const tag = el.tagName.toLowerCase();
+
+      // Elemente mit relevantem sichtbaren Text
+      const textTags = [
+        "p", "span", "a", "button", "label", "li", "td", "th",
+        "div", "section", "article", "header", "footer", "main",
+        "h1", "h2", "h3", "h4", "h5", "h6", "blockquote",
+        "figcaption", "summary"
+      ];
+
+      return textTags.includes(tag);
+    }
+
+    function getTextElements() {
+      return Array.from(document.body.querySelectorAll("*"))
+        .filter(el => isVisible(el) && hasRelevantText(el));
+    }
+
+    function getProblemSnippet(el) {
+      const text = (el.innerText || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 120);
+
+      return `
+        <li>
+          <strong>${escapeHtml(getDomPath(el))}</strong><br>
+          <code>${escapeHtml(text)}</code>
+        </li>
+      `;
+    }
+
+    function rectsOverlap(a, b) {
+      return !(
+        a.right <= b.left ||
+        a.left >= b.right ||
+        a.bottom <= b.top ||
+        a.top >= b.bottom
+      );
+    }
+
+    function getOriginalState(elements) {
+      return elements.map(el => {
+        const rect = el.getBoundingClientRect();
+        return {
+          el,
+          rect,
+          scrollWidth: el.scrollWidth,
+          scrollHeight: el.scrollHeight,
+          clientWidth: el.clientWidth,
+          clientHeight: el.clientHeight,
+          overflowX: window.getComputedStyle(el).overflowX,
+          overflowY: window.getComputedStyle(el).overflowY
+        };
+      });
+    }
+
+    function injectTextSpacingStyles() {
+      const style = document.createElement("style");
+      style.id = STYLE_ID;
+
+      /*
+        WCAG 1.4.12 Text Spacing:
+        - line-height: mindestens 1.5-fach
+        - paragraph spacing: mindestens 2-fach der Schriftgröße
+        - letter-spacing: mindestens 0.12-fach der Schriftgröße
+        - word-spacing: mindestens 0.16-fach der Schriftgröße
+      */
+      style.textContent = `
+        body.${TEST_CLASS},
+        body.${TEST_CLASS} *:not(script):not(style):not(noscript):not(svg):not(svg *) {
+          line-height: 1.5 !important;
+          letter-spacing: 0.12em !important;
+          word-spacing: 0.16em !important;
+        }
+
+        body.${TEST_CLASS} p,
+        body.${TEST_CLASS} li,
+        body.${TEST_CLASS} blockquote,
+        body.${TEST_CLASS} figcaption,
+        body.${TEST_CLASS} dd,
+        body.${TEST_CLASS} dt {
+          margin-bottom: 2em !important;
+        }
+      `;
+
+      document.head.appendChild(style);
+      document.body.classList.add(TEST_CLASS);
+    }
+
+    function removeTextSpacingStyles() {
+      document.body.classList.remove(TEST_CLASS);
+      const style = document.getElementById(STYLE_ID);
+      if (style) style.remove();
+    }
+
+    function detectClipping(elements) {
+      const clipped = [];
+
+      elements.forEach(el => {
+        if (!isVisible(el)) return;
+
+        const style = window.getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+
+        const clipsX =
+          ["hidden", "clip"].includes(style.overflowX) &&
+          el.scrollWidth > el.clientWidth + 2;
+
+        const clipsY =
+          ["hidden", "clip"].includes(style.overflowY) &&
+          el.scrollHeight > el.clientHeight + 2;
+
+        const fixedHeightWithOverflow =
+          rect.height > 0 &&
+          el.scrollHeight > el.clientHeight + 2 &&
+          ["hidden", "clip"].includes(style.overflowY);
+
+        if (clipsX || clipsY || fixedHeightWithOverflow) {
+          clipped.push(el);
+        }
+      });
+
+      return clipped;
+    }
+
+    function detectHorizontalPageScroll() {
+      return document.documentElement.scrollWidth > window.innerWidth + 5;
+    }
+
+    function detectSuspiciousFixedSizes(elements) {
+      const suspicious = [];
+
+      elements.forEach(el => {
+        const style = window.getComputedStyle(el);
+
+        const hasFixedHeight =
+          style.height &&
+          style.height !== "auto" &&
+          style.height !== "0px";
+
+        const hasMaxHeight =
+          style.maxHeight &&
+          style.maxHeight !== "none" &&
+          style.maxHeight !== "0px";
+
+        const hasHiddenOverflow =
+          ["hidden", "clip"].includes(style.overflow) ||
+          ["hidden", "clip"].includes(style.overflowY) ||
+          ["hidden", "clip"].includes(style.overflowX);
+
+        if ((hasFixedHeight || hasMaxHeight) && hasHiddenOverflow) {
+          suspicious.push(el);
+        }
+      });
+
+      return suspicious;
+    }
+
+    function detectOverlaps(elements) {
+      const overlaps = [];
+
+      const candidates = elements
+        .filter(isVisible)
+        .map(el => ({
+          el,
+          rect: el.getBoundingClientRect()
+        }))
+        .filter(item => item.rect.width > 0 && item.rect.height > 0);
+
+      for (let i = 0; i < candidates.length; i++) {
+        for (let j = i + 1; j < candidates.length; j++) {
+          const a = candidates[i];
+          const b = candidates[j];
+
+          // Parent/Child-Überschneidungen sind normal und sollen ignoriert werden.
+          if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+
+          // Sehr kleine Überlappungen ignorieren.
+          if (!rectsOverlap(a.rect, b.rect)) continue;
+
+          const overlapWidth =
+            Math.min(a.rect.right, b.rect.right) -
+            Math.max(a.rect.left, b.rect.left);
+
+          const overlapHeight =
+            Math.min(a.rect.bottom, b.rect.bottom) -
+            Math.max(a.rect.top, b.rect.top);
+
+          if (overlapWidth > 4 && overlapHeight > 4) {
+            overlaps.push([a.el, b.el]);
+          }
+
+          if (overlaps.length >= maxReportedItems) return overlaps;
+        }
+      }
+
+      return overlaps;
+    }
+
+    function formatElementList(title, elements) {
+      if (!elements.length) return "";
+
+      return `
+        <h3>${escapeHtml(title)}</h3>
+        <ul>
+          ${elements.slice(0, maxReportedItems).map(getProblemSnippet).join("")}
+        </ul>
+        ${
+          elements.length > maxReportedItems
+            ? `<p>Weitere ${elements.length - maxReportedItems} Elemente wurden nicht angezeigt.</p>`
+            : ""
+        }
+      `;
+    }
+
+    function formatOverlapList(overlaps) {
+      if (!overlaps.length) return "";
+
+      return `
+        <h3>Mögliche Überlappungen nach Textabstands-Anpassung</h3>
+        <ul>
+          ${overlaps.slice(0, maxReportedItems).map(pair => {
+            const a = pair[0];
+            const b = pair[1];
+
+            return `
+              <li>
+                <strong>${escapeHtml(getDomPath(a))}</strong><br>
+                überlappt möglicherweise mit<br>
+                <strong>${escapeHtml(getDomPath(b))}</strong>
+              </li>
+            `;
+          }).join("")}
+        </ul>
+        ${
+          overlaps.length > maxReportedItems
+            ? `<p>Weitere ${overlaps.length - maxReportedItems} Überlappungen wurden nicht angezeigt.</p>`
+            : ""
+        }
+      `;
+    }
+
+    try {
+      if (!document.body) {
+        return {
+          title: "Textabstände anpassbar",
+          status: "check",
+          content: "Die Prüfung konnte nicht ausgeführt werden, da kein <code>body</code>-Element gefunden wurde."
+        };
+      }
+
+      const textElementsBefore = getTextElements();
+
+      if (!textElementsBefore.length) {
+        return {
+          title: "Textabstände anpassbar",
+          status: "check",
+          content: "Es wurden keine sichtbaren Textelemente gefunden. Bitte manuell prüfen."
+        };
+      }
+
+      const originalState = getOriginalState(textElementsBefore);
+      const suspiciousFixedSizesBefore = detectSuspiciousFixedSizes(textElementsBefore);
+
+      injectTextSpacingStyles();
+
+      // Layout neu berechnen lassen
+      document.body.offsetHeight;
+
+      const textElementsAfter = getTextElements();
+
+      const clippedAfter = detectClipping(textElementsAfter);
+      const overlapsAfter = detectOverlaps(textElementsAfter);
+      const hasHorizontalScrollAfter = detectHorizontalPageScroll();
+
+      removeTextSpacingStyles();
+
+      const problemCount =
+        clippedAfter.length +
+        overlapsAfter.length +
+        suspiciousFixedSizesBefore.length +
+        (hasHorizontalScrollAfter ? 1 : 0);
+
+      if (suspiciousFixedSizesBefore.length) {
+        warnings.push(`
+          <p>
+            Es wurden Elemente mit fester Höhe oder maximaler Höhe und verstecktem Overflow gefunden.
+            Solche Container sind häufig problematisch, wenn Textabstände durch Nutzer:innen erhöht werden.
+          </p>
+        `);
+      }
+
+      if (hasHorizontalScrollAfter) {
+        warnings.push(`
+          <p>
+            Nach Anwendung der WCAG-Textabstände entsteht horizontales Scrollen auf Seitenebene.
+            Das kann auf abgeschnittene oder nicht umbrechende Inhalte hinweisen.
+          </p>
+        `);
+      }
+
+      let status = "pass";
+
+      if (problemCount > 0) {
+        status = "check";
+      }
+
+      let content = `
+        <p>
+          Die Seite wurde testweise mit folgenden Textabständen geprüft:
+        </p>
+        <ul>
+          <li><code>line-height: 1.5</code></li>
+          <li><code>letter-spacing: 0.12em</code></li>
+          <li><code>word-spacing: 0.16em</code></li>
+          <li><code>margin-bottom: 2em</code> für absatzähnliche Elemente</li>
+        </ul>
+        <p>
+          Geprüfte sichtbare Textelemente: <strong>${textElementsBefore.length}</strong>
+        </p>
+      `;
+
+      if (status === "pass") {
+        content += `
+          <p>
+            Es wurden keine offensichtlichen Probleme durch angepasste Textabstände erkannt.
+            Eine manuelle Sichtprüfung ist dennoch empfohlen, da Überlappungen und abgeschnittene Inhalte nicht immer zuverlässig automatisiert erkannt werden können.
+          </p>
+        `;
+      } else {
+        content += `
+          <p>
+            Es wurden mögliche Probleme gefunden. Bitte die folgenden Stellen manuell prüfen.
+            Nicht jede Auffälligkeit ist automatisch ein WCAG-Verstoß.
+          </p>
+        `;
+
+        content += warnings.join("");
+
+        content += formatElementList(
+          "Möglicherweise abgeschnittener Text nach Textabstands-Anpassung",
+          clippedAfter
+        );
+
+        content += formatElementList(
+          "Elemente mit fester Höhe / verstecktem Overflow",
+          suspiciousFixedSizesBefore
+        );
+
+        content += formatOverlapList(overlapsAfter);
+      }
+
+      return {
+        title: "Textabstände anpassbar",
+        status: status,
+        content: content
+      };
+
+    } catch (error) {
+      removeTextSpacingStyles();
+
+      return {
+        title: "Textabstände anpassbar",
+        status: "check",
+        content: `
+          <p>Die Prüfung konnte nicht vollständig ausgeführt werden.</p>
+          <p><strong>Fehler:</strong> ${escapeHtml(error.message || String(error))}</p>
+        `
+      };
+    }
   }
 
 };

@@ -27,7 +27,8 @@
     /* 1036 */ "checkThScope",
     /* 2146 */ "checkHorizontalScroll320",
     /* 2143 */ "pruefeTextKontrast",
-    /* 2144 */ "pruefeTextVergroesserung200"
+    /* 2144 */ "pruefeTextVergroesserung200",
+    /* */ "pruefeTextabstaendeAnpassbar"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
@@ -691,7 +692,10 @@
         </div>
 
         <script>
-        document.body.style.fontSize = 'unset';
+        document.body.style.fontSize = 'unset'; //2144
+        document.body.classList.remove(TEST_CLASS); //2148
+        const style2148 = document.getElementById(STYLE_ID); //2148
+        if (style2148) style2148.remove(); //2148
 
         function cssVar(s) {
             return getComputedStyle(document.documentElement).getPropertyValue(s);
