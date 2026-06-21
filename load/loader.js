@@ -17,7 +17,7 @@
     /* 1035 */ "pruefeSichtbareTabellen",
     /* 1037 */ "pruefeTransparenteTabellen",
     /* 1311 */ "pruefeLangAttribut",
-    /* 8010 */ "findeKomplettLeereTags",
+    /* 8010 */ /*"findeKomplettLeereTags",*/
     /* 1141 */ "pruefeLinksImFliesstext",
     /* 1032 */ "pruefeListenStruktur",
     /* 2135 */ "pruefeAutocompleteAttribute",
@@ -28,7 +28,7 @@
     /* 2146 */ "checkHorizontalScroll320",
     /* 2143 */ "pruefeTextKontrast",
     /* 2144 */ "pruefeTextVergroesserung200",
-    /* */ "pruefeTextabstaendeAnpassbar"
+    /* 2148 */ "pruefeTextabstaendeAnpassbar"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
@@ -709,6 +709,7 @@
             </div>
           </details>
         `).join("")}
+        <p style="color: var(--gray-700); margin-top: 30px; font-size: 0.75rem"><strong>corvin breyer / 2026</strong><br>v.019ee9b3-c5c3-796d-b742-4497982acb5d</p>
         </div>
 
         <script>

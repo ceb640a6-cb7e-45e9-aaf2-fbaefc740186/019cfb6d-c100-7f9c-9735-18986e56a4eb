@@ -4687,6 +4687,9 @@ const tests = {
     try {
       if (!document.body) {
         return {
+          id: 'R2148',
+          reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-5-eingabefelder-zu-nutzerdaten-vermitteln-den-zweck', 'Prüfschritt aufrufen'],
+          reqInfo: ['Prüfschritt 9.1.4.12', 'Textabstände anpassbar'],
           title: "Textabstände anpassbar",
           status: "check",
           content: "Die Prüfung konnte nicht ausgeführt werden, da kein <code>body</code>-Element gefunden wurde."
@@ -4697,6 +4700,9 @@ const tests = {
 
       if (!textElementsBefore.length) {
         return {
+          id: 'R2148',
+          reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-5-eingabefelder-zu-nutzerdaten-vermitteln-den-zweck', 'Prüfschritt aufrufen'],
+          reqInfo: ['Prüfschritt 9.1.4.12', 'Textabstände anpassbar'],
           title: "Textabstände anpassbar",
           status: "check",
           content: "Es wurden keine sichtbaren Textelemente gefunden. Bitte manuell prüfen."
@@ -4790,6 +4796,9 @@ const tests = {
       }
 
       return {
+        id: 'R2148',
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-5-eingabefelder-zu-nutzerdaten-vermitteln-den-zweck', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.4.12', 'Textabstände anpassbar'],
         title: "Textabstände anpassbar",
         status: status,
         content: content
@@ -4799,6 +4808,9 @@ const tests = {
       removeTextSpacingStyles();
 
       return {
+        id: 'R2148',
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-5-eingabefelder-zu-nutzerdaten-vermitteln-den-zweck', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.4.12', 'Textabstände anpassbar'],
         title: "Textabstände anpassbar",
         status: "check",
         content: `
