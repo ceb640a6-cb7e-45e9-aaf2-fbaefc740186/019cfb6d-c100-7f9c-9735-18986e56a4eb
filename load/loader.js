@@ -264,6 +264,14 @@
                 font-weight: 600;
             }
 
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+              margin-top: 10px;
+            }
+
             strong {
                 font-weight: 600;
             }
@@ -309,6 +317,13 @@
 
             button:hover {
                 background: var(--gray-50);
+            }
+
+            code {
+                background: var(--gray-50);
+                border: 1px solid var(--gray-200);
+                padding: 1px 3px;
+                border-radius: 3px;
             }
 
             .content {
@@ -403,6 +418,7 @@
             details {
                 border: 1px solid var(--gray-400);
                 border-radius: 6px;
+                margin-top: 5px;
             }
 
             summary {
@@ -601,6 +617,10 @@
                 top: 0.05rem;
                 transform: rotate(90deg);
                 transition: all 0.2s;
+            }
+
+            .inline-content {
+                padding:10px;
             }
 
             .reqInfo {
