@@ -268,7 +268,7 @@
             }
 
             a {
-                color: var(--info-600);
+                color: var(--info-700);
             }
 
             ol,
@@ -297,12 +297,13 @@
             }
 
             button {
-                background: var(--gray-200);
-                color: var(--gray-970);
-                padding: 3px 8px;
+                background: var(--gray-800);
+                color: var(--gray-50);
+                padding: 5px 12px;
                 border-radius: 6px;
-                border: 1px solid var(--gray-400);
+                border: 1px solid var(--gray-900);
                 font-weight: 500;
+                margin: 2px 0;
             }
 
             button:hover {
@@ -391,7 +392,7 @@
             }
 
             .box-content summary {
-                color: var(--info-600);
+                color: var(--info-700);
             }
 
             summary {
@@ -602,7 +603,7 @@
             }
 
             .reqInfo {
-                padding: 10px;
+                padding: 10px !important;
             }
 
             .popupButton {
@@ -690,6 +691,12 @@
         </div>
 
         <script>
+        document.body.style.fontSize = 'unset';
+
+        function cssVar(s) {
+            return getComputedStyle(document.documentElement).getPropertyValue(s);
+        }
+
         function openPopup(button, docTitle) {
             const details = button.closest('details.box');
             const clone = details.cloneNode(true);
@@ -735,10 +742,10 @@
               label: 'Testfälle',
               data: [${summary.crash > 0 ? `${summary.crash},` : ''} ${summary.pass}, ${summary.check}, ${summary.fail}],
               backgroundColor: [
-                ${summary.crash > 0 ? `'#6941d0',` : ''}
-                '#41d0a7', // pass
-                '#e8b129', // check
-                '#d93872' // fail
+                ${summary.crash > 0 ? `cssVar('--crash-600'),` : ''}
+                cssVar('--pass-600'), // pass
+                cssVar('--check-600'), // check
+                cssVar('--fail-600') // fail
               ],
               borderColor: [
                 ${summary.crash > 0 ? `'#ffffff00',` : ''}

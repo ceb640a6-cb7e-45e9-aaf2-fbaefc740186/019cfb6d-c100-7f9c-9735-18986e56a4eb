@@ -4397,7 +4397,10 @@ const tests = {
       }
 
       return {
-        title: "9.1.4.4 Text auf 200% vergrößerbar",
+        id: 'R2144',
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-4-text-auf-200-vergroesserbar', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.4.4', 'Text auf 200% vergrößerbar'],
+        title: "Text auf 200% vergrößerbar",
         status,
         content
       };
