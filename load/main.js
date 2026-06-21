@@ -4136,6 +4136,276 @@ const tests = {
       status: status,
       content: content
     };
+  },
+
+  pruefeTextVergroesserung200() {
+    const originalHtmlFontSize = document.documentElement.style.fontSize;
+    const originalBodyFontSize = document.body.style.fontSize;
+
+    const issues = [];
+    const checkedElements = [];
+
+    function isVisible(el) {
+      if (!el || !(el instanceof HTMLElement)) return false;
+
+      const style = window.getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0" &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+    }
+
+    function hasMeaningfulText(el) {
+      if (!el || !el.innerText) return false;
+
+      const text = el.innerText.trim();
+
+      return text.length > 0;
+    }
+
+    function getTextPreview(el) {
+      const text = (el.innerText || "").trim().replace(/\s+/g, " ");
+      return escapeHtml(text.length > 120 ? text.slice(0, 120) + "…" : text);
+    }
+
+    function pxToNumber(value) {
+      const parsed = parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function hasFixedHeight(style) {
+      const height = style.height;
+      const maxHeight = style.maxHeight;
+
+      const fixedHeight =
+        height &&
+        height !== "auto" &&
+        height !== "none" &&
+        height.endsWith("px");
+
+      const fixedMaxHeight =
+        maxHeight &&
+        maxHeight !== "none" &&
+        maxHeight.endsWith("px");
+
+      return fixedHeight || fixedMaxHeight;
+    }
+
+    function hasClippingOverflow(style) {
+      return (
+        style.overflow === "hidden" ||
+        style.overflowX === "hidden" ||
+        style.overflowY === "hidden" ||
+        style.textOverflow === "ellipsis"
+      );
+    }
+
+    function elementHasOverflow(el) {
+      const tolerance = 2;
+
+      return (
+        el.scrollWidth > el.clientWidth + tolerance ||
+        el.scrollHeight > el.clientHeight + tolerance
+      );
+    }
+
+    function isTextLikelyCutOff(el, style) {
+      if (!hasMeaningfulText(el)) return false;
+
+      const overflow = elementHasOverflow(el);
+      const clipping = hasClippingOverflow(style);
+      const fixedHeight = hasFixedHeight(style);
+
+      return overflow && (clipping || fixedHeight);
+    }
+
+    function isFontSizeAbsolutePx(style) {
+      return style.fontSize && style.fontSize.endsWith("px");
+    }
+
+    function collectIssue(el, type, severity, message) {
+      issues.push({
+        element: el,
+        type,
+        severity,
+        path: getDomPath(el),
+        text: getTextPreview(el),
+        message
+      });
+    }
+
+    function scanPage(phase) {
+      const elements = Array.from(document.body.querySelectorAll("*"));
+
+      elements.forEach((el) => {
+        if (!isVisible(el)) return;
+        if (!hasMeaningfulText(el)) return;
+
+        const style = window.getComputedStyle(el);
+
+        checkedElements.push(el);
+
+        if (isTextLikelyCutOff(el, style)) {
+          collectIssue(
+            el,
+            "text-cut-off",
+            "fail",
+            `Nach Textvergrößerung auf 200% wirkt Text abgeschnitten oder nicht vollständig sichtbar.`
+          );
+        }
+
+        if (hasClippingOverflow(style) && elementHasOverflow(el)) {
+          collectIssue(
+            el,
+            "overflow-hidden",
+            "fail",
+            `Element hat überlaufenden Inhalt und verwendet overflow:hidden, overflow-x:hidden, overflow-y:hidden oder text-overflow:ellipsis.`
+          );
+        }
+
+        if (hasFixedHeight(style) && elementHasOverflow(el)) {
+          collectIssue(
+            el,
+            "fixed-height-overflow",
+            "fail",
+            `Element hat eine feste Höhe oder max-height in px und der Inhalt läuft über.`
+          );
+        }
+
+        if (
+          phase === "after-resize" &&
+          isFontSizeAbsolutePx(style) &&
+          pxToNumber(style.fontSize) < 12
+        ) {
+          collectIssue(
+            el,
+            "very-small-text",
+            "check",
+            `Text ist nach der Vergrößerung weiterhin sehr klein. Prüfen, ob eigene CSS-Regeln die Skalierung verhindern.`
+          );
+        }
+      });
+    }
+
+    function uniqueIssues(items) {
+      const seen = new Set();
+
+      return items.filter((issue) => {
+        const key = issue.type + "|" + issue.path + "|" + issue.message;
+
+        if (seen.has(key)) return false;
+
+        seen.add(key);
+        return true;
+      });
+    }
+
+    try {
+      // Ausgangszustand prüfen
+      scanPage("before-resize");
+
+      // Textvergrößerung simulieren
+      document.documentElement.style.fontSize = "200%";
+      document.body.style.fontSize = "200%";
+
+      // Layout-Neuberechnung erzwingen
+      document.body.offsetHeight;
+
+      // Zustand nach Vergrößerung prüfen
+      scanPage("after-resize");
+
+      const finalIssues = uniqueIssues(issues);
+
+      const failIssues = finalIssues.filter((issue) => issue.severity === "fail");
+      const checkIssues = finalIssues.filter((issue) => issue.severity === "check");
+
+      let status = "pass";
+
+      if (failIssues.length > 0) {
+        status = "fail";
+      } else if (checkIssues.length > 0) {
+        status = "check";
+      }
+
+      let content = "";
+
+      if (status === "pass") {
+        content = `
+          <p><strong>Keine offensichtlichen Probleme gefunden.</strong></p>
+          <p>
+            Es wurden ${checkedElements.length} sichtbare Textelemente geprüft.
+            Die Seite zeigt bei simulierter Textvergrößerung auf 200% keine klar erkennbaren
+            abgeschnittenen oder überlaufenden Textbereiche.
+          </p>
+          <p>
+            Hinweis: Die Prüfung ersetzt keinen manuellen Test. Bitte zusätzlich prüfen,
+            ob alle Inhalte und Funktionen bei 200% Textgröße bedienbar bleiben.
+          </p>
+        `;
+      } else {
+        const maxShown = 30;
+
+        const issueList = finalIssues.slice(0, maxShown).map((issue) => {
+          return `
+            <li>
+              <strong>${escapeHtml(issue.severity)}: ${escapeHtml(issue.type)}</strong><br>
+              ${escapeHtml(issue.message)}<br>
+              Position: <code>${escapeHtml(issue.path)}</code><br>
+              <em>Text:</em> ${issue.text || "<em>kein Textauszug verfügbar</em>"}
+              <details class="clone">
+                <summary><p class="toggleText">Element anzeigen</p></summary>
+                <div class="inline-content details-content">
+                  <div class="clonedElement">${cloneEl(issue.element)}</div>
+                </div>
+              </details>
+            </li>
+          `;
+        }).join("");
+
+        content = `
+          <p>
+            <strong>${failIssues.length}</strong> potenzielle Fehler und
+            <strong>${checkIssues.length}</strong> manuell zu prüfende Hinweise gefunden.
+          </p>
+
+          <p>
+            Die Seite wurde mit simulierter Textvergrößerung auf 200% geprüft.
+            Besonders kritisch sind Elemente mit abgeschnittenem Text, fester Höhe,
+            verstecktem Overflow oder Ellipsen.
+          </p>
+
+          <ol>
+            ${issueList}
+          </ol>
+
+          ${
+            finalIssues.length > maxShown
+              ? `<p>Es werden nur die ersten ${maxShown} von ${finalIssues.length} Treffern angezeigt.</p>`
+              : ""
+          }
+
+          <p>
+            Manuell prüfen: Sind alle Texte vollständig lesbar? Bleiben Buttons, Formulare,
+            Navigation, Modale und Fehlermeldungen vollständig nutzbar?
+          </p>
+        `;
+      }
+
+      return {
+        title: "9.1.4.4 Text auf 200% vergrößerbar",
+        status,
+        content
+      };
+    } finally {
+      // Originalzustand wiederherstellen
+      document.documentElement.style.fontSize = originalHtmlFontSize;
+      document.body.style.fontSize = originalBodyFontSize;
+    }
   }
 
 };

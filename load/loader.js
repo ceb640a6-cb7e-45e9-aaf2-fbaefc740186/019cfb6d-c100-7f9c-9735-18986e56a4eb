@@ -26,7 +26,8 @@
     /* 1038 */ "pruefeBeschriftungenStrengWCAG",
     /* 1036 */ "checkThScope",
     /* 2146 */ "checkHorizontalScroll320",
-    /* 2143 */ "pruefeTextKontrast"
+    /* 2143 */ "pruefeTextKontrast",
+    /* 2144 */ "pruefeTextVergroesserung200"
   ];
 
   if (RESULTS_SORT_AtoZ) selectedTests = selectedTests.sort();
@@ -141,90 +142,90 @@
           <style>
             :root {
                 --gray-0: #fff;
-                --gray-50: #fbfbfb;
-                --gray-100: #f3f3f4;
-                --gray-200: #e6e6e8;
-                --gray-300: #d2d4d8;
-                --gray-400: #b6b8c1;
-                --gray-500: #969aa8;
-                --gray-600: #7e8293;
-                --gray-700: #696c7a;
-                --gray-800: #52545e;
-                --gray-900: #3b3c42;
-                --gray-950: #262629;
-                --gray-970: #1b1b1d;
-                --gray-990: #151516;
+                --gray-50: #eeeeef;
+                --gray-100: #dfe1e2;
+                --gray-200: #caced2;
+                --gray-300: #b1b9c2;
+                --gray-400: #919eae;
+                --gray-500: #718199;
+                --gray-600: #5e6b81;
+                --gray-700: #4f5768;
+                --gray-800: #3e434d;
+                --gray-900: #2d2f35;
+                --gray-950: #1d1e21;
+                --gray-970: #141416;
+                --gray-990: #0f0f10;
                 --gray-999: #000;
 
-                --info-50: #fbfbfc;
-                --info-100: #f1f4f6;
-                --info-200: #dfe7ef;
-                --info-300: #c2d5e8;
-                --info-400: #95b9e2;
-                --info-500: #629adc;
-                --info-600: #417fd0;
-                --info-700: #3668ad;
-                --info-800: #32507e;
-                --info-900: #2a3a53;
-                --info-950: #1d2532;
-                --info-970: #161a21;
-                --info-990: #121418;
+                --info-50: #ebf1f2;
+                --info-100: #d6e9eb;
+                --info-200: #b5e1e8;
+                --info-300: #87dbeb;
+                --info-400: #4ad4f5;
+                --info-500: #0bc6ff;
+                --info-600: #06a1da;
+                --info-700: #1079a6;
+                --info-800: #165575;
+                --info-900: #17374a;
+                --info-950: #12212b;
+                --info-970: #0f161b;
+                --info-990: #0d1012;
 
                 --pass-50: #fbfcfb;
-                --pass-100: #f1f6f4;
-                --pass-200: #dfefe9;
-                --pass-300: #c2e8db;
-                --pass-400: #95e2c9;
-                --pass-500: #63dcb8;
-                --pass-600: #41d0a7;
-                --pass-700: #37ac8d;
-                --pass-800: #327e6b;
-                --pass-900: #2a534a;
-                --pass-950: #1d322d;
-                --pass-970: #17211f;
-                --pass-990: #121817;
+                --pass-100: #f2f6f1;
+                --pass-200: #e0eee0;
+                --pass-300: #c4e6c4;
+                --pass-400: #99de9b;
+                --pass-500: #69d670;
+                --pass-600: #48c955;
+                --pass-700: #3ca74b;
+                --pass-800: #367a41;
+                --pass-900: #2c5134;
+                --pass-950: #1e3122;
+                --pass-970: #172019;
+                --pass-990: #121613;
 
                 --check-50: #fcfcfa;
-                --check-100: #f7f7f0;
-                --check-200: #f1f0dc;
-                --check-300: #efe8bb;
-                --check-400: #efdc88;
-                --check-500: #f0ca4e;
-                --check-600: #e8b129;
-                --check-700: #c08a23;
-                --check-800: #8b6325;
-                --check-900: #5a4123;
-                --check-950: #35281a;
-                --check-970: #231c15;
-                --check-990: #191511;
+                --check-100: #f8f6f0;
+                --check-200: #f3edda;
+                --check-300: #f3e2b7;
+                --check-400: #f8d27f;
+                --check-500: #ffbc40;
+                --check-600: #f9a218;
+                --check-700: #cf8014;
+                --check-800: #945d1c;
+                --check-900: #5f3f1e;
+                --check-950: #382717;
+                --check-970: #231b13;
+                --check-990: #181410;
 
                 --fail-50: #fcfbfb;
-                --fail-100: #f6f1f2;
-                --fail-200: #f0dee3;
-                --fail-300: #ebbfcd;
-                --fail-400: #e790ac;
-                --fail-500: #e45b8a;
-                --fail-600: #d93872;
-                --fail-700: #b42f61;
-                --fail-800: #832d4f;
-                --fail-900: #56273a;
-                --fail-950: #331c26;
-                --fail-970: #22161b;
-                --fail-990: #181215;
+                --fail-100: #f6f1f1;
+                --fail-200: #f0dfde;
+                --fail-300: #eac2c0;
+                --fail-400: #e69191;
+                --fail-500: #e25d61;
+                --fail-600: #d73a44;
+                --fail-700: #b2313e;
+                --fail-800: #822e3a;
+                --fail-900: #552830;
+                --fail-950: #331c20;
+                --fail-970: #211618;
+                --fail-990: #171113;
 
-                --crash-50: #fbfbfc;
-                --crash-100: #f3f1f6;
-                --crash-200: #e4dfef;
-                --crash-300: #cfc2e8;
-                --crash-400: #ad95e2;
-                --crash-500: #8762dc;
-                --crash-600: #6941d0;
-                --crash-700: #5636ad;
-                --crash-800: #45327e;
-                --crash-900: #332a53;
-                --crash-950: #221d32;
-                --crash-970: #191621;
-                --crash-990: #131218;
+                --crash-50: #f0edf0;
+                --crash-100: #e4dce6;
+                --crash-200: #d6c3da;
+                --crash-300: #c6a2d0;
+                --crash-400: #b378c7;
+                --crash-500: #9d4dbd;
+                --crash-600: #813fa0;
+                --crash-700: #65397e;
+                --crash-800: #4a305b;
+                --crash-900: #32253c;
+                --crash-950: #1f1924;
+                --crash-970: #151218;
+                --crash-990: #100e11;
             }
 
             * {
@@ -245,6 +246,9 @@
                 background: var(--gray-50);
                 color: var(--gray-990);
                 line-height: 1.55;
+
+                background-size: 40px 40px;
+                background-image: radial-gradient(circle, var(--gray-300) 1px, var(--gray-100) 1px);
             }
 
             h1 {
@@ -596,6 +600,14 @@
                 transform: rotate(90deg);
                 transition: all 0.2s;
             }
+
+            .reqInfo {
+                padding: 10px;
+            }
+
+            .popupButton {
+              margin-top: 5px;
+            }
         </style>
       </head>
       <body>
@@ -656,7 +668,6 @@
               <div class="resultContent">
                 ${r.content}
               </div>
-              <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
               <hr class="reqHr">
               <details class="reqirementDetails">
                 <summary>
@@ -669,6 +680,7 @@
                       <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a><br>
                       <span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span>
                     </p>
+                    <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
                   </div>
                 </div>
               </details>
