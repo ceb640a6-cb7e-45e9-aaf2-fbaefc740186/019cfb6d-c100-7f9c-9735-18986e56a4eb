@@ -14,7 +14,7 @@ const tests = {
       content: missingAlt.length === 0
         ? "All images have an <code>alt</code> attribute."
         : `
-          <p><strong>${missingAlt.length}</strong> image(s) are missing an <code>alt</code> attribute.</p>
+          <p><strong>${missingAlt.length}</strong> Bild(er) besitzen kein <code>alt</code>-Attribut.</p>
           <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
               <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
@@ -23,7 +23,7 @@ const tests = {
               <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
-          ${missingAlt.length > 20 ? "<p>Nur die ersten 20 Bilder werden gezeigt.</p>" : ""}
+          ${missingAlt.length > 20 ? "<p>Es werden nur die ersten 20 Probleme angezeigt.</p>" : ""}
         `
     };
   },
@@ -50,7 +50,7 @@ const tests = {
               <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
           </ol>
-          ${emptyAltImages.length > 30 ? "<p>Nur die ersten 30 Bilder werden gezeigt.</p>" : ""}
+          ${emptyAltImages.length > 30 ? "<p>Es werden nur die ersten 30 Probleme angezeigt.</p>" : ""}
         `
     };
   },
@@ -167,13 +167,13 @@ const tests = {
       id: 'R1244',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-4-aussagekraeftige-linktexte', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.2.4.4', 'Aussagekräftige Linktexte'],
-      title: "Links without accessible names",
+      title: "Links ohne zugänglichen Namen",
       status: badLinks.length === 0 ? "pass" : "fail",
       content: badLinks.length === 0
-        ? "<p>No links without accessible names found.</p>"
+        ? "<p>Keine Links ohne zugänglichen Namen gefunden.</p>"
         : `
-          <p><strong>${badLinks.length}</strong> link${badLinks.length == 1 ? '' : 's'} appear to have no accessible name.</p>
-          <p>A link should usually have visible text, or otherwise be labelled with text alternatives such as <code>aria-label</code>, <code>aria-labelledby</code>, image <code>alt</code> text, or an SVG <code>title</code>.</p>
+          <p><strong>${badLinks.length}</strong> Link${badLinks.length == 1 ? '' : 's'} scheinen keinen zugänglichen Namen zu haben.</p>
+          <p>Ein Link sollte üblicherweise einen sichtbaren Text haben. Links können auch mit Text-Alternativen versehen werden, wie beispielsweise <code>aria-label</code>, <code>aria-labelledby</code>, <code>alt</code>-Texten oder einem SVG <code>title</code>.</p>
           <ol>
             ${badLinks.slice(0, 20).map(a => `
               <li>
@@ -193,17 +193,17 @@ const tests = {
     };
   },
 
-  oneH1() {
+  oneH1() { /* very likely not present anymore in loader.js because of merge with 1031:checkHeadings below */
     const heads = [...all('h1')];
     return {
       id: 'R1031',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
-      title: "Only one H1",
+      title: "Einzelne H1",
       status: (heads.length === 1) ? "pass" : "fail",
       content: (heads.length === 1)
-        ? `<p>Heading: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
-        : ((heads.length <= 0) ? "<p>This page has no heading h1.</p>" : `<p>This page has <strong>${heads.length}</strong> <code>h1</code> headings.</p>
+        ? `<p>Überschrift: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
+        : ((heads.length <= 0) ? "<p>Diese Seite hat keine h1.</p>" : `<p>Diese Seite hat <strong>${heads.length}</strong> <code>h1</code> Überschriften.</p>
         <ol>
         ${heads.map(el => `
           <li><strong>${el.textContent}</strong><br>
@@ -228,7 +228,9 @@ const tests = {
     if (headings.length <= 0) {
       return {
         id: 'R1031',
-        title: "Heading hierarchy jumps",
+        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
+        reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
+        title: "Sprünge in Überschriften",
         status: "check",
         content: `<p>Es wurden keine Überschriften oder ähnliche Elemente auf der Seite gefunden. Sollte es sich um eine inhaltsreiche Seite handeln, sollte dies vermieden werden.</p>`
       };
@@ -237,7 +239,7 @@ const tests = {
     const head1s = [...all('h1')];
     let h1res = ['check', 'Es wurden keine H1 Überschriften auf der Seite gefunden. Dies verstößt nicht gegen die WCAG Richtlinien, ist aber auch nicht ideal oder empfohlen; vor allem, da andere Überschriften auf der Seite existieren.'];
     if (head1s.length == 1) h1res = ['pass', `Es wurde eine H1 Überschrift auf der Seite gefunden: <strong>${head1s[0]}</strong>. Dies bildet das übliche Verhalten von Webseiten ab.`];
-    if (head1s.length > 1) h1res = ['check', 'Es wurde mehr als eine H1 Überschrift auf der Seite gefunden. Dies verstößt nicht gegen die WCAG Richtlinien, doch ist eine Seite mit nur einer H1 Überschrift häufig einfacher zu verstehen.'];
+    if (head1s.length > 1) h1res = ['check', 'Es wurde mehr als eine H1 Überschrift auf der Seite gefunden. Dies verstößt nicht gegen die WCAG-Richtlinien, doch ist eine Seite mit nur einer H1 Überschrift häufig einfacher zu verstehen.'];
 
     for (let i = 1; i < headings.length; i++) {
       const previous = headings[i - 1];
@@ -258,9 +260,9 @@ const tests = {
 
     let prevHLevel = +headings[0].tagName.substring(1);
     let headingList_content = (headings.length === 0)
-        ? "<p>No headings found on the page.</p>"
+        ? "<p>Keine Überschriften auf der Seite gefunden.</p>"
         : `
-          <p><strong>${headings.length}</strong> heading(s) found.</p>
+          <p><strong>${headings.length}</strong> Überschriften gefunden.</p>
           <ol>
             ${headings.map((el, i) => {
               const level = parseInt(el.tagName.substring(1), 10);
@@ -279,15 +281,15 @@ const tests = {
         `;
 
     let headingJumps_content = (jumps.length === 0)
-        ? "<p>No heading hierarchy jumps found.</p>"
+        ? "<p>Keine Sprünge in Überschriften gefunden.</p>"
         : `
-          <p><strong>${jumps.length}</strong> jump(s) in heading hierarchy found.</p>
+          <p><strong>${jumps.length}</strong> Sprünge in Überschriften gefunden.</p>
           <ol>
             ${jumps.slice(0, 20).map((jump, i) => `
               <li>
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
                 <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
-                In Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</p></summary>
                   <div class="inline-content details-content">
@@ -297,7 +299,7 @@ const tests = {
               </li>
             `).join("")}
           </ol>
-          ${jumps.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+          ${jumps.length > 20 ? "<p>Es werden nur die ersten 20 Probleme angezeigt.</p>" : ""}
         `;
 
     const invalidHeadings = [...document.querySelectorAll('*')]
@@ -326,7 +328,7 @@ const tests = {
               </li>
             `).join("")}
           </ol>
-          ${invalidHeadings.length > 20 ? "<p>Only the first 20 are shown.</p>" : ""}
+          ${invalidHeadings.length > 20 ? "<p>Es werden nur die ersten 20 Probleme angezeigt.</p>" : ""}
         `;
 
     let resStatus = jumps.length === 0 ? (headings.length === 0 ? "check" : "pass") : "fail"; //maybe the headings.length fork is obsolete but oh well
@@ -334,7 +336,9 @@ const tests = {
 
     return {
       id: 'R1031',
-      title: "Heading hierarchy jumps",
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1a', 'HTML-Strukturelemente für Überschriften'],
+      title: "Sprünge in Überschriften",
       status: resStatus,
       content: `<p>${h1res[1]}</p>
       ${invalidHeadings_content}
@@ -356,7 +360,7 @@ const tests = {
         id: 'R1242',
         reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
         reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
-        title: "Dokumenttitel prüfen",
+        title: "Sinnvoller Dokumenttitel",
         status: "fail",
         content: `<p>Dokumenttitel ist ausschließlich "${COMPANY_NAME}" und gibt daher keine Informationen über den Inhalt der Seite.</p>`
       };
@@ -380,7 +384,7 @@ const tests = {
         id: 'R1242',
         reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
         reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
-        title: "Dokumenttitel prüfen",
+        title: "Sinnvoller Dokumenttitel",
         status: "fail",
         content: "<p>Kein Dokumenttitel vorhanden.</p>"
       };
@@ -452,9 +456,9 @@ const tests = {
 
     return {
       id: 'R1242',
-        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
-        reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
-        title: "Dokumenttitel prüfen",
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-2-sinnvolle-dokumenttitel', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.2.4.2', 'Sinnvolle Dokumenttitel'],
+      title: "Sinnvoller Dokumenttitel",
       status,
       content: `<p>${parts.join("<br>")}</p>`
     };
@@ -550,7 +554,7 @@ const tests = {
       id: 'R1411',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-4-1-1-korrekte-syntax', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.4.1.1', 'Korrekte Syntax'],
-      title: "Prüfe IDs",
+      title: "Elemente IDs",
       status,
       content
     };
@@ -697,9 +701,9 @@ const tests = {
 
     return {
       id: 'R1034',
-        reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1d-inhalt-gegliedert', 'Prüfschritt aufrufen'],
-        reqInfo: ['Prüfschritt 9.1.3.1d', 'Inhalt gegliedert'],
-        title: "CSS-Text in Pseudo-Elementen",
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1d-inhalt-gegliedert', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.1.3.1d', 'Inhalt gegliedert'],
+      title: "CSS-Text in Pseudo-Elementen",
       status: "fail",
       content:
         `<p>Es wurde${results.length == 1 ? '' : 'n'} ${results.length} Element${results.length == 1 ? '' : 'e'} mit per CSS eingebundenem Text gefunden:</p>
@@ -753,8 +757,6 @@ const tests = {
     function isPageLevelHeaderOrFooter(el) {
       if (!el) return false;
 
-      // header/footer innerhalb article/section/nav/aside/main sind keine seitenweiten
-      // banner/contentinfo-landmarks.
       return !el.closest("article, aside, main, nav, section");
     }
 
@@ -900,7 +902,7 @@ const tests = {
       if (!hasWorkingSkipLink) {
         status = "check";
         notes.push(
-          `Kein funktionierender Sprunglink zum Hauptinhalt erkannt. Mit Landmarken kann 9.2.4.1 zwar erfüllt sein, ein sichtbarer/fokussierbarer Skiplink sollte aber manuell geprüft werden.`
+          `Kein funktionierender Sprunglink zum Hauptinhalt erkannt. Mit Landmarken kann diese Anforderung zwar erfüllt sein, ein sichtbarer/fokussierbarer Skiplink sollte aber manuell geprüft werden.`
         );
       }
 
@@ -914,7 +916,7 @@ const tests = {
       if (navCount > 1 && byType.nav.namedCount < navCount) {
         status = "check";
         notes.push(
-          `Mehrere sichtbare Navigationsbereiche gefunden, aber nicht alle sind eindeutig benannt. Mehrere <code>nav</code>/<code>role="navigation"</code>-Bereiche sollten unterscheidbare Namen haben.`
+          `Mehrere sichtbare Navigationsbereiche gefunden, aber nicht alle sind eindeutig benannt. Mehrere <code>nav</code> bzw. <code>role="navigation"</code>-Bereiche sollten unterscheidbare Namen haben.`
         );
       }
 
@@ -954,10 +956,10 @@ const tests = {
     const summaryList = details
       .map((item) => {
         const label = `<code>${escapeHtml(item.type)}</code>`;
-        let base = `${label}: gefunden <b>${item.count}</b>, sichtbar <b>${item.visibleCount}</b>`;
+        let base = `${label}: gefunden <strong>${item.count}</strong>, sichtbar <strong>${item.visibleCount}</strong>`;
 
         if (item.namedCount !== null && item.visibleCount > 1) {
-          base += `, benannt <b>${item.namedCount}</b>`;
+          base += `, benannt <strong>${item.namedCount}</strong>`;
         }
 
         return base;
@@ -965,10 +967,10 @@ const tests = {
       .join("<br>");
 
     const skipLinkSummary =
-      `Sprunglink-Kandidaten: <b>${skipLinks.length}</b>, funktionierend: <b>${workingSkipLinks.length}</b>`;
+      `Sprunglink-Kandidaten: <strong>${skipLinks.length}</strong>, funktionierend: <strong>${workingSkipLinks.length}</strong>`;
 
     const frameSummary =
-      `Sichtbare Frames/iFrames ohne Titel: <b>${framesWithoutTitle.length}</b>`;
+      `Sichtbare Frames/iFrames ohne Titel: <strong>${framesWithoutTitle.length}</strong>`;
 
     const allMessages = [...messages, ...notes];
 
@@ -2189,7 +2191,7 @@ const tests = {
       });
       content += `</ol>`;
     } else {
-      content += `<p>Keine offensichtlichen Fake-Listen aus <code>&lt;p&gt;</code>-Elementen gefunden.</p>`;
+      content += `<p>Es wurden keine offensichtlichen Fake-Listen aus <code>&lt;p&gt;</code>-Elementen gefunden.</p>`;
     }
 
     return {
@@ -2197,7 +2199,7 @@ const tests = {
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1b-html-strukturelemente-fuer-listen', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.1.3.1b', 'HTML-Strukturelemente für Listen'],
       title: "Listenstruktur prüfen",
-      status,
+      status: status,
       content
     };
   },
@@ -2665,7 +2667,7 @@ const tests = {
         failures.push({
           path: path,
           cloned: cloneEl(el),
-          message: `Für dieses personenbezogene Feld fehlt autocomplete. Erwartet wäre z. B. "${expectedPurpose}".`
+          message: `Für dieses personenbezogene Feld fehlt ein autocomplete-Wert. Erwartet wäre z.B. "${expectedPurpose}".`
         });
         return;
       }
@@ -3725,14 +3727,14 @@ const tests = {
           el: th,
           index,
           valid: false,
-          message: "Missing scope attribute"
+          message: "Fehlendes scope-Attribut"
         }); check += 1;
       } else if (!validScopes.includes(scope.toLowerCase())) {
         results.push({
           el: th,
           index,
           valid: false,
-          message: `Invalid scope value: "${scope}"`
+          message: `Ungültiger scope-Attributwert: "${scope}"`
         }); check += 1;
       } else {
         pass += 1;
@@ -3784,16 +3786,16 @@ const tests = {
           id: "R2146",
           reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
           reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
-          title: "Horizontal scroll at 320px",
+          title: "Horizontaler Überlauf bei 320px",
           status: "check",
           content: localFile ? `
-            <p>This test cannot run on local HTML files (<code>file://</code>).<br>
-            Browsers block access to popup window dimensions/content for local files because the origin is <code>null</code>.<br>
-            Please run the test from a web server instead.</p>
+            <p>Dieser Test kann nicht bei lokalen HTML-Dateien ausgeführt werden (<code>file://</code>).<br>
+            Browser verbieten den Zugriff zu Größe/Inhalt von Popups in lokalen Dateien, weil der Ursprung der Datei <code>null</code> ist.<br>
+            Bitte führe den Test mit einer gehosteten Seite erneut durch.
             ` : `
             <p>Der Ursprung der Datei ist <code>null</code>.<br>
-            Browsers block access to popup window dimensions/content pages where the origin is <code>null</code>.<br>
-            This test couldn't be executed/was skipped.</p>
+            Browser verbieten den Zugriff zu Größe/Inhalt von Popups in Seiten, weil der Ursprung der Seite <code>null</code> ist.<br>
+            Dieser Test konnte nicht ausgeführt werden.</p>
             ` 
         });
         return;
@@ -3807,9 +3809,9 @@ const tests = {
           id: "R2146",
           reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
           reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
-          title: "Horizontal scroll at 320px",
+          title: "Horizontaler Überlauf bei 320px",
           status: "check",
-          content: "Popup could not be opened. Please allow popups and run the test again."
+          content: "Popup konnte nicht geöffnet werden. Bitte erlaube Popups und führe den Test danach erneut aus."
         });
         return;
       }
@@ -3835,21 +3837,21 @@ const tests = {
             id: "R2146",
             reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
             reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
-            title: "Horizontal scroll at 320px",
+            title: "Horizontaler Überlauf bei 320px",
             status: overflow ? "fail" : "pass",
             content: overflow ? `
               Die Seite läuft bei 320px Breite horizontal über.
 
-              Viewport width tested: \`${clientWidth}px\`  
-              Document scroll width: \`${scrollWidth}px\`  
-              Horizontally scrollable: **YES**
+              Erkannte Viewport-Breite: \`${clientWidth}px\`  
+              Dokument Scroll-Breite: \`${scrollWidth}px\`  
+              Horizontal scrollbar: **Ja**
 
-              A horizontal scrollbar is needed because \`scrollWidth > clientWidth\`.
+              Ein horizontaler Überlauf wurde erkannt, da \`scrollWidth > clientWidth\`.
               ` : `
-              No horizontal overflow detected at 320px width.
+              Kein horizontaler Überlauf wurde bei einer Fensterbreite von 320px erkannt.
 
-              Viewport width tested: \`${clientWidth}px\`  
-              Document scroll width: \`${scrollWidth}px\`
+              Erkannte Viewport-Breite: \`${clientWidth}px\`  
+              Dokument Scroll-Breite: \`${scrollWidth}px\`
               `
           });
         } catch (e) {
@@ -3861,9 +3863,9 @@ const tests = {
             id: "R2146",
             reqLink: ["https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-4-10-inhalte-brechen-um", "Prüfschritt aufrufen"],
             reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
-            title: "Horizontal scroll at 320px",
+            title: "Horizontaler Überlauf bei 320px",
             status: "crash",
-            content: `Check failed: ${escapeHtml(e && e.message ? e.message : e)}`
+            content: `Test abgebrochen: ${escapeHtml(e && e.message ? e.message : e)}`
           });
         }
       };
@@ -4273,7 +4275,7 @@ const tests = {
             el,
             "fixed-height-overflow",
             "fail",
-            `Element hat eine feste Höhe oder max-height in px und der Inhalt läuft über.`
+            `Element hat eine feste Höhe oder max-height in px, und der Inhalt läuft über.`
           );
         }
 
@@ -4337,15 +4339,8 @@ const tests = {
       if (status === "pass") {
         content = `
           <p><strong>Keine offensichtlichen Probleme gefunden.</strong></p>
-          <p>
-            Es wurden ${checkedElements.length} sichtbare Textelemente geprüft.
-            Die Seite zeigt bei simulierter Textvergrößerung auf 200% keine klar erkennbaren
-            abgeschnittenen oder überlaufenden Textbereiche.
-          </p>
-          <p>
-            Hinweis: Die Prüfung ersetzt keinen manuellen Test. Bitte zusätzlich prüfen,
-            ob alle Inhalte und Funktionen bei 200% Textgröße bedienbar bleiben.
-          </p>
+          <p>Es wurden ${checkedElements.length} sichtbare Textelemente geprüft. Die Seite zeigt bei simulierter Textvergrößerung auf 200% keine klar erkennbaren abgeschnittenen oder überlaufenden Textbereiche.</p>
+          <p>Hinweis: Die Prüfung ersetzt keinen manuellen Test. Bitte zusätzlich prüfen, ob alle Inhalte und Funktionen bei 200% Textgröße bedienbar bleiben.</p>
         `;
       } else {
         const maxShown = 30;
