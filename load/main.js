@@ -984,6 +984,8 @@ const tests = {
 
     return {
       id: "R1241",
+      reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-1-bereiche-ueberspringbar', 'Prüfschritt aufrufen'],
+      reqInfo: ['Prüfschritt 9.2.4.1', 'Bereiche überspringbar'],
       title: "Landmarken / Blöcke umgehen",
       status,
       content: `
@@ -4820,6 +4822,15 @@ const tests = {
 
 const __bar_g = elId => document.getElementById(elId);
 const __bar_all = cssSel => document.querySelectorAll(cssSel);
+
+function __bar_escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function cloneEl(el, container = null) {
   /*return el.parentElement.outerHTML;*/

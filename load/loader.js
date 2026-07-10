@@ -709,7 +709,7 @@
             </div>
           </details>
         `).join("")}
-        <p style="color: var(--gray-700); margin-top: 30px; font-size: 0.75rem"><strong>corvin breyer / 2026</strong><br>v.019ee9b3-c5c3-796d-b742-4497982acb5d</p>
+        <p style="color: var(--gray-700); margin-top: 30px; font-size: 0.75rem"><strong>corvin breyer / 2026</strong><br>v.01a0ef2e-8b00-7235-9aa8-02e45fd2eeb5</p>
         </div>
 
         <script>
