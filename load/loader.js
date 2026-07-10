@@ -92,7 +92,7 @@
           reqInfo: [`${err.name} im Test`, `${name}: <code>${err.name || 'Unbekannter Fehler'}</code>`],
           title: `${err.name} in test: ${name}`,
           status: "crash",
-          content: `<pre>${escapeHtml(err.toString() || String(err))}</pre><pre>${escapeHtml(err.stack || err)}</pre>`
+          content: `<pre>${__bar_escapeHtml(err.toString() || String(err))}</pre><pre>${__bar_escapeHtml(err.stack || err)}</pre>`
         });
       }
     }
@@ -636,8 +636,8 @@
         <div class="content">
           <h1>Page Analysis Report</h1>
           <div class="meta">
-            <div class="metaUrl"><strong>URL:</strong> <a href="${escapeHtml(location.href)}" target="_blank">${escapeHtml(location.href)}</a></div>
-            <div class="metaDate"><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleString())}</div>
+            <div class="metaUrl"><strong>URL:</strong> <a href="${__bar_escapeHtml(location.href)}" target="_blank">${__bar_escapeHtml(location.href)}</a></div>
+            <div class="metaDate"><strong>Generated:</strong> ${__bar_escapeHtml(new Date().toLocaleString())}</div>
             <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
           </div>
           
@@ -683,7 +683,7 @@
               
           ${results.map(r => `<details class="box box-${r.status}" id="${r.uuid}" ${r.status == 'pass' ? '' : 'open'}>
             <summary class="box-header">
-              <h2 class="toggleText">${escapeHtml(r.title)}</h2>
+              <h2 class="toggleText">${__bar_escapeHtml(r.title)}</h2>
               <span class="badge badge-${r.status}">${getBadgeLabel(r.status)}</span>
             </summary>
             <div class="box-content details-content">
@@ -697,12 +697,12 @@
                 </summary>
                 <div class="inline-content details-content">
                   <div class="reqInfo">
-                    <p><strong>${escapeHtml(r.reqInfo[0])}</strong><br>
-                      ${escapeHtml(r.reqInfo[1])}<br>
-                      <a class="reqLink" href="${escapeHtml(r.reqLink[0])}" target="_blank">${escapeHtml(r.reqLink[1])}</a><br>
-                      <span class="reqId">Projektinterne ID: ${escapeHtml(r.id)}</span>
+                    <p><strong>${__bar_escapeHtml(r.reqInfo[0])}</strong><br>
+                      ${__bar_escapeHtml(r.reqInfo[1])}<br>
+                      <a class="reqLink" href="${__bar_escapeHtml(r.reqLink[0])}" target="_blank">${__bar_escapeHtml(r.reqLink[1])}</a><br>
+                      <span class="reqId">Projektinterne ID: ${__bar_escapeHtml(r.id)}</span>
                     </p>
-                    <button class="popupButton removeInPopup" onclick="openPopup(this, '${escapeHtml(r.title)}')">Open in popup</button>
+                    <button class="popupButton removeInPopup" onclick="openPopup(this, '${__bar_escapeHtml(r.title)}')">Open in popup</button>
                   </div>
                 </div>
               </details>
@@ -809,7 +809,7 @@
     reportWindow.document.close();
   }
 
-  function escapeHtml(str) {
+  function __bar_escapeHtml(str) {
     return String(str)
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
@@ -822,7 +822,7 @@
     return window.getComputedStyle(document.body).getPropertyValue(cssVar);
   }*/
 
-  async function init() {
+  async function __bar_init() {
     try {
       await ensureMainLoaded();
       const results = await runTests(selectedTests);
@@ -840,5 +840,5 @@
     }
   }
 
-  init();
+  __bar_init();
 })();

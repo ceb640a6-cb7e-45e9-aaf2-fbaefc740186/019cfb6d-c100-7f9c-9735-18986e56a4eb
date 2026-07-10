@@ -2,7 +2,7 @@ const COMPANY_NAME = 'Ernst Klett Verlag';
 
 const tests = {
   imagesMissingAlt() {
-    const images = [...all("img")];
+    const images = [...__bar_all("img")];
     const missingAlt = images.filter(img => !img.hasAttribute("alt"));
 
     return {
@@ -17,8 +17,8 @@ const tests = {
           <p><strong>${missingAlt.length}</strong> Bild(er) besitzen kein <code>alt</code>-Attribut.</p>
           <ol>
             ${missingAlt.slice(0, 20).map((img, i) => `
-              <li>Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
-              Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
+              <li>Element: <code>${__bar_escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
+              Quelle: <a href="${__bar_escapeHtml(img.src)}" target="_blank">${__bar_escapeHtml(img.src.slice(0, 200))}</a><br>
               Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br>
               <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
@@ -29,7 +29,7 @@ const tests = {
   },
 
   imagesEmptyAlt() {
-    const images = [...all("img")];
+    const images = [...__bar_all("img")];
     const emptyAltImages = images.filter(img => img.hasAttribute("alt") && img.getAttribute("alt").trim() === "");
 
     return {
@@ -44,8 +44,8 @@ const tests = {
           <p><strong>${emptyAltImages.length}</strong> ${emptyAltImages.length == 1 ? 'Bild hat' : 'Bilder haben'} einen leeren <code>alt</code>-Tag. ${emptyAltImages.length == 1 ? 'Dieses Bild darf' : 'Diese Bilder dürfen'} daher <strong>keinen wichtigen Informationsgehalt</strong> besitzen, da diese${emptyAltImages.length == 1 ? 's' : ''} als Schmuckbild${emptyAltImages.length == 1 ? '' : 'er'} interpretiert ${emptyAltImages.length == 1 ? 'wird' : 'werden'}.<br>Bitte kontrolliere, ob das so korrekt ist.</p>
           <ol>
             ${emptyAltImages.slice(0, 30).map((img, i) => `
-              <li>Quelle: <a href="${escapeHtml(img.src)}" target="_blank">${escapeHtml(img.src.slice(0, 200))}</a><br>
-              Element: <code>${escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
+              <li>Quelle: <a href="${__bar_escapeHtml(img.src)}" target="_blank">${__bar_escapeHtml(img.src.slice(0, 200))}</a><br>
+              Element: <code>${__bar_escapeHtml(img.outerHTML.slice(0, 200))}</code><br>
               Position: <code>${getDomPath(img)}</code>${img.hasAttribute('src') ? `<br>
               <img src="${img.src}" height="100">` : ''}</li>
             `).join("")}
@@ -56,7 +56,7 @@ const tests = {
   },
 
   linksWithoutText() {
-    const links = [...all("a")];
+    const links = [...__bar_all("a")];
 
     const isHidden = (el) => {
       if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
@@ -177,8 +177,8 @@ const tests = {
           <ol>
             ${badLinks.slice(0, 20).map(a => `
               <li>
-                Element: <code>${escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
-                Link zu: <a href="${escapeHtml(a.href)}" target="_blank">${escapeHtml(a.href.slice(0, 200))}</a><br>
+                Element: <code>${__bar_escapeHtml(a.outerHTML.slice(0, 200))}</code><br>
+                Link zu: <a href="${__bar_escapeHtml(a.href)}" target="_blank">${__bar_escapeHtml(a.href.slice(0, 200))}</a><br>
                 Position: <code>${getDomPath(a)}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -194,7 +194,7 @@ const tests = {
   },
 
   oneH1() { /* very likely not present anymore in loader.js because of merge with 1031:checkHeadings below */
-    const heads = [...all('h1')];
+    const heads = [...__bar_all('h1')];
     return {
       id: 'R1031',
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-1-3-1a-html-strukturelemente-fuer-ueberschriften', 'Prüfschritt aufrufen'],
@@ -202,7 +202,7 @@ const tests = {
       title: "Einzelne H1",
       status: (heads.length === 1) ? "pass" : "fail",
       content: (heads.length === 1)
-        ? `<p>Überschrift: <strong>${escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
+        ? `<p>Überschrift: <strong>${__bar_escapeHtml(document.querySelector('h1').textContent)}</strong></p>`
         : ((heads.length <= 0) ? "<p>Diese Seite hat keine h1.</p>" : `<p>Diese Seite hat <strong>${heads.length}</strong> <code>h1</code> Überschriften.</p>
         <ol>
         ${heads.map(el => `
@@ -222,7 +222,7 @@ const tests = {
   },
 
   checkHeadings() {
-    const headings = [...all("h1, h2, h3, h4, h5, h6")];
+    const headings = [...__bar_all("h1, h2, h3, h4, h5, h6")];
     const jumps = [];
 
     if (headings.length <= 0) {
@@ -236,7 +236,7 @@ const tests = {
       };
     }
 
-    const head1s = [...all('h1')];
+    const head1s = [...__bar_all('h1')];
     let h1res = ['check', 'Es wurden keine H1 Überschriften auf der Seite gefunden. Dies verstößt nicht gegen die WCAG Richtlinien, ist aber auch nicht ideal oder empfohlen; vor allem, da andere Überschriften auf der Seite existieren.'];
     if (head1s.length == 1) h1res = ['pass', `Es wurde eine H1 Überschrift auf der Seite gefunden: <strong>${head1s[0]}</strong>. Dies bildet das übliche Verhalten von Webseiten ab.`];
     if (head1s.length > 1) h1res = ['check', 'Es wurde mehr als eine H1 Überschrift auf der Seite gefunden. Dies verstößt nicht gegen die WCAG-Richtlinien, doch ist eine Seite mit nur einer H1 Überschrift häufig einfacher zu verstehen.'];
@@ -273,7 +273,7 @@ const tests = {
 
               return `
                 <li style="margin-left:${indent}px" ${isJump ? 'class="highlight-temp"' : ''}>
-                  <strong>&lt;h${level}&gt;</strong> ${escapeHtml(text)}
+                  <strong>&lt;h${level}&gt;</strong> ${__bar_escapeHtml(text)}
                 </li>
               `;
             }).join("")}
@@ -288,8 +288,8 @@ const tests = {
             ${jumps.slice(0, 20).map((jump, i) => `
               <li>
                 <strong>Sprung von &lt;h${jump.fromLevel}&gt; zu &lt;h${jump.toLevel}&gt;</strong><br>
-                <strong>"${escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
-                Position: <code>${escapeHtml(getDomPath(jump.to))}</code>
+                <strong>"${__bar_escapeHtml((jump.from.textContent || "").trim() || "[ohne Text]")}"</strong> zu <strong>"${__bar_escapeHtml((jump.to.textContent || "").trim() || "[ohne Text]")}"</strong><br>
+                Position: <code>${__bar_escapeHtml(getDomPath(jump.to))}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</p></summary>
                   <div class="inline-content details-content">
@@ -318,7 +318,7 @@ const tests = {
               <li>
                 <strong>Ungültiges Element: &lt;${el.tagName.toLowerCase()}&gt;</strong><br>
                 <strong>"${el.textContent}"</strong><br>
-                Position: <code>${escapeHtml(getDomPath(el))}</code>
+                Position: <code>${__bar_escapeHtml(getDomPath(el))}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</p></summary>
                   <div class="inline-content details-content">
@@ -483,7 +483,7 @@ const tests = {
       return true;
     };
 
-    const elementsWithId = Array.from(all("[id]")).filter(visible);
+    const elementsWithId = Array.from(__bar_all("[id]")).filter(visible);
 
     const idMap = new Map();
     const emptyElements = [];
@@ -579,7 +579,7 @@ const tests = {
       return true;
     };
 
-    const allVisibleElements = Array.from(all("*")).filter(visible);
+    const allVisibleElements = Array.from(__bar_all("*")).filter(visible);
     const affectedElements = [];
 
     allVisibleElements.forEach((el) => {
@@ -640,7 +640,7 @@ const tests = {
 
     const results = [];
 
-    all("*").forEach((el) => {
+    __bar_all("*").forEach((el) => {
       let before = "";
       let after = "";
 
@@ -676,8 +676,8 @@ const tests = {
         results.push(
           `<strong>${selector || "(node)"}</strong><br>
           ${matches.join(" | ")}<br>
-          Element: <code>${escapeHtml(getElTag(el))}</code>
-          Position: <code>${escapeHtml(getDomPath(el))}</code>
+          Element: <code>${__bar_escapeHtml(getElTag(el))}</code>
+          Position: <code>${__bar_escapeHtml(getDomPath(el))}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</code></p></summary>
             <div class="inline-content details-content">
@@ -724,7 +724,7 @@ const tests = {
       footer: 'footer:not([role]), [role="contentinfo"]'
     };
 
-    function escapeHtml(value) {
+    function __bar_escapeHtml(value) {
       return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -768,7 +768,7 @@ const tests = {
       if (labelledBy) {
         const text = labelledBy
           .split(/\s+/)
-          .map((id) => g(id))
+          .map((id) => __bar_g(id))
           .filter(Boolean)
           .map((node) => (node.textContent || "").trim())
           .filter(Boolean)
@@ -781,7 +781,7 @@ const tests = {
     }
 
     function getLandmarkElements(type) {
-      const elements = Array.from(all(LANDMARK_SELECTORS[type]));
+      const elements = Array.from(__bar_all(LANDMARK_SELECTORS[type]));
 
       if (type === "header" || type === "footer") {
         return elements.filter((el) => {
@@ -810,13 +810,13 @@ const tests = {
     }
 
     function getSkipLinks() {
-      const links = Array.from(all('a[href^="#"]'));
+      const links = Array.from(__bar_all('a[href^="#"]'));
 
       return links
         .map((link) => {
           const href = link.getAttribute("href");
           const id = href && href.length > 1 ? decodeURIComponent(href.slice(1)) : "";
-          const target = id ? g(id) : null;
+          const target = id ? __bar_g(id) : null;
           const text = (link.textContent || "").trim();
 
           const looksLikeSkipLink =
@@ -837,7 +837,7 @@ const tests = {
     }
 
     function getFramesWithoutTitle() {
-      return Array.from(all("frame, iframe"))
+      return Array.from(__bar_all("frame, iframe"))
         .filter(isVisible)
         .filter((frame) => {
           const title = frame.getAttribute("title");
@@ -955,7 +955,7 @@ const tests = {
 
     const summaryList = details
       .map((item) => {
-        const label = `<code>${escapeHtml(item.type)}</code>`;
+        const label = `<code>${__bar_escapeHtml(item.type)}</code>`;
         let base = `${label}: gefunden <strong>${item.count}</strong>, sichtbar <strong>${item.visibleCount}</strong>`;
 
         if (item.namedCount !== null && item.visibleCount > 1) {
@@ -1063,7 +1063,7 @@ const tests = {
     }
 
     const issues = [];
-    const tables = Array.from(all("table"));
+    const tables = Array.from(__bar_all("table"));
     const visibleTables = tables.filter(hasVisibleTableStyling);
 
     visibleTables.forEach((table) => {
@@ -1137,7 +1137,7 @@ const tests = {
 
     const orphanIssuesRaw = [];
 
-    Array.from(all("tr,th,td")).forEach((el) => {
+    Array.from(__bar_all("tr,th,td")).forEach((el) => {
       const tag = el.tagName.toLowerCase();
       const table = el.closest("table");
 
@@ -1228,14 +1228,14 @@ const tests = {
           .map(
             (item, index) => `
               <li>
-                <strong>${escapeHtml(item.label)}</strong><br>
+                <strong>${__bar_escapeHtml(item.label)}</strong><br>
                 ${item.errors
                 .map(
-                  (err) => `${escapeHtml(err)}`
+                  (err) => `${__bar_escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Element: <code>${escapeHtml(getElTag(item.el))}</code>
-                Position: <code>${escapeHtml(item.path)}</code>
+                Element: <code>${__bar_escapeHtml(getElTag(item.el))}</code>
+                Position: <code>${__bar_escapeHtml(item.path)}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
                   <div class="inline-content details-content">
@@ -1323,7 +1323,7 @@ const tests = {
       return relevantElements.some((el) => hasVisibleBackground(el) || hasVisibleBorder(el));
     }
 
-    const tables = Array.from(all("table"));
+    const tables = Array.from(__bar_all("table"));
     const transparentTables = tables.filter((table) => !hasVisibleTableStyling(table));
     const issues = [];
 
@@ -1393,14 +1393,14 @@ const tests = {
           .map(
             (item, index) => `
               <li>
-                <strong>${escapeHtml(item.label)}</strong><br>
+                <strong>${__bar_escapeHtml(item.label)}</strong><br>
                 ${item.errors
                 .map(
-                  (err) => `${escapeHtml(err)}`
+                  (err) => `${__bar_escapeHtml(err)}`
                 )
                 .join("<br>")}<br>
-                Element: <code>${escapeHtml(getElTag(item.el))}</code><br>
-                Position: <code>${escapeHtml(item.path)}</code>
+                Element: <code>${__bar_escapeHtml(getElTag(item.el))}</code><br>
+                Position: <code>${__bar_escapeHtml(item.path)}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
                   <div class="inline-content details-content">
@@ -1460,7 +1460,7 @@ const tests = {
       "LINK", "META", "PARAM", "SOURCE", "TRACK", "WBR"
     ]);
 
-    const alleElemente = Array.from(all("*"));
+    const alleElemente = Array.from(__bar_all("*"));
 
     function hatSichtbarenText(el) {
       return Array.from(el.childNodes).some(
@@ -1507,8 +1507,8 @@ const tests = {
             return `
               <li>
                 <strong>${getElTag(el)}</strong>
-                Element: <code>${escapeHtml(el.outerHTML)}</code><br>
-                Position: <code>${escapeHtml(getDomPath(el))}</code>
+                Element: <code>${__bar_escapeHtml(el.outerHTML)}</code><br>
+                Position: <code>${__bar_escapeHtml(getDomPath(el))}</code>
                 <details class="clone">
                   <summary><p class="toggleText">Element anzeigen</code></p></summary>
                   <div class="inline-content details-content">
@@ -1890,9 +1890,9 @@ const tests = {
       let rows = Object.entries(x.diff)
       .filter(([, v]) => v && String(v.link) !== String(v.context))
       .map(([key, v]) => `
-          <strong>${escapeHtml(labels[key] || key)}:</strong>
-          Text = <code>${escapeHtml(v.context || "(leer)")}</code>
-          → Link = <code>${escapeHtml(v.link || "(leer)")}</code>
+          <strong>${__bar_escapeHtml(labels[key] || key)}:</strong>
+          Text = <code>${__bar_escapeHtml(v.context || "(leer)")}</code>
+          → Link = <code>${__bar_escapeHtml(v.link || "(leer)")}</code>
       `)
       .join("<br>");
 
@@ -1905,13 +1905,13 @@ const tests = {
     const renderItem = (x, i) => {
       return `
         <li>
-          <strong>${escapeHtml(x.text)}</strong><br>
-          ${escapeHtml(x.reason)}<br>
-          Link-Farbe: <code>${escapeHtml(x.linkColor)}</code> →
-          Umgebender Text: <code>${escapeHtml(x.ctxColor)}</code>
-          ${x.contrast != null ? ` → Kontrast Link/Text: <strong>${escapeHtml(x.contrast.toFixed(2))}:1</strong>` : ""}<br>
-          Element: <code>${escapeHtml(getElTag(x.el))}</code><br>
-          Position: <code>${escapeHtml(x.path)}</code>
+          <strong>${__bar_escapeHtml(x.text)}</strong><br>
+          ${__bar_escapeHtml(x.reason)}<br>
+          Link-Farbe: <code>${__bar_escapeHtml(x.linkColor)}</code> →
+          Umgebender Text: <code>${__bar_escapeHtml(x.ctxColor)}</code>
+          ${x.contrast != null ? ` → Kontrast Link/Text: <strong>${__bar_escapeHtml(x.contrast.toFixed(2))}:1</strong>` : ""}<br>
+          Element: <code>${__bar_escapeHtml(getElTag(x.el))}</code><br>
+          Position: <code>${__bar_escapeHtml(x.path)}</code>
           ${renderDiffs(x)}
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</code></p></summary>
@@ -1923,7 +1923,7 @@ const tests = {
       `;
     };
 
-    const allLinks = Array.from(all("a[href]"));
+    const allLinks = Array.from(__bar_all("a[href]"));
     const inlineLinks = allLinks.filter(looksLikeInlineTextLink);
     const results = inlineLinks.map(analyzeLink);
 
@@ -2040,7 +2040,7 @@ const tests = {
     }
 
     // Strukturprüfung für <ul> und <ol>
-    all("ul, ol").forEach((list) => {
+    __bar_all("ul, ol").forEach((list) => {
       const allowedChildTags = new Set(["LI", "SCRIPT", "TEMPLATE", "STYLE"]);
       const children = Array.from(list.children);
 
@@ -2064,7 +2064,7 @@ const tests = {
     });
 
     // Strukturprüfung für <li>
-    all("li").forEach((li) => {
+    __bar_all("li").forEach((li) => {
       const parent = li.parentElement;
       if (!parent || !/^(UL|OL)$/.test(parent.tagName)) {
         pushStrukturFehler(
@@ -2075,7 +2075,7 @@ const tests = {
     });
 
     // Erkennung möglicher Fake-Lists aus <p>-Elementen
-    all("p").forEach((p) => {
+    __bar_all("p").forEach((p) => {
       if (isHidden(p)) {
         return;
       }
@@ -2147,9 +2147,9 @@ const tests = {
       strukturFehler.forEach((entry) => {
         content += `
           <li>
-            <strong>${escapeHtml(entry.message)}</strong><br>
-            Element: <code>${escapeHtml(getElTag(entry.el))}</code><br>
-            Position: <code>${escapeHtml(entry.path)}</code>
+            <strong>${__bar_escapeHtml(entry.message)}</strong><br>
+            Element: <code>${__bar_escapeHtml(getElTag(entry.el))}</code><br>
+            Position: <code>${__bar_escapeHtml(entry.path)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
               <div class="inline-content details-content">
@@ -2168,7 +2168,7 @@ const tests = {
       content += `<h4>Mögliche Fake-Listen</h4><ol>`;
       fakeLists.forEach((entry) => {
         const examplesHtml = entry.examples.length
-          ? `Listeneinträge: ${entry.examples.map((ex) => `"${escapeHtml(ex)}"`).join(", ")}`
+          ? `Listeneinträge: ${entry.examples.map((ex) => `"${__bar_escapeHtml(ex)}"`).join(", ")}`
           : "(keine Listeneinträge gefunden)";
 
         const cssInfo = entry.viaCssBefore
@@ -2179,7 +2179,7 @@ const tests = {
           <li>
             <strong>${examplesHtml}</strong><br>
             ${entry.count} aufeinanderfolgende <code>&lt;p&gt;</code>-Elemente wirken wie eine Liste${cssInfo}<br>
-            Position: <code>${escapeHtml(entry.path)}</code>
+            Position: <code>${__bar_escapeHtml(entry.path)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</code></p></summary>
               <div class="inline-content details-content">
@@ -2206,7 +2206,7 @@ const tests = {
 
   pruefeAutocompleteAttribute() {
     const selector = "input, textarea, select";
-    const allElements = Array.from(all(selector));
+    const allElements = Array.from(__bar_all(selector));
 
     const ignoredInputTypes = new Set([
       "hidden",
@@ -2512,7 +2512,7 @@ const tests = {
       const ariaLabelledBy = el.getAttribute("aria-labelledby");
       if (ariaLabelledBy) {
         ariaLabelledBy.split(/\s+/).forEach(function (refId) {
-          const ref = g(refId);
+          const ref = __bar_g(refId);
           if (ref && ref.textContent) parts.push(ref.textContent);
         });
       }
@@ -2705,8 +2705,8 @@ const tests = {
       return `<ol>${items
         .map(
           (item) =>
-          `<li><strong>${escapeHtml(item.message)}</strong><br>
-            Position: <code>${escapeHtml(item.path)}</code><br>
+          `<li><strong>${__bar_escapeHtml(item.message)}</strong><br>
+            Position: <code>${__bar_escapeHtml(item.path)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -2753,7 +2753,7 @@ const tests = {
   },
 
   pruefeLabelInName() {
-    const elements = all(`
+    const elements = __bar_all(`
       button,
       a[href],
       input[type="button"],
@@ -2773,7 +2773,7 @@ const tests = {
       } else if (el.hasAttribute("aria-labelledby")) {
         const ids = el.getAttribute("aria-labelledby").split(/\s+/);
         accessibleName = ids
-          .map((id) => g(id)?.innerText || "")
+          .map((id) => __bar_g(id)?.innerText || "")
           .join(" ")
           .trim();
       } else if (el.alt) {
@@ -2812,8 +2812,8 @@ const tests = {
       .map((issue) => `
         <li>
           <strong>Element:</strong> &lt;${issue.tagName}&gt;<br>
-          <strong>Sichtbare Beschriftung:</strong> ${escapeHtml(issue.visibleText)}<br>
-          <strong>Zugänglicher Name:</strong> ${escapeHtml(issue.accessibleName)}
+          <strong>Sichtbare Beschriftung:</strong> ${__bar_escapeHtml(issue.visibleText)}<br>
+          <strong>Zugänglicher Name:</strong> ${__bar_escapeHtml(issue.accessibleName)}
 
           <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -2847,7 +2847,7 @@ const tests = {
       'textarea'
     ].join(',');
 
-    const elements = Array.from(all(selector));
+    const elements = Array.from(__bar_all(selector));
 
     function isElementVisible(el) {
       if (!el || !(el instanceof Element)) return false;
@@ -2953,7 +2953,7 @@ const tests = {
       const sources = [];
 
       ids.forEach((id) => {
-        const ref = g(id);
+        const ref = __bar_g(id);
         if (!ref) return;
 
         const text = getVisibleTextFromElement(ref);
@@ -3029,7 +3029,7 @@ const tests = {
           <li>
             <strong>Fehlende Beschriftung</strong><br>
             Keine sichtbare Beschriftung gefunden.<br>
-            Position: <code>${escapeHtml(domPath)}</code><br>
+            Position: <code>${__bar_escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3049,9 +3049,9 @@ const tests = {
       if (!hasProgrammaticAssociation) {
         warnings.push(`
           <li>
-            Beschriftung: <strong>"${escapeHtml(labelInfo.text)}"</strong><br>
+            Beschriftung: <strong>"${__bar_escapeHtml(labelInfo.text)}"</strong><br>
             Es wurde nur sichtbarer Text in der Umgebung gefunden, aber keine eindeutige technische Zuordnung per <code>label</code> oder <code>aria-labelledby</code>.<br>
-            Position: <code>${escapeHtml(domPath)}</code><br>
+            Position: <code>${__bar_escapeHtml(domPath)}</code><br>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3063,7 +3063,7 @@ const tests = {
         return;
       }
 
-      passes.push(`<li><code>${escapeHtml(domPath)}</code></li>`);
+      passes.push(`<li><code>${__bar_escapeHtml(domPath)}</code></li>`);
     });
 
     if (!relevantElements.length) {
@@ -3206,7 +3206,7 @@ const tests = {
     function getAssociatedControlForLabel(label) {
       const forId = label.getAttribute('for');
       if (forId) {
-        const target = g(forId);
+        const target = __bar_g(forId);
         return {
           mode: 'for',
           forId,
@@ -3238,11 +3238,11 @@ const tests = {
 
     function getExplicitLabelsForControl(control) {
       if (!control.id) return [];
-      return Array.from(all(`label[for="${CSS.escape(control.id)}"]`));
+      return Array.from(__bar_all(`label[for="${CSS.escape(control.id)}"]`));
     }
 
     function getImplicitLabelsForControl(control) {
-      return Array.from(all('label')).filter(label => {
+      return Array.from(__bar_all('label')).filter(label => {
         if (label.hasAttribute('for')) return false;
         return label.contains(control);
       });
@@ -3258,7 +3258,7 @@ const tests = {
         .split(/\s+/)
         .filter(Boolean);
 
-      return ids.map(id => g(id)).filter(Boolean);
+      return ids.map(id => __bar_g(id)).filter(Boolean);
     }
 
     function findNearestGroupContainer(el) {
@@ -3331,10 +3331,10 @@ const tests = {
     const warnings = [];
     const passes = [];
 
-    const allLabels = Array.from(all('label'));
+    const allLabels = Array.from(__bar_all('label'));
     const visibleLabels = allLabels.filter(isElementVisible);
-    const allControls = Array.from(all(formControlSelector)).filter(isElementVisible);
-    const allFieldsets = Array.from(all('fieldset')).filter(isElementVisible);
+    const allControls = Array.from(__bar_all(formControlSelector)).filter(isElementVisible);
+    const allFieldsets = Array.from(__bar_all('fieldset')).filter(isElementVisible);
 
     // 1) Labels selbst prüfen
     visibleLabels.forEach(label => {
@@ -3348,8 +3348,8 @@ const tests = {
           <li>
             <strong><label ohne Textstrong><br>
             Sichtbares <code>label</code> ohne erkennbaren sichtbaren Text. Manuell prüfen.<br>
-            Element: <code>${escapeHtml(labelDesc)}</code><br>
-            Position: <code>${escapeHtml(labelPath)}</code>
+            Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="inline-content details-content">
@@ -3365,10 +3365,10 @@ const tests = {
         if (!assoc.target) {
           issues.push(`
             <li>
-              Text: <strong>"${escapeHtml(text)}"</strong><br>
-              <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.<br>
-              Element: <code>${escapeHtml(labelDesc)}</code><br>
-              Position: <code>${escapeHtml(labelPath)}</code>
+              Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
+              <code>for="${__bar_escapeHtml(assoc.forId)}"</code> verweist auf kein existierendes Element.<br>
+              Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+              Position: <code>${__bar_escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="inline-content details-content">
@@ -3383,10 +3383,10 @@ const tests = {
         if (!isLabelableElement(assoc.target)) {
           issues.push(`
             <li>
-              Text: <strong>"${escapeHtml(text)}"</strong><br>
-              <code>for="${escapeHtml(assoc.forId)}"</code> verweist auf ${getElTag(assoc.target)}, aber dieses Element ist nicht beschriftbar.<br>
-              Element: <code>${escapeHtml(labelDesc)}</code><br>
-              Position: <code>${escapeHtml(labelPath)}</code>
+              Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
+              <code>for="${__bar_escapeHtml(assoc.forId)}"</code> verweist auf ${getElTag(assoc.target)}, aber dieses Element ist nicht beschriftbar.<br>
+              Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+              Position: <code>${__bar_escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="inline-content details-content">
@@ -3401,10 +3401,10 @@ const tests = {
         if (!isElementVisible(assoc.target)) {
           warnings.push(`
             <li>
-              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
               Das referenzierte Element ist nicht sichtbar. Manuell prüfen, ob die Zuordnung im Prüfumfang relevant ist.<br>
-              Element: <code>${escapeHtml(labelDesc)}</code><br>
-              Position: <code>${escapeHtml(labelPath)}</code>
+              Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+              Position: <code>${__bar_escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="inline-content details-content">
@@ -3419,8 +3419,8 @@ const tests = {
         passes.push(`
           <li>
             ${labelDesc}<br>
-            Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Beschriftung "${escapeHtml(text)}" ist per <code>for</code> korrekt mit ${getElTag(assoc.target)} verknüpft.
+            Pfad: <code>${__bar_escapeHtml(labelPath)}</code><br>
+            Beschriftung "${__bar_escapeHtml(text)}" ist per <code>for</code> korrekt mit ${getElTag(assoc.target)} verknüpft.
           </li>
         `);
         return;
@@ -3430,10 +3430,10 @@ const tests = {
         if (!isLabelableElement(assoc.target)) {
           issues.push(`
             <li>
-              Text: <strong>"${escapeHtml(text)}"</strong><br>
+              Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
               Das umschlossene Element ist nicht beschriftbar.<br>
-              Element: <code>${escapeHtml(labelDesc)}</code><br>
-              Position: <code>${escapeHtml(labelPath)}</code>
+              Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+              Position: <code>${__bar_escapeHtml(labelPath)}</code>
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
                 <div class="inline-content details-content">
@@ -3448,8 +3448,8 @@ const tests = {
         passes.push(`
           <li>
             ${labelDesc}<br>
-            Pfad: <code>${escapeHtml(labelPath)}</code><br>
-            Beschriftung "${escapeHtml(text)}" umschließt ${getElTag(assoc.target)} korrekt.
+            Pfad: <code>${__bar_escapeHtml(labelPath)}</code><br>
+            Beschriftung "${__bar_escapeHtml(text)}" umschließt ${getElTag(assoc.target)} korrekt.
           </li>
         `);
         return;
@@ -3458,10 +3458,10 @@ const tests = {
       if (assoc.mode === 'nested-multiple') {
         issues.push(`
           <li>
-            Text: <strong>"${escapeHtml(text)}"</strong><br>
+            Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
             Das <code>label</code> enthält mehrere Formular-/beschriftbare Elemente. Die Zuordnung ist nicht eindeutig.<br>
-            Element: <code>${escapeHtml(labelDesc)}</code><br>
-            Position: <code>${escapeHtml(labelPath)}</code>
+            Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(labelPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3475,10 +3475,10 @@ const tests = {
 
       issues.push(`
         <li>
-          Text: <strong>"${escapeHtml(text)}"</strong><br>
+          Text: <strong>"${__bar_escapeHtml(text)}"</strong><br>
           <code>label</code> hat weder ein gültiges <code>for</code>-Attribut noch umschließt es ein Formularfeld.<br>
-          Element: <code>${escapeHtml(labelDesc)}</code><br>
-          Position: <code>${escapeHtml(labelPath)}</code>
+          Element: <code>${__bar_escapeHtml(labelDesc)}</code><br>
+          Position: <code>${__bar_escapeHtml(labelPath)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
@@ -3511,9 +3511,9 @@ const tests = {
         warnings.push(`
           <li>
             <strong>Feld hat mehrere label-Elemente</strong>
-            Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.<br>
-            Element: <code>${escapeHtml(controlDesc)}</code><br>
-            Position: <code>${escapeHtml(controlPath)}</code>
+            Dem Feld sind mehrere sichtbare <code>label</code>-Elemente zugeordnet (${labels.length}): "${__bar_escapeHtml(visibleLabelTexts.join('" / "'))}". Manuell prüfen, ob dies beabsichtigt und verständlich ist.<br>
+            Element: <code>${__bar_escapeHtml(controlDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3541,8 +3541,8 @@ const tests = {
           <li>
             <strong>Mehrere mögliche Beschriftungen</strong><br>
             Im nahen Umfeld wurden mehrere sichtbare Beschriftungskandidaten gefunden (${distinctNearbyTexts.length}). Manuell prüfen, ob die sichtbare Beschriftung eindeutig ist.<br>
-            Element: <code>${escapeHtml(controlDesc)}</code><br>
-            Position: <code>${escapeHtml(controlPath)}</code>
+            Element: <code>${__bar_escapeHtml(controlDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(controlPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3572,8 +3572,8 @@ const tests = {
           <li>
             <strong>Fehlendes legend-Element</strong><br>
             <code>fieldset</code> mit sichtbaren Formularfeldern, aber ohne sichtbares <code>legend</code>. Bei Gruppen gleichartiger Auswahlfelder kann das ein WCAG-relevantes Problem sein.<br>
-            Element: <code>${escapeHtml(fieldsetDesc)}</code><br>
-            Position: <code>${escapeHtml(fieldsetPath)}</code>
+            Element: <code>${__bar_escapeHtml(fieldsetDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3590,8 +3590,8 @@ const tests = {
           <li>
             <strong>Mehrere <code>legend</code>-Elemente</strong><br>
             Mehrere sichtbare <code>legend</code>-Elemente gefunden. Manuell prüfen, ob die Gruppenbeschriftung eindeutig ist.<br>
-            Element: <code>${escapeHtml(fieldsetDesc)}</code><br>
-            Position: <code>${escapeHtml(fieldsetPath)}</code>
+            Element: <code>${__bar_escapeHtml(fieldsetDesc)}</code><br>
+            Position: <code>${__bar_escapeHtml(fieldsetPath)}</code>
             <details class="clone">
               <summary><p class="toggleText">Element anzeigen</p></summary>
               <div class="inline-content details-content">
@@ -3605,15 +3605,15 @@ const tests = {
 
       passes.push(`
         <li>
-          ${escapeHtml(fieldsetDesc)}<br>
-          Pfad: <code>${escapeHtml(fieldsetPath)}</code><br>
-          Gruppenbeschriftung per <code>legend</code>: "${escapeHtml(visibleLegendsWithText[0].text)}"
+          ${__bar_escapeHtml(fieldsetDesc)}<br>
+          Pfad: <code>${__bar_escapeHtml(fieldsetPath)}</code><br>
+          Gruppenbeschriftung per <code>legend</code>: "${__bar_escapeHtml(visibleLegendsWithText[0].text)}"
         </li>
       `);
     });
 
     // 4) label-ähnliche Elemente prüfen
-    const potentialLabelLikeElements = Array.from(all([
+    const potentialLabelLikeElements = Array.from(__bar_all([
       '.control-label',
       '.form-label',
       '.col-form-label',
@@ -3652,10 +3652,10 @@ const tests = {
 
       warnings.push(`
         <li>
-          Beschriftung: <strong>"${escapeHtml(text)}"</strong><br>
+          Beschriftung: <strong>"${__bar_escapeHtml(text)}"</strong><br>
           Dieses Element wirkt wie eine sichtbare Beschriftung für ein Formularfeld, ist aber nicht programmatisch als <code>label</code> oder per <code>aria-labelledby</code> mit einem Feld verknüpft.<br>
-          Element: <code>${escapeHtml(desc)}</code><br>
-          Position: <code>${escapeHtml(path)}</code>
+          Element: <code>${__bar_escapeHtml(desc)}</code><br>
+          Position: <code>${__bar_escapeHtml(path)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
@@ -3702,7 +3702,7 @@ const tests = {
 
   checkThScope() {
     const validScopes = ["row", "col", "rowgroup", "colgroup"];
-    const thElements = all("th");
+    const thElements = __bar_all("th");
     const results = [];
     let pass = 0, check = 0, fail = 0;
 
@@ -3745,8 +3745,8 @@ const tests = {
       .map((issue) => `
         <li>
           <strong>${issue.message}</strong><br>
-          <strong>Element:</strong> <code>${escapeHtml(getElTag(issue.el))}</code><br>
-          <strong>Position:</strong> <code>${escapeHtml(getDomPath(issue.el))}</code>
+          <strong>Element:</strong> <code>${__bar_escapeHtml(getElTag(issue.el))}</code><br>
+          <strong>Position:</strong> <code>${__bar_escapeHtml(getDomPath(issue.el))}</code>
 
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -3865,7 +3865,7 @@ const tests = {
             reqInfo: ["Prüfschritt 9.1.4.10", "Inhalte brechen um"],
             title: "Horizontaler Überlauf bei 320px",
             status: "crash",
-            content: `Test abgebrochen: ${escapeHtml(e && e.message ? e.message : e)}`
+            content: `Test abgebrochen: ${__bar_escapeHtml(e && e.message ? e.message : e)}`
           });
         }
       };
@@ -4063,13 +4063,13 @@ const tests = {
     const failureHtml = failures.map(item => `
       <li>
         <br>
-        Text: <strong>${escapeHtml(item.text)}</strong><br>
-        Kontrast: <div style="width: 1rem; height: 1rem; position:relative; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"><span style="color:${escapeHtml(item.textColor)};position:absolute;transform:translate(-50%,-50%);top:50%;left:50%">A</span></div><strong>${item.contrast}:1</strong>,
+        Text: <strong>${__bar_escapeHtml(item.text)}</strong><br>
+        Kontrast: <div style="width: 1rem; height: 1rem; position:relative; margin: 0 0.35rem; display: inline-block; background: ${__bar_escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"><span style="color:${__bar_escapeHtml(item.textColor)};position:absolute;transform:translate(-50%,-50%);top:50%;left:50%">A</span></div><strong>${item.contrast}:1</strong>,
         erforderlich: <strong>${item.required}:1</strong><br>
-        Textfarbe: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.textColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.textColor)},
-        Hintergrund: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${escapeHtml(item.backgroundColor)}<br>
-        Element: <code>${escapeHtml(getElTag(item.element))}</code><br>
-        Position: <code>${escapeHtml(item.path)}</code>
+        Textfarbe: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${__bar_escapeHtml(item.textColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${__bar_escapeHtml(item.textColor)},
+        Hintergrund: <div style="width: 1rem; height: 1rem; margin: 0 0.35rem; display: inline-block; background: ${__bar_escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"></div>${__bar_escapeHtml(item.backgroundColor)}<br>
+        Element: <code>${__bar_escapeHtml(getElTag(item.element))}</code><br>
+        Position: <code>${__bar_escapeHtml(item.path)}</code>
         <details class="clone">
           <summary><p class="toggleText">Element anzeigen</p></summary>
           <div class="inline-content details-content">
@@ -4086,12 +4086,12 @@ const tests = {
 
       return `
         <li>
-          Text: <strong>${escapeHtml(item.text)}</strong><br>
+          Text: <strong>${__bar_escapeHtml(item.text)}</strong><br>
           Erforderlicher Kontrast: <strong>${item.required}:1</strong><br>
-          Simulierte Kontraste: ${escapeHtml(simulatedText)}<br>
+          Simulierte Kontraste: ${__bar_escapeHtml(simulatedText)}<br>
           Hinweis: Der WCAG-Kontrast ist ausreichend, aber eine vereinfachte Farbfehlsichtigkeits-Simulation ist potenziell auffällig.<br>
-          Element: <code>${escapeHtml(getElTag(item.element))}</code><br>
-          Position: <code>${escapeHtml(item.path)}</code>
+          Element: <code>${__bar_escapeHtml(getElTag(item.element))}</code><br>
+          Position: <code>${__bar_escapeHtml(item.path)}</code>
           <details class="clone">
             <summary><p class="toggleText">Element anzeigen</p></summary>
             <div class="inline-content details-content">
@@ -4172,7 +4172,7 @@ const tests = {
 
     function getTextPreview(el) {
       const text = (el.innerText || "").trim().replace(/\s+/g, " ");
-      return escapeHtml(text.length > 120 ? text.slice(0, 120) + "…" : text);
+      return __bar_escapeHtml(text.length > 120 ? text.slice(0, 120) + "…" : text);
     }
 
     function pxToNumber(value) {
@@ -4348,9 +4348,9 @@ const tests = {
         const issueList = finalIssues.slice(0, maxShown).map((issue) => {
           return `
             <li>
-              <strong>${escapeHtml(issue.severity)}: ${escapeHtml(issue.type)}</strong><br>
-              ${escapeHtml(issue.message)}<br>
-              Position: <code>${escapeHtml(issue.path)}</code><br>
+              <strong>${__bar_escapeHtml(issue.severity)}: ${__bar_escapeHtml(issue.type)}</strong><br>
+              ${__bar_escapeHtml(issue.message)}<br>
+              Position: <code>${__bar_escapeHtml(issue.path)}</code><br>
               <em>Text:</em> ${issue.text || "<em>kein Textauszug verfügbar</em>"}
               <details class="clone">
                 <summary><p class="toggleText">Element anzeigen</p></summary>
@@ -4462,8 +4462,8 @@ const tests = {
 
       return `
         <li>
-          <strong>${escapeHtml(getDomPath(el))}</strong><br>
-          <code>${escapeHtml(text)}</code>
+          <strong>${__bar_escapeHtml(getDomPath(el))}</strong><br>
+          <code>${__bar_escapeHtml(text)}</code>
         </li>
       `;
     }
@@ -4640,7 +4640,7 @@ const tests = {
       if (!elements.length) return "";
 
       return `
-        <h3>${escapeHtml(title)}</h3>
+        <h3>${__bar_escapeHtml(title)}</h3>
         <ul>
           ${elements.slice(0, maxReportedItems).map(getProblemSnippet).join("")}
         </ul>
@@ -4664,9 +4664,9 @@ const tests = {
 
             return `
               <li>
-                <strong>${escapeHtml(getDomPath(a))}</strong><br>
+                <strong>${__bar_escapeHtml(getDomPath(a))}</strong><br>
                 überlappt möglicherweise mit<br>
-                <strong>${escapeHtml(getDomPath(b))}</strong>
+                <strong>${__bar_escapeHtml(getDomPath(b))}</strong>
               </li>
             `;
           }).join("")}
@@ -4810,7 +4810,7 @@ const tests = {
         status: "check",
         content: `
           <p>Die Prüfung konnte nicht vollständig ausgeführt werden.</p>
-          <p><strong>Fehler:</strong> ${escapeHtml(error.message || String(error))}</p>
+          <p><strong>Fehler:</strong> ${__bar_escapeHtml(error.message || String(error))}</p>
         `
       };
     }
@@ -4818,17 +4818,8 @@ const tests = {
 
 };
 
-const g = elId => document.getElementById(elId);
-const all = cssSel => document.querySelectorAll(cssSel);
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+const __bar_g = elId => document.getElementById(elId);
+const __bar_all = cssSel => document.querySelectorAll(cssSel);
 
 function cloneEl(el, container = null) {
   /*return el.parentElement.outerHTML;*/
