@@ -37,6 +37,7 @@
     return new Promise((resolve, reject) => {
       const s = document.createElement("script");
       s.src = src;
+      s.dataset.scope='__bar318a5bb8aaf3e';
       s.onload = resolve;
       s.onerror = () => reject(new Error(`Failed to load script: ${src}`));
       document.documentElement.appendChild(s);
