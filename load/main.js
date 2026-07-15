@@ -986,7 +986,7 @@ const tests = {
       id: "R1241",
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-1-bereiche-ueberspringbar', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.2.4.1', 'Bereiche überspringbar'],
-      title: "Landmarken / Blöcke umgehen :)",
+      title: "Landmarken / Blöcke umgehen",
       status,
       content: `
         <p>${summaryList}<br>${skipLinkSummary}<br>${frameSummary}</p>
