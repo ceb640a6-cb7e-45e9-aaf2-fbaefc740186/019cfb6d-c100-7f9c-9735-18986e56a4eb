@@ -4062,9 +4062,7 @@ const tests = {
       }
     });
 
-    const failureHtml = failures.map(item => `
-      <li>
-        <br>
+    const failureHtml = failures.map(item => `<li>
         Text: <strong>${__bar_escapeHtml(item.text)}</strong><br>
         Kontrast: <div style="width: 1rem; height: 1rem; position:relative; margin: 0 0.35rem; display: inline-block; background: ${__bar_escapeHtml(item.backgroundColor)};outline: 1px solid #0008; transform: translateY(0.12rem)"><span style="color:${__bar_escapeHtml(item.textColor)};position:absolute;transform:translate(-50%,-50%);top:50%;left:50%">A</span></div><strong>${item.contrast}:1</strong>,
         erforderlich: <strong>${item.required}:1</strong><br>
@@ -4086,8 +4084,7 @@ const tests = {
         .map(r => `${r.type}: <strong>${r.ratio}:1</strong>`)
         .join(", ");
 
-      return `
-        <li>
+      return `<li>
           Text: <strong>${__bar_escapeHtml(item.text)}</strong><br>
           Erforderlicher Kontrast: <strong>${item.required}:1</strong><br>
           Simulierte Kontraste: ${__bar_escapeHtml(simulatedText)}<br>

@@ -238,7 +238,7 @@
                 font-family: Arial, sans-serif;
                 line-height: 1.5;
                 margin: 0;
-                padding: 30px 20px;
+                padding: 40px 20px;
                 background: var(--gray-200);
                 color: var(--gray-970);
 
@@ -327,7 +327,6 @@
 
             code {
                 background: var(--gray-50);
-                border: 1px solid var(--gray-200);
                 padding: 1px 3px;
                 border-radius: 3px;
             }
@@ -340,6 +339,8 @@
             .headFlex {
               display: flex;
               justify-content: space-between;
+              margin: 40px;
+              flex-wrap: wrap;
             }
 
             .highlight-temp {
@@ -369,7 +370,6 @@
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
-                margin-bottom: 24px;
             }
 
             .summary-box {
@@ -646,7 +646,7 @@
             }
 
             details.reqirementDetails {
-              border: 1px solid var(--gray-300);
+              border: 1px solid var(--gray-200);
             }
 
             .reqirementDetails summary {
@@ -699,7 +699,7 @@
               <button onclick="closeBoxes()">⮞ Alle zuklappen</button>
             </div>
             <div>
-              <canvas id="summary-chart" width="500" height="300"></canvas>
+              <canvas id="summary-chart" width="500" height="300" style="max-width: 100%;"></canvas>
             </div>
           </div>
               
