@@ -340,7 +340,7 @@
             .headFlex {
               display: flex;
               justify-content: space-between;
-              margin: 40px;
+              margin: 40px 0;
               flex-wrap: wrap;
             }
 

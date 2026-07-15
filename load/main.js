@@ -986,7 +986,7 @@ const tests = {
       id: "R1241",
       reqLink: ['https://bitvtest.de/pruefschritt/bitv-20-web/bitv-20-web-9-2-4-1-bereiche-ueberspringbar', 'Prüfschritt aufrufen'],
       reqInfo: ['Prüfschritt 9.2.4.1', 'Bereiche überspringbar'],
-      title: "Landmarken / Blöcke umgehen",
+      title: "Landmarken / Blöcke umgehen :)",
       status,
       content: `
         <p>${summaryList}<br>${skipLinkSummary}<br>${frameSummary}</p>
@@ -4613,7 +4613,6 @@ const tests = {
           // Parent/Child-Überschneidungen sind normal und sollen ignoriert werden.
           if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
 
-          // Sehr kleine Überlappungen ignorieren.
           if (!rectsOverlap(a.rect, b.rect)) continue;
 
           const overlapWidth =
