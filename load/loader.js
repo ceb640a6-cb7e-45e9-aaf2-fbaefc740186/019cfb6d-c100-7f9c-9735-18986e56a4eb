@@ -139,7 +139,7 @@
       <html lang="de">
       <head>
         <meta charset="UTF-8" />
-        <title>Page Analysis Report</title>
+        <title>Barrierefreiheit Analyse Report</title>
           <style>
             :root {
                 --gray-0: #fff;
@@ -256,7 +256,11 @@
                 margin-top: 0;
                 margin-bottom: 8px;
                 font-size: 1.5rem;
-                font-weight: 600;
+                font-weight: 700;
+                background: var(--gray-50);
+                padding: 5px 15px;
+                border-radius: 6px;
+                border: 1px solid var(--gray-300);
             }
 
             h2 {
@@ -292,6 +296,7 @@
                 margin-top: 10px;
                 border-radius: 4px;
                 box-shadow: 0 0 8px var(--gray-200);
+                overflow-wrap: break-word;
             }
 
             img {
@@ -317,6 +322,7 @@
 
             button:hover {
                 background: var(--gray-50);
+                color: var(--gray-950);
             }
 
             code {
@@ -329,6 +335,15 @@
             .content {
                 max-width: 1300px;
                 margin: 0 auto;
+            }
+
+            .headFlex {
+              display: flex;
+              justify-content: space-between;
+            }
+
+            .headFlex > div {
+              background: white;
             }
 
             .highlight-temp {
@@ -344,10 +359,9 @@
 
             .summary {
                 display: flex;
-                gap: 12px;
+                gap: 10px;
                 flex-wrap: wrap;
                 margin-bottom: 24px;
-                flex-direction: column;
             }
 
             .summary-box {
@@ -355,7 +369,9 @@
                 border: 1px solid var(--gray-300);
                 border-radius: 8px;
                 padding: 12px 16px;
-                min-width: 120px;
+                min-width: 100px;
+                font-size: 1.25rem;
+                text-align: center;
             }
 
             .summary-pass {
@@ -380,12 +396,6 @@
                 background: var(--crash-100);
                 color: var(--crash-970);
                 border: 3px solid var(--crash-600);
-            }
-
-            .summary-box strong {
-                display: block;
-                font-size: 20px;
-                margin-top: 4px;
             }
 
             .box {
@@ -623,10 +633,6 @@
                 padding:10px;
             }
 
-            .reqInfo {
-                padding: 10px !important;
-            }
-
             .popupButton {
               margin-top: 5px;
             }
@@ -634,52 +640,45 @@
       </head>
       <body>
         <div class="content">
-          <h1>Page Analysis Report</h1>
-          <div class="meta">
-            <div class="metaUrl"><strong>URL:</strong> <a href="${__bar_escapeHtml(location.href)}" target="_blank">${__bar_escapeHtml(location.href)}</a></div>
-            <div class="metaDate"><strong>Generated:</strong> ${__bar_escapeHtml(new Date().toLocaleString())}</div>
-            <div class="metaCount"><strong>Total tests:</strong> ${results.length}</div>
-          </div>
-          
-          <table>
-            <tr>
-              <td>
-                <div class="summary">
-                  ${summary.crash > 0 ? `
-                  <div class="summary-box summary-crash">
-                    Crash
-                    <strong>${summary.crash}</strong>
-                  </div>` : ''}
-                  <div class="summary-box summary-fail">
-                    Fail
-                    <strong>${summary.fail}</strong>
-                  </div>
-                  <div class="summary-box summary-check">
-                    Check
-                    <strong>${summary.check}</strong>
-                  </div>
-                  <div class="summary-box summary-pass">
-                    Pass
-                    <strong>${summary.pass}</strong>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <canvas id="summary-chart" width="350" height="350"></canvas>
-              </td>
-            </tr>
-          </table>
-          
-          <h2>Total Score: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
+          <h1>Barrierefreiheit Analyse Report</h1>
 
-          <button onclick="openBoxes()">Alle Tests ausklappen</button>
-          <button onclick="closeBoxes()">Alle Tests zuklappen</button><br>
-          <button onclick="openBoxes('-fail')">Fail ausklappen</button>
-          <button onclick="closeBoxes('-fail')">Fail zuklappen</button><br>
-          <button onclick="openBoxes('-check')">Check ausklappen</button>
-          <button onclick="closeBoxes('-check')">Check zuklappen</button><br>
-          <button onclick="openBoxes('-pass')">Pass ausklappen</button>
-          <button onclick="closeBoxes('-pass')">Pass zuklappen</button><br>
+          <div class="headFlex">
+            <div>
+              <div class="meta">
+                <div class="metaUrl"><strong>Seite/URL:</strong> <a href="${__bar_escapeHtml(location.href)}" target="_blank">${__bar_escapeHtml(location.href)}</a></div>
+                <div class="metaDate"><strong>Erstellt:</strong> ${__bar_escapeHtml(new Date().toLocaleString())}</div>
+                <div class="metaCount"><strong>Geprüfte Tests:</strong> ${results.length}</div>
+              </div>
+              
+              <h2>Gesamtwertung: <span style="color:var(--${ratingColor}-black); background:var(--${ratingColor}-white); padding: 0 4px; border-radius: 6px">${ratingOutput}%</span></h2>
+
+              <div class="summary">
+                ${summary.crash > 0 ? `
+                <div class="summary-box summary-crash">
+                  Crash
+                  <strong>${summary.crash}</strong>
+                </div>` : ''}
+                <div class="summary-box summary-fail">
+                  Fail
+                  <strong>${summary.fail}</strong>
+                </div>
+                <div class="summary-box summary-check">
+                  Check
+                  <strong>${summary.check}</strong>
+                </div>
+                <div class="summary-box summary-pass">
+                  Pass
+                  <strong>${summary.pass}</strong>
+                </div>
+              </div>
+
+              <button onclick="openBoxes()">Alle ausklappen</button>
+              <button onclick="closeBoxes()">Alle zuklappen</button>
+            </div>
+            <div>
+              <canvas id="summary-chart" width="350" height="350"></canvas>
+            </div>
+          </div>
               
           ${results.map(r => `<details class="box box-${r.status}" id="${r.uuid}" ${r.status == 'pass' ? '' : 'open'}>
             <summary class="box-header">
@@ -709,7 +708,7 @@
             </div>
           </details>
         `).join("")}
-        <p style="color: var(--gray-700); margin-top: 30px; font-size: 0.75rem"><strong>corvin breyer / 2026</strong><br>v.01a0ef2e-8b00-7235-9aa8-02e45fd2eeb5</p>
+        <p style="color: var(--gray-700); margin-top: 30px; font-size: 0.75rem"><strong>Corvin Breyer / 2026</strong><br>averinprojects@gmail.com<br>v.01a0ef2e-8b00-7235-9aa8-02e45fd2eeb5</p>
         </div>
 
         <script>
@@ -762,7 +761,7 @@
 
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: [${summary.crash > 0 ? `'Crash',` : ''} 'Pass', 'Check', 'Fail'],
+            labels: [${summary.crash > 0 ? `'Error',` : ''} 'Pass', 'Prüfen', 'Problem'],
             datasets: [{
               label: 'Testfälle',
               data: [${summary.crash > 0 ? `${summary.crash},` : ''} ${summary.pass}, ${summary.check}, ${summary.fail}],
