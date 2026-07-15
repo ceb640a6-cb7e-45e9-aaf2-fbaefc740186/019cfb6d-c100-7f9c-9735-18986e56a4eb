@@ -111,10 +111,10 @@
   }
 
   function getBadgeLabel(status) {
-    if (status === "pass") return "PASS";
-    if (status === "check") return "CHECK";
-    if (status === "fail") return "FAIL";
-    if (status === "crash") return "CRASH";
+    if (status === "pass") return "BESTANDEN";
+    if (status === "check") return "PRÜFEN";
+    if (status === "fail") return "PROBLEM";
+    if (status === "crash") return "ERROR";
     return "CHECK";
   }
 
@@ -123,7 +123,7 @@
 
     const reportWindow = window.open("", "_blank");
     if (!reportWindow) {
-      alert("Popup blocked. Please allow popups for this site.");
+      alert("Popup wurde blockiert. Bitte erlaube Popups auf dieser Seite, um die Prüfung durchzuführen.");
       return;
     }
 
@@ -340,10 +340,6 @@
             .headFlex {
               display: flex;
               justify-content: space-between;
-            }
-
-            .headFlex > div {
-              background: white;
             }
 
             .highlight-temp {
@@ -636,6 +632,20 @@
             .popupButton {
               margin-top: 5px;
             }
+
+            details.reqirementDetails {
+              border: 1px solid var(--gray-300);
+            }
+
+            .reqirementDetails summary {
+              padding: 2px 8px;
+              color: var(--gray-800);
+            }
+
+            summary,
+            button {
+              cursor: pointer;
+            }
         </style>
       </head>
       <body>
@@ -672,11 +682,11 @@
                 </div>
               </div>
 
-              <button onclick="openBoxes()">Alle ausklappen</button>
-              <button onclick="closeBoxes()">Alle zuklappen</button>
+              <button onclick="openBoxes()">⮟ Alle ausklappen</button>
+              <button onclick="closeBoxes()">⮞ Alle zuklappen</button>
             </div>
             <div>
-              <canvas id="summary-chart" width="350" height="350"></canvas>
+              <canvas id="summary-chart"></canvas>
             </div>
           </div>
               
@@ -701,7 +711,7 @@
                       <a class="reqLink" href="${__bar_escapeHtml(r.reqLink[0])}" target="_blank">${__bar_escapeHtml(r.reqLink[1])}</a><br>
                       <span class="reqId">Projektinterne ID: ${__bar_escapeHtml(r.id)}</span>
                     </p>
-                    <button class="popupButton removeInPopup" onclick="openPopup(this, '${__bar_escapeHtml(r.title)}')">Open in popup</button>
+                    <button class="popupButton removeInPopup" onclick="openPopup(this, '${__bar_escapeHtml(r.title)}')">Ergebnisse in Popup öffnen</button>
                   </div>
                 </div>
               </details>
@@ -761,7 +771,7 @@
 
           const ctx = document.getElementById('summary-chart').getContext('2d');
           const data = {
-            labels: [${summary.crash > 0 ? `'Error',` : ''} 'Pass', 'Prüfen', 'Problem'],
+            labels: [${summary.crash > 0 ? `'Error',` : ''} 'Bestanden', 'Prüfen', 'Problem'],
             datasets: [{
               label: 'Testfälle',
               data: [${summary.crash > 0 ? `${summary.crash},` : ''} ${summary.pass}, ${summary.check}, ${summary.fail}],
