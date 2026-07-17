@@ -345,12 +345,6 @@
             flex-wrap: wrap;
           }
 
-          .highlight-temp {
-              border: 2px solid var(--fail-600);
-              box-shadow: 0 0 10px var(--fail-500);
-              border-radius: 4px;
-          }
-
           .meta {
               margin-bottom: 24px;
               color: var(--gray-900);

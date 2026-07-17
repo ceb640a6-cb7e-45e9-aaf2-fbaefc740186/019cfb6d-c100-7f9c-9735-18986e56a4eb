@@ -4843,14 +4843,26 @@ function cloneEl(el, container = null) {
       <head>
         <meta charset="utf-8">
         <style>
+          * {
+            font-family: Arial, sans-serif;
+          }
+            
           body {
             margin: 16px;
           }
 
-          /*.highlight-temp {
-            outline: 4px solid #ff00c8 !important;
-            outline-offset: 4px !important;
-          }*/
+          iframe {
+            border: none;
+            width: 100%;
+            height: 400px;
+          }
+
+          .highlight-temp {
+              border: 3px solid #ff00c8 !important;
+              outline-offset: 3px !important;
+              box-shadow: 0 0 10px #ff00c877;
+              border-radius: 4px;
+          }
         </style>
       </head>
       <body>
