@@ -4859,7 +4859,7 @@ function cloneEl(el, container = null) {
     </html>
   `;
 
-  return iframe;
+  return iframe.outerHTML;
 }
 
 function getSelector(el) {
