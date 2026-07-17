@@ -333,6 +333,12 @@
               border-radius: 3px;
           }
 
+          iframe {
+            border: none;
+            width: 100%;
+            height: 400px;
+          }
+
           .content {
               max-width: 1300px;
               margin: 0 auto;

@@ -4851,12 +4851,6 @@ function cloneEl(el, container = null) {
             margin: 16px;
           }
 
-          iframe {
-            border: none;
-            width: 100%;
-            height: 400px;
-          }
-
           .highlight-temp {
               border: 3px solid #ff00c8 !important;
               outline-offset: 3px !important;
