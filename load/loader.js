@@ -588,9 +588,6 @@
           }
 
           .clonedElement {
-              user-select: none;
-              display: inline-block;
-              pointer-events: none;
               background: var(--gray-50);
               border-radius: 6px;
               border: 3px solid var(--gray-200);
